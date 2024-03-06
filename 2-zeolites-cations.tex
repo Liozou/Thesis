@@ -1,0 +1,154 @@
+%!TeX root = main.tex
+%!TeX root = 1-screening.tex
+\documentclass[main.tex]{subfiles}
+
+\begin{document}
+
+\chapter{Cation placement in zeolites}
+\vspace*{-1\baselineskip}
+
+Among the different families of adsorbents, zeolites are among the most used in industry. Small gases tend to adsorb preferentially on cations when they are present, which makes the study of cationic zeolites particularly relevant to the understanding of industrial adsorption processes. This chapter presents the chemical nature of cationic zeolites and explain the challenges and methods used to obtain representative models of them for subsequent adsorption simulations. The last part of the chapter focuses on the newly developed ``shooting star'' methodology, which significantly reduces the amount of resource needed to compute the repartition of cations in zeolites.
+
+\section{Cationic zeolites}
+
+In this section, we detail the general structure of cationic zeolites and highlight the challenges associated with the simulation of such systems.
+
+\subsection{Structure and properties}
+
+Zeolites are a family of aluminosilicates, first discovered by Axel Fredrik Cronstedt REF in 1756. Similar to glass, their atomic structure is made of tetrahedra where the central atom, called a T-atom, is usually silicon, bridged together by oxygens. They are crystalline however, with typical unit cell lengths varying between \qty{10}{\angstrom} and \qty{100}{\angstrom} [REF], and have nanopores.
+
+The different kinds of zeolites are separated by topology: each known zeolite topology is given a capital three-letter code by the International Zeolite Association Structure Committee (IZA-SC) [REF]. As explained in~\autoref{topology_introduction}, the topology designates the information extracted from the network of chemical bonds: in the case of zeolites, this network can be simplified by taking one vertex per T-atom, and abstracting each oxygen bridge as a simple edge between the two corresponding T-atoms. This simple protocol makes it clear that the net of a zeolite is very close to the structure it represents \en~in other words, simplifying the crystal into its net does not lose much information on the initial structure \en~which explains why a classification by topology is the primary way to distinguish different zeolite structures. It is noteworthy that such a classification is vastly insufficient in the case of MOFs, where the chemistry of metal nodes and the nature of the ligands is thus used first; while for other kinds of materials such as glasses, it is downright impossible to establish because of the absence of cell periodicity.
+
+While millions of hypothetical zeolite topologies have been identified by numerical methods [REF], only 256 have been experimentally observed. This discrepancy may stem from the metastability of zeolites, whose porosity make them thermodynamically less favourable than glass [10.1021/acs.cgd.3c00893]. On the other hand, new experimental zeolite topologies have been discovered each year in the last twenty years, which indicate that accessing new structures is also limited by the current synthetic methods used. Moreover, new synthetic routes can allow new chemistry on existing topologies [REF].
+
+Indeed, each given topology may give rise to several zeolites that differ by their exact chemical composition. Isoelectronic metal substitution consists in the replacement of silicon by germanium or, in some cases, titanium, zinc or tin [REF]. A much more common kind of substitution consists in replacing some T-atoms by aluminium, or, more anecdotally, boron and gallium [REF]: each such substitution introduces one extra electron in the system, hence these zeolites contain cations to maintain electroneutrality. The nature of the cation itself leads to some more variability: sodium cations are usually the ones used during synthesis [REF], and can then be substituted by other cations [REF]. For simplicity, all zeolites discussed will be considered having only either Si or Al as T-atoms.
+
+Ion exchange is actually the most prevalent industrial use case for cationic zeolites, especially as water softener for laundry agents [REF]. Their considerable internal surface and the accessibility of active sites such as the cations or the substituted metals make them also useful for catalysis [REF]. Other applications include nuclear waste storage, building material additives, water absorbents, soil treatment, and others. Finally, they can be used as adsorbents for gas separation or storage, which is also of capital industrial interest.
+
+Zeolite structures are usually rigid structures, although some exceptions exist [REF]. In addition, T-atom substitution tends to modify only slightly the T-O bond length (Si-O: REF while Al-O: REF) and does not affect the O-T-O angles [REF]. As a consequence, the structure of a substituted zeolite can usually be well approximated by taking the reference structure of the topology (provided as a pure silicate by the IZA-SC) and replacing the relevant silicon atoms. However, not all placements of the substituents may correspond to existing zeolites
+
+\subsection{Aluminium placement}
+
+Cationic zeolites have some aluminiums as part of their structure, however their repartition among the T-atoms is not random.
+
+\subsubsection{Rules}
+
+The first rule, which is obeyed by almost all known zeolites, was discovered by L\"owenstein [REF]. It states that no two aluminiums may be neighbours, in the topological sense of being bridged by an oxygen. This hard rule limits the maximum number of aluminiums to half the number of T-atoms in general, and less for topologies that contain odd cycles: for instance, if there is a cycle of 5 T-atoms, only two among them can be Al.
+
+The amount of aluminiums in a zeolite is usually discussed in terms of Si/Al ratio. L\"owenstein's rule thus limits the minimal Si/Al ratio to 1 in general, which corresponds to the maximum number of Al and thus of cations. Zeolites with high Si/Al ratios, usually called high-silica zeolites, contain few cations and tend to be hydrophobic [REF]; in general, they also tend to adsorb fewer molecules since cations are privileged adsorption sites.
+
+While L\"owenstein's rule is widely accepted as fact, and is mainly sustained by the absence of experimental synthesis of any zeolite with Si/Al ratio lower than 1, it is not currently proven experimentally. This comes from the cost of the few spectroscopic methods that allow identifying the precise locations of Al atoms: \ce{^{27}Al} and \ce{^{29}Si} magic-angle spinning NMR can be used to provide some limited information, while [10.1039/B203966B, 10.1039/B301634J] used UV-Visible-NIR spectroscopy on \ce{Co^{2+}}-exchanged ZSM-5 with high Si/Al ratio to retrieve their Al distribution. But this method cannot be generalized to low-silica zeolites. DFT computation confirm the rule in general, but also show potential violations for some zeolite topologies such as HEU [10.1016/j.mtcomm.2021.102028].
+
+The second rule, proposed by [REF Dempsey et al, 10.1021/j100722a020] on the basis of FAU zeolites with varying Si/Al ratios, states that when possible, the number of next-neighbours Al atoms should be minimized to decrease the number of unfavourable interactions between close aluminiums. This rule is actually known to be violated in many real zeolites, including dealuminated FAU. Speculatively, this may come from the fact that the [REF Dempsey et al] made their observations on zeolites whose synthesis lead them to reach their global energy minimum, while many other synthetic routes can create structures trapped in a local energy minimum with respect to their Si/Al ordering.
+
+\subsubsection{Simulation methodologies}
+
+Overall, the lack of experimental evidence attesting to the precise position of aluminiums in zeolites make the theoretical prediction of such placement delicate, since it lacks any verifiable comparison point. In particular, a crucial question is whether Si/Al ordering is truly guided by thermodynamical consideration or not. The latter case would appear for zeolites whose structure is in a metastable state, which is likely to be the case for many real zeolites as evidenced by [10.1039/B301634J] in one of the few experimental studies tackling that very issue.
+
+Even if the aluminium placement can be obtained as that which minimizes the global energy of the structure, this does not necessarily mean that the placement itself is periodic, nor that it follows the same periodicity as the unit cell. Yet, as it is difficult to provide a concrete result on the localisation of aluminiums without making such hypotheses, the studies in the literature only focus on the study of the placement of aluminiums in a single unit cell, supposing that the rest is periodic.
+
+In these conditions, the last remaining question is the simulation methodology to use to find the global energy minimum of the structure. The most basic method consists in generating a few random configurations, computing their energy, and choosing that which minimizes the energy. [REF Marie Jeffroy]\label{mariejeffroy_al} proposed a more refined Monte-Carlo (MC) protocol for this problem: starting from a configuration with the target Si/Al ratio under L\"owenstein's rule, each MC step consists in exchanging the positions of a Si and an Al while maintaining L\"owenstein's rule, and accepting or refusing the step according to the Metropolis criterion (see [infra]). For low Si/Al ratios, this algorithm requires adding some ``restart'' option that entirely repopulates the aluminiums at random under L\"owenstein's rule, because that very rule can lead to blocked situation where no single Si/Al exchange is possible, see [FIGURE].
+
+[REF Findley et al., 10.1021/acs.jpcc.8b03475] proposed an innovative method to assess the validity of theoretically-obtained aluminium placements, by studying \ce{CO_2} adsorption isotherms. They found that different Si/Al orderings lead to different isotherms, which, conversely, means that obtaining a precise experimental isotherm can allow retrieving the degree of Al ordering. In accordance to other results of Marie Jeffroy [REF], they conclude that some topologies (REF) are more likely to have their aluminiums placed at random compared to others (REF).
+
+Hence, given the uncertainty that any aluminium placements obtained by thermodynamical simulation actually reflects those observed in real zeolites, we choose to consider that the aluminium placement in our zeolites is taken at random. In practise, each zeolite with a given Si/Al ratio will be modelled as the average of six zeolites of that topology with the same Si/Al ratio, all following L\"owenstein's rule but having different Al repartition (taking symmetry into account as well). The results will be computed on each of these six models, and averaged to obtain the result for the zeolite.
+
+To obtain the zeolite structures with random aluminium placements obeying L\"owenstein's rule and the target Si/Al ratio, we use the following algorithm:
+\begin{itemize}
+    \item The starting point is either the zeolite filled with Si if the required Si/Al ratio is above 3, else a zeolite filled with as many Al as possible using a greedy algorithm. That greedy technique consists in doing a graph traversal of the T-atoms, transforming each atom into an Al if it is not the neighbour of an Al, or making it a Si otherwise: if all cycles in the graph are even, this is guaranteed to provide an aluminium placement with the minimal Si/Al of 1.
+    \item The main algorithm then alternates between adjusting the number of Al and changing their positions, for a few steps each, back and forth.
+    \begin{itemize}
+        \item The position update follows the principle of Marie Jeffroy's MC scheme but disregarding the energy change: one Si and one Al are exchanged at random if the resulting structure still follows L\"owenstein's rule.
+        \item The number of Al atoms is modified if the current Si/Al ratio does not correspond to the target: if it is too high, an Al is converted into a Si, and otherwise a Si that has no Al neighbour is converted into an Al.
+    \end{itemize}
+    \item Since the situation can be blocked (see [FIGURE]), the algorithm sometimes restart from scratch, or sometimes does a partial restart by converting multiple Al atoms into Si.
+    \item Configurations where the correct Si/Al ratio is reached are kept in a set. Each configuration is assigned a hash, which is simply a sequence of 0 if the T-atom is a Si or 1 otherwise, in a fixed order of the T-atom. To avoid considering symmetry-equivalent configurations as different, the signature of a configuration is computed as the lexicographically minimum of all the hashes corresponding to the application of a symmetry operation on the configuration. For each unique signature, a corresponding configuration is then retained, and the six models are taken at random among these configurations.
+\end{itemize}
+
+\subsection{Cations}
+
+The electroneutrality of the framework requires that each negative introduced by an Al substitution be compensated by the introduction of a cation in the framework. In many cases, \ce{Na^+} is used during synthesis; it is sometimes replaced by other cations in later steps.
+
+These cations have a primordial role for adsorption processes, because they constitute privileged adsorption sites for many small gases. In order to perform numerical simulation of the adsorption process, it is thus necessary to have a model of the zeolite that places its cations in the correct positions. Fortunately, and opposite to the previous case of aluminiums, X-ray diffraction is a convenient technique which can be used to obtain the crystallographic sites in which the cations are located, as well as the respective occupancy of each such site.
+
+\subsubsection{Diversity of cases}
+
+
+\subsubsection{Experimental information}
+
+
+\section{Prediction of cation placement}
+
+While experimental cation maps are available on some zeolite structures, two seminal problems remain. First, when screening through a large amount of zeolite topologies and Si/Al ratio, only a small fraction of structures have their experimental cation map available. Second, even with the crystallographic sites, not all cation repartitions that obey the given occupancies have the same energy. For example, the site I and I' of FAU being very close to one another, the occupation of a site I prevents either of the neighbouring sites I' from being occupied at the same time. Deciding on the exact location of cations in a zeolite model is thus no trivial matter.
+
+\subsection{Current methodologies}
+
+To obtain equilibrium data, such as average positions, on molecular systems, there are two general simulation frameworks which can be used: molecular dynamics and Monte-Carlo (MC) simulation. We only used MC and its variations, because they are the only strategy available to study a variable number of molecules, which is necessary for the simulation of adsorption as we will explain in more details in \autoref{gcmc}.
+
+\subsubsection{Canonical Monte-Carlo}
+% mention ergodicity
+\subsubsection{Simulated annealing}
+
+Simply doing canonical MC at room temperature does not provide the cations with enough energy to overcome the barriers inherent to the structure of the zeolitic framework. For example, a cation trapped in the site I of FAU will never manage escape into a site III in a room-temperature simulation of reasonable length without a reinsertion move: this simply comes from the high activation barrier it needs to overcome while physically moving out of the sodalite cage. Reinsertion moves are thus useful to allow large configuration movements to occur without having to pass through physical energy barriers.
+
+However, a reinsertion can only move one particle at a time, which is sometimes not enough. For instance, the population of two sites I' from an initial configuration where only the central site I is occupied, requires that both the central cation move to the edge of the cage and that an external cation be set in the opposite window. Since both movements require passing through an activation barrier, the probability of it happening naturally is low, and thus requires particularly long simulation times to be observed.
+
+To circumvent this issue, the temperature of the simulation can be raised: this mechanically makes all MC steps more likely to be accepted, so higher-energy regions become more reachable. At the same time, a simulation at a hot temperature is much less likely to explore the details of the energy landscape enough to fall into the energy minima of interest, since the accessible configuration space became so much larger. A compromise thus consists in performing simulated annealing, which is simply a simulation in which the temperature varies between room and hot, alternating between increasing and decreasing phases, possibly interspersed with plateaux.
+
+% TODO: comment, illustrate
+
+\subsubsection{Parallel tempering}
+
+Simulated annealing explores the configuration space by alternating between cold phases, where the exploration is detailed but localized, and hot phases, where the exploration is fast but superficial. Parallel tempering proposes doing both phases at the same time.
+
+In more detail, a parallel tempering simulation consists in running several MC simulations in parallel, each at a different temperature. The temperatures are taken between room temperature and a hot temperature. An extra MC step is introduced, called the ``exchange'' step, which consists in exchanging the configurations of two MC simulations with neighbour temperatures. As with any MC step, the Metropolis algorithm ensures that the exchange is accepted only if the difference of energy resulting from this exchange is not too high: as a consequence, for the exchange step to be accepted regularly, the temperatures must be taken so that the typical energies of the system between neighbour temperatures overlap, as shown on [FIGURE].
+
+In this strategy, the coldest simulation is constantly exploring a local free energy minimum, while the hottest simulation easily accepts MC moves and thus walks through the entire configuration space. By exchanging configurations, new configurations regularly trickle down from the hot simulations to the colder ones, while the general Metropolis strategy ensures convergence towards a global minimum. Parallel tempering is therefore the method of choice used to obtain convergence when facing difficult energy landscapes such as the one encountered for cation placement.
+
+Naturally, its main downside is its computational cost, proportional to the number of simulations and thus effectively related to the difference between the highest and the lowest temperatures. The choice of intermediate temperatures must be guided by an initial discovery of the typical energies encountered by system at each temperature, which requires a few dedicated simulations prior to the parallel tempering. Finding the optimal number of simulations requires striking a balance with the proportion of accepted MC exchange steps, whose impact on the overall simulation convergence can be difficult to measure. Additionally, simulations with neighbour temperatures must regularly synchronize to attempt an exchange, which strongly limits the amount of parallelization usable in the implementation of parallel tempering.
+
+\subsubsection{Hybrid MC} % method of Marie Jeffroy
+
+Specifically in the case cationic zeolites, [Marie Jeffroy REF] proposes a simulation method to obtain both the placement of cations in the structure and the location of aluminium atoms across the T-sites. This consists in running an MC simulation where the cations are allowed all previously mentioned MC steps, while the aluminiums are only allowed exchanging positions with siliciums, or a restart step that randomly positions aluminiums and siliciums, both while obeying L\"owenstein's rule as explained in \autoref{mariejeffory_al}.
+
+In order to be computationally efficient, this scheme 
+
+\subsection{Shooting star methodology}
+
+\subsubsection{Principle}
+\subsubsection{Extraction of sites from densities}
+\subsubsection{Validation}
+
+\subsection{Possible alternatives}
+
+Molecular dynamics (MD) could also be used to place cations in zeolites. Generally speaking, the principle of MD consists in running a simulation where the particles follow Newton's laws of motion, with forces based on force fields like for MC schemes. The simulation is divided in time steps, between which the forces are computed on each particle to derive their position at the next time step. Hence, the trajectories of the particles in MD follow a physical path.
+
+Temperature can be included in different ways in MD, all of which use an element of randomness that eventually impacts the velocities of particles, in order to ensure that the average values extracted from the simulation correspond to those which would be obtained at that temperature. This means that the precedent discussion on the inaccessibility of high-energy regions to the system at room temperature still applies in MD.\@ A simple MD simulation is thus doomed to only explore local energy minima, failing to reach ergodicity like with the simple canonical MC scheme.
+
+To circumvent this issue, it is necessary to bias the simulation in order to force the system to explore regions of high energy. One such strategy consists in doing metadynamics [REF], which is a variation of MD in which the potential energy landscapes is modified during the simulation. The effective free energy of a point in configuration space is computed as the sum of the real free energy of that point without bias, added to the sum of some Gaussian functions centred on previously explored points. Every few steps, another Gaussian function centred on the current configuration point is added to the bias, so that the effective free energy of explored regions increases through the simulation, which allows the system to eventually escape local minima and explore other regions.
+
+A Gaussian is a function of the form $f:\mathbf x\mapsto Ae^{-(\mathbf x - \mathbf\mu)^T\Sigma(\mathbf x - \mathbf\mu)}$. In practise, the variable $\mathbf x$ of the Gaussians used in metadynamics are not directly the $3N$ coordinates of the $N$ particles, but a small-dimensional vector whose coordinates are called ``collective variables''. These collective variables are themselves function of the $3N$ initial coordinates. The parameter $A$ and $\Sigma$ of the Gaussians being usually fixed, each Gaussian is stored by its centre $\mathbf\mu$, whose coordinates are thus the collective variables of the current configuration point. Therefore, compared to regular MD, running a metadynamics simulation incurs the additional cost of computing the collective variables $\mathbf x$ of each visited configuration point, storing the Gaussians' centres, and computing their value at each step.
+
+For cation placement the main issue is to find a small set of relevant collective variables, since the cost of metadynamics grows with their number. We did not explore this venue because we expected it to be similar in difficulty to the MC alternatives, with no clear reason why it should be more efficient. MD in general is also known to converge more slowly than MC, because large configuration change made possible by MC steps are prohibited by the physics-driven approach of MD, and the same argument could be made of metadynamics compared to other accelerated MC schemes. Exploring metadynamics or its variants could nonetheless be of interest in the search for more alternative, and potentially more efficient, algorithms.
+
+% \begin{figure}[ht]
+%   \centering
+%   \begin{subfigure}[b]{0.45\textwidth}
+%     \centering
+%     \includegraphics[height=0.7\textwidth]{figures/something.pdf}
+%     \caption{Experimental}
+%   \end{subfigure}
+%   \hfill
+%   \begin{subfigure}[b]{0.45\textwidth}
+%     \centering
+%     \includegraphics[height=0.7\textwidth]{figures/else.pdf}
+%     \caption{Theoretical calculation}
+%   \end{subfigure}
+%   \caption{Illustration of something (a) else (b). See also\textsuperscript{1} by Ref.~\cite{foo}. }\label{something_else}
+% \end{figure}
+% \footnotetext[1]{Available on Github at \url{https://github.com/foo}}
+
+
+\OnlyInSubfile{\printglobalbibliography}
+
+\end{document}

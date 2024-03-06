@@ -1,0 +1,54 @@
+%!TeX root = main.tex
+%!TeX spellcheck = fr-FR
+% Lionel Zoubritzky PhD thesis -- (C) 2024
+
+\documentclass[thesis]{subfiles}
+
+\begin{document}
+
+\begin{otherlanguage}{french}
+
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}}
+\renewcommand{\thefigure}{R\arabic{figure}}
+\setcounter{figure}{0}
+\titlecontents{section}[4.8em]{\addvspace{0.1em}}{\contentslabel{2.2em}}{}{\titlerule*[1pc]{.}\contentspage}[]
+
+\chapter*{Résumé en français}
+\startcontents[chapters]
+\printpartialtoc
+
+\section*{Introduction}
+
+% \begin{figure}[h]
+% \begin{minipage}[t]{.43\textwidth}
+% \centering
+%   \includegraphics[width=\linewidth]{figures/2-thermo/Enthalpy_0_log.jpg}
+%   \caption{\small{\ Pour 8\,401 MOFs avec une sélectivité Xe/Kr favorable ($s\e{0} > 1$), pair-plots entre les différentes grandeurs $\log(s\e{0})$, $\Delta\e{exc}H\e{0}$, $\Delta\e{ads}H\ex{Xe}\e{0}$ et $\Delta\e{ads}H\ex{Kr}\e{0}$ (les enthalpies sont en \si{\kilo\joule\per\mol}) en dehors de la diagonale et la distribution de chaque grandeur sur la diagonale.}}\label{fgr:histo_H_resume}
+% \end{minipage}
+% \hfill
+% \begin{minipage}[t]{.5\textwidth}
+% \centering
+%   \includegraphics[width=\linewidth]{figures/2-thermo/s_0_vs_s_2080_overview_log.jpg}
+%   \caption{\small{\ Sélectivité à 1\,atm de pression en fonction de la sélectivité à basse pression pour une composition 20\pp{}80 Xe/Kr. Les points sont étiquetés selon la différence relative entre les deux sélectivités. Les points violets ont une grande différence relative entre les sélectivités. }}
+%   \label{fgr:overview_resume}
+% \end{minipage}
+% \end{figure}
+
+
+% \clearpage
+% \section*{Conclusion}
+
+% Texte \autocite{citation}
+
+% \vfill
+% \begin{center}
+%     \pgfornament[width=6cm,color=CTsemi]{75}
+% \end{center}
+% \vfill\vfill
+
+\end{otherlanguage}
+
+\OnlyInSubfile{\printglobalbibliography}
+
+\end{document}
