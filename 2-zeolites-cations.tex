@@ -225,15 +225,17 @@ where $\pnorm{\boldsymbol x}$ designates the distance to the origin of the close
 \subsubsection{Reciprocal term}
 
 For the reciprocal term, we start by writing the total charge density coming from the Gaussians given in \autoref{gaussian_charge}:
-\[\rho^\text{reciprocal}(\boldsymbol r) = \sum_{\boldsymbol l}\sum_{n=1}^N q_n\paren{\frac\alpha{\sqrt\pi}}^3\exp\paren{-\alpha^2\norm{\boldsymbol r_n + \boldsymbol l - \boldsymbol r}^2}\]
+\[\rho^\text{reciprocal}(\boldsymbol r) = \sum_{\boldsymbol l}\sum_{n=1}^N \frac{q_n}{4\pi\varepsilon_0}\paren{\frac\alpha{\sqrt\pi}}^3\exp\paren{-\alpha^2\norm{\boldsymbol r_n + \boldsymbol l - \boldsymbol r}^2}\]
 Its Fourier decomposition over the periodic unit cell of volume $V$ is:
 \[\begin{split}
 \hat\rho^\text{reciprocal}(\boldsymbol k) &= \frac1V\int_V e^{-i\boldsymbol k\cdot\boldsymbol r} \rho^\text{reciprocal}(\boldsymbol r)\text d\boldsymbol r
-\\&= \frac1V\int_\Omega e^{-i\boldsymbol k\cdot\boldsymbol r} \sum_{n=1}^N q_n \paren{\frac\alpha{\sqrt\pi}}^3\exp\paren{-\alpha^2\norm{\boldsymbol r_n + \boldsymbol r}^2} \text d\boldsymbol r
-\\&= \frac{2\pi\alpha^3}{V\pi^{3/2}} \sum_{n=1}^N q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n} \int_0^\infty \norm{\boldsymbol{r'}}^2\exp\paren{-\alpha^2 \norm{\boldsymbol{r'}}^2}\int_0^\pi e^{-i\boldsymbol k\cdot\boldsymbol{r'}} \sin(\theta) \text d \theta \text d \boldsymbol{r'}
-\\&= \frac1V\exp\paren{\frac{-k^2}{4\alpha^2}}\sum_{n=1}^N q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n}\end{split}\]
+\\&= \frac1V\int_\Omega e^{-i\boldsymbol k\cdot\boldsymbol r} \sum_{n=1}^N \frac{q_n}{4\pi\varepsilon_0} \paren{\frac\alpha{\sqrt\pi}}^3\exp\paren{-\alpha^2\norm{\boldsymbol r_n + \boldsymbol r}^2} \text d\boldsymbol r
+\\&= \frac{2\pi\alpha^3}{V\pi^{3/2}} \sum_{n=1}^N \frac{q_n}{4\pi\varepsilon_0} e^{-i\boldsymbol k\cdot\boldsymbol r_n} \int_0^\infty \norm{\boldsymbol{r'}}^2\exp\paren{-\alpha^2 \norm{\boldsymbol{r'}}^2}\int_0^\pi e^{-i\boldsymbol k\cdot\boldsymbol{r'}} \sin(\theta) \text d \theta \text d \boldsymbol{r'}
+\\&= \frac1{4\pi\varepsilon_0V}\exp\paren{\frac{-k^2}{4\alpha^2}}\sum_{n=1}^N q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n}\end{split}\]
 after several simplification steps not detailed here. Using Poisson's law (\autoref{Poisson}), the electric potential due to the Gaussians can then finally be expressed as:
-\[\Phi^\text{reciprocal}(\boldsymbol r) = \frac{4\pi}V\sum_{\boldsymbol k\neq \boldsymbol 0}\sum_{n=1}^N \frac{q_n}{k^2} e^{i\boldsymbol k\cdot\paren{\boldsymbol r - \boldsymbol r_n}}\exp\paren{\frac{-k^2}{4\alpha^2}}\]
+\[\Phi^\text{reciprocal}(\boldsymbol r) = \frac{1}{\varepsilon_0V}\sum_{\boldsymbol k\neq \boldsymbol 0}\sum_{n=1}^N \frac{q_n}{k^2} e^{i\boldsymbol k\cdot\paren{\boldsymbol r - \boldsymbol r_n}}\exp\paren{\frac{-k^2}{4\alpha^2}}\label{eq:reciprocal}\]
+
+The term $\kappa_{\boldsymbol{k}} = \frac1{k^2}\exp\paren{-k^2/(4\alpha^2)}$ decays fast, so the sum over $\boldsymbol{k}\neq\boldsymbol{0}$ is actually computed as a sum over a finite number of values of $\boldsymbol{k}$. These values are chosen so that for any $\boldsymbol{k}$ not retained, $\kappa_{\boldsymbol{k}}$ is below the target precision of the computation.
 
 \subsubsection{Self-interaction term}
 
@@ -242,7 +244,7 @@ The last remaining term is the self-interaction, which must be removed. Its exis
 Moreover, in the case of rigid polyatomic molecules, like the small gases we will discuss in \autoref{adsorption}, there should not be any contribution of atom $A$ at the positions $\boldsymbol r_B$ of other atoms $B$ part of the same molecule.
 
 Each atom $1\le n\le N$ thus contributes a spurious potential term:
-\[\Phi^\text{self}_n = \frac{2\alpha q_n}{\sqrt\pi} + \frac12\sum_{\substack{m\\m\smile n,\ m\neq n}}\frac{q_m\text{erf}\paren{\pnorm{\boldsymbol r_n - \boldsymbol r_m}}}{\pnorm{\boldsymbol r_n - \boldsymbol r_m}}\]
+\[\Phi^\text{self}_n = \frac{2\alpha q_n}{\sqrt\pi} + \frac12\sum_{\substack{m\\m\smile n,\ m\neq n}}\frac{q_m\text{erf}\paren{\pnorm{\boldsymbol r_n - \boldsymbol r_m}}}{4\pi\varepsilon_0\pnorm{\boldsymbol r_n - \boldsymbol r_m}}\]
 where $m\smile n$ is true when both atoms $m$ and $n$ belong to the same molecule.
 
 \subsubsection{Total charge energy}
@@ -250,20 +252,53 @@ where $m\smile n$ is true when both atoms $m$ and $n$ belong to the same molecul
 Combining the last three terms, we obtain the overall Coulomb energy:
 \[\begin{split}
 E^\text{Coulomb} &= \sum_{\boldsymbol l} \sum_{n=1}^N\sum_{\substack{m=1\\m\not\smile n}}^n \frac{q_n q_m}{8\pi\varepsilon_0}\frac{\text{erfc}\paren{\alpha\norm{\boldsymbol r_n - \boldsymbol r_m + \boldsymbol l}}}{\norm{\boldsymbol r_n - \boldsymbol r_m + \boldsymbol l}}
-\\&+ \frac{2\pi}V \sum_{\boldsymbol k\neq 0}\sum_{n=1}^N\sum_{m=1}^N \frac{q_n q_m}{4\pi\varepsilon_0\times k^2}e^{i\boldsymbol k\cdot\paren{\boldsymbol r_m - \boldsymbol r_n}}\exp\paren{\frac{-k^2}{4\alpha^2}}
+\\&+ \frac1{2\varepsilon_0V} \sum_{\boldsymbol{k}\neq\boldsymbol{0}}\sum_{n=1}^N\sum_{m=1}^N \frac{q_n q_m}{k^2}e^{i\boldsymbol k\cdot\paren{\boldsymbol r_m - \boldsymbol r_n}}\exp\paren{\frac{-k^2}{4\alpha^2}}
 \\&- \sum_{n=1}^N\frac{2\alpha q_n}{\sqrt\pi} - \frac12\sum_{n=1}^N\sum_{\substack{m=1\\m\smile n,\ m\neq n}}^N \frac{q_n q_m}{4\pi\varepsilon_0}\frac{\text{erf}\paren{\pnorm{\boldsymbol r_n - \boldsymbol r_m}}}{\pnorm{\boldsymbol r_n - \boldsymbol r_m}}
 \end{split}\]
 
-TODO: check $4\pi\varepsilon_0$ in reciprocal term
-
 \subsection{Precomputation}
 
-\subsection{Optimizations for computing the difference of energies}
+Different algorithms that solve a particular problem generally differ in the specific space-time tradeoff they choose. Obtaining the energy of a configuration presents the same possibility: while entirely computing the energy from scratch requires a set amount of computation, it is possible to make subsequent computations faster at the cost of a greater memory footprint of the algorithm, by storing some intermediate results which can be reused afterwards.
 
-\subsection{Blocking pockets}
+\subsubsection{Energy grid}
 
+In the case of simulations involving a rigid framework, the most obvious precomputation that can be done is that of the short-term interactions of the guest species with the framework atoms. Indeed, such interactions only depend on the nature and the position of the guest atom, so it is possible to store them on an energy grid.
 
+More precisely, fore each possible guest atom, the unit cell of the framework is divided into a regular grid, with a set spacing between consecutive points. We use \qty{0.15}{\angstrom}, which is fine enough to be accurate but not too fine to avoid using too much memory. For each grid point, the sum of the interactions of all framework atoms with a guest atom in that position is stored at that point. The grid is then written to disk.
 
+During the simulation, in order to compute the short-term interactions between the framework atoms and a guest atom at a given position, the value is interpolated from the surrounding grid points. Using a simple linear interpolation of the values does not yield very satisfactory results however, since derivative discontinuity would push that atoms towards the grid points, which would result in simulation artifacts. To prevent this, RASPA2 stores not only the value of the energy, but also the three first derivatives, three values of the second derivatives and one of the third, following a scheme by [REF]. Moveover, the grid is forced to be orthorombic: this means that it may not be aligned with the unit cell of the framework, but it does not matter as long as each point in the unit cell can be surrounded by recorded grid points. I reimplemented the same grid algorithm, which ensures a smooth interpolation everywhere in space.
+
+\subsubsection{Ewald precomputation}
+
+Short-term interactions that can be stored in grids include the short-term direct part of the Ewald summation. The reciprocal term cannot however be simply stored as such.
+
+Yet, it is still possible to precompute a large part of the reciprocal interaction which is due to the framework. Looking back at \autoref{eq:reciprocal}, the list of relevant $\boldsymbol{k}$, associated to their factor $\exp\paren{-k^2/\paren{4\alpha^2}}/k^2$, is computed once and for all. For each atom $n$, the factors $\exp\paren{\boldsymbol{k}\cdot\boldsymbol{r}_n}$ are also computed once. Hence, \autoref{eq:reciprocal} can be rewritten as
+\[\begin{split}\Phi^\text{reciprocal}(\boldsymbol r) &= \frac{1}{\varepsilon_0V}\sum_{\boldsymbol k\neq \boldsymbol 0}e^{i\boldsymbol{k}\cdot\boldsymbol{r}}\underbrace{\frac1{k^2}\exp\paren{\frac{-k^2}{4\alpha^2}}\left(\sum_{n\text{ framework}} q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n}\right.}_\text{precomputed part}\left. + \sum_{n\text{ guest}} q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n}\right)
+\\&= \frac1{\varepsilon_0V}\sum_{\boldsymbol k\neq \boldsymbol 0} \kappa_{\boldsymbol k} F_{\boldsymbol k} e^{i\boldsymbol{k}\cdot\boldsymbol{r}} \ +\  \frac1{\varepsilon_0V}\sum_{\boldsymbol k\neq \boldsymbol 0} \kappa_{\boldsymbol k} e^{i\boldsymbol{k}\cdot\boldsymbol{r}} \sum_{n\text{ guest}} q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n}
+\label{eq:reciprocal_decomposed}\end{split}\]
+where $\kappa_{\boldsymbol k} = \frac1{k^2}\exp\paren{-k^2/(4\alpha^2)}$ and $F_{\boldsymbol k} = \sum\limits_{n\text{ framework}} q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n}$ are precomputed terms.
+
+Finally, the entire self-interaction term can be computed once for all, since it does not depend on the configuration. This is only the case here because the simulated moleculses are rigid bodies; for deformable structures, the self-interaction term depends on the actual conformation of the guests, which may depend on the state.
+
+\subsubsection{Blocking pockets}
+
+Some MC trial moves attempt to displace an atom to a location that would lead to unphysically high energies -- typically, too close to a framework atom. Such positions can be determined once and for all, and the relevant MC moves automatically refused without the need for any energy computation.
+
+To do so, the simplest strategy consists in making a boolean grid, aligned with the energy grids used for short-term interactions, which stores a 1 when the voxel is blocked or 0 if it is allowed. The first step of any MC trial move then consists in checking whether each atom is in an allowed voxel, or refusing the move otherwise. In practise, the simplest implementation consists in making one such boolean grid per atom kind (since the energy threshold depends on the atom), and for each atom, checking the closest grid point of its kind.
+
+In addition to its use as computational optimization, such boolean grids can also be used to mark some parts of the framework as inaccessible, irrespective of the corresponding energy. This is useful when small window size prevents a species -- for instance a gas molecule -- from entering a pore -- for instance the sodalite cages in FAU zeolites. Indeed, without explicitly blocking the pocket, an MC move could make a species appear in the pore, whereas it should be kinetically impossible to enter. This strategy will thus be used when studying the adsorption of gases in zeolites (see \autoref{adsorption}), but for the small cations under study here, there is no need to additionally block any part of the frameworks.
+
+\subsubsection{Optimizations for computing the difference of energies}
+
+A simulation that follows the Metropolis-Hastings algorithm walks across configurations, each pair of contiguous states being separated by a single MC move. In this context, computing the energy of each trial configuration to compare it to the previous one is wasteful: the only part of the energy impacted by the MC move is that which stems from the moved species. Instead of computing the energy of the trial configuration, it is thus better to directly compute the energy difference due to the move.
+
+For the short-term interactions, this is straightforward: the energy difference is simply the sum of the interactions of the species at the new position minus that at its previous position. If there are $N$ species, moving one thus costs $O(N)$ computations for these terms, instead of $O(N^2)$ required to compute this energy the first time. The direct part of the Ewald summation follows the same principle.
+
+For the reciprocal part, \autoref{eq:reciprocal_decomposed} can be revisited by removing the first constant term, and singling out the atoms $n$ for the moved species:
+\[\Delta\Phi^\text{reciprocal}(\boldsymbol{r}) = \frac1{\varepsilon_0V}\sum_{\boldsymbol{k}\neq\boldsymbol{0}} \kappa_{\boldsymbol k}e^{i\boldsymbol k\cdot\boldsymbol{r}} \sum_{n\text{ moved}}q_n\paren{e^{-i\boldsymbol k\cdot\boldsymbol{r'}_n} - e^{-i\boldsymbol k\cdot\boldsymbol r_n}}\]
+where $\boldsymbol{r'}$ is the position after the move and $\boldsymbol{r}$ before.
+
+In order to allow computing this efficiently, each term $e^{-i\boldsymbol k\cdot\boldsymbol r_n}$ is thus stored in memory (instead of recomputing it each time). The new values $e^{-i\boldsymbol k\cdot\boldsymbol{r'}_n}$ computed for the trial move are also temporarily kept in memory, so they can be used to replace the previous ones if the trial move is accepted.
 
 % \begin{figure}[ht]
 %   \centering
