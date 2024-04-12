@@ -37,7 +37,7 @@ The first rule, which is obeyed by almost all known zeolites, was discovered by 
 
 The amount of aluminiums in a zeolite is usually discussed in terms of \SiAl ratio. L\"owenstein's rule thus limits the minimal \SiAl ratio to 1 in general, which corresponds to the maximum number of Al and thus of cations. Zeolites with high \SiAl ratios, usually called high-silica zeolites, contain few cations and tend to be hydrophobic [REF]; in general, they also tend to adsorb fewer molecules since cations are privileged adsorption sites.
 
-While L\"owenstein's rule is widely accepted as fact, and is mainly sustained by the absence of experimental synthesis of any zeolite with \SiAl ratio lower than 1, it is not currently proven experimentally. This comes from the cost of the few spectroscopic methods that allow identifying the precise locations of Al atoms: \ce{^{27}Al} and \ce{^{29}Si} magic-angle spinning NMR can be used to provide some limited information, while [10.1039/B203966B, 10.1039/B301634J] used UV-Visible-NIR spectroscopy on \ce{Co^{2+}}-exchanged ZSM-5 with high \SiAl ratio to retrieve their Al distribution. But this method cannot be generalized to low-silica zeolites. DFT computation confirm the rule in general, but also show potential violations for some zeolite topologies such as HEU [10.1016/j.mtcomm.2021.102028].
+While L\"owenstein's rule is widely accepted as an axiom, and is mainly sustained by the absence of experimental synthesis of any zeolite with \SiAl ratio lower than 1, it is not currently proven. This comes from the cost of the few spectroscopic methods that allow identifying the precise locations of Al atoms: \ce{^{27}Al} and \ce{^{29}Si} magic-angle spinning NMR can be used to provide some limited information, while [10.1039/B203966B, 10.1039/B301634J] used UV-Visible-NIR spectroscopy on \ce{Co^{2+}}-exchanged ZSM-5 with high \SiAl ratio to retrieve their Al distribution. But this method cannot be generalized to low-silica zeolites. DFT computation confirms the rule in general, but also show potential violations for some zeolite topologies such as HEU [10.1016/j.mtcomm.2021.102028].
 
 The second rule, proposed by [REF Dempsey et al, 10.1021/j100722a020] on the basis of FAU zeolites with varying \SiAl ratios, states that when possible, the number of next-neighbours Al atoms should be minimized to decrease the number of unfavourable interactions between close aluminiums. This rule is actually known to be violated in many real zeolites, including dealuminated FAU. Speculatively, this may come from the fact that the [REF Dempsey et al] made their observations on zeolites whose synthesis lead them to reach their global energy minimum, while many other synthetic routes can create structures trapped in a local energy minimum with respect to their \SiAl ordering.
 
@@ -64,6 +64,285 @@ To obtain the zeolite structures with random aluminium placements obeying L\"owe
     \item Since the situation can be blocked (see [FIGURE]), the algorithm sometimes restart from scratch, or sometimes does a partial restart by converting multiple Al atoms into Si.
     \item Configurations where the correct \SiAl ratio is reached are kept in a set. Each configuration is assigned a hash, which is simply a sequence of 0 if the T-atom is a Si or 1 otherwise, in a fixed order of the T-atom. To avoid considering symmetry-equivalent configurations as different, the signature of a configuration is computed as the lexicographically minimum of all the hashes corresponding to the application of a symmetry operation on the configuration. For each unique signature, a corresponding configuration is then retained, and the six models are taken at random among these configurations.
 \end{itemize}
+
+One last consideration is the choice of the supercell. It appears that, for a large number of zeolites topologies, the smallest unit cell cannot be filled with aluminiums so that it both obeys L\"owenstein's rule and reaches the minimal \SiAl ratio for that topology. In the case of LTA for instance, the smallest compatible cell is a $2\times2\times2$ supercell of the smallest unit cell. As a consequence, the greedy algorithm used before is actually attempted on several supercells, and the one leading to the smallest \SiAl ratio is retained. The full list of minimum \SiAl ratio found for each zeolite topology and the respective unit cell is presented in \cref{table:zeo_sial}.
+
+It is worth mentioning that a previous screening study of adsorption in zeolite by [10.1021/acsami.0c20892] claimed to use the lowest possible \SiAl ratios to screen through zeolites, but failed to reach the ones presented here, systematically in the case where a supercell needed to be used. Another [10.1021/acs.jpcc.3c06115, 10.1021/acs.jpcc.4c00066] alluded to that issue in the case of LTA, yet failed to identify some other topologies (ATT, JBY, LEV, LTL, MRT, OFF) which could reach an \SiAl ratio of 1. The choice of the supercell during aluminium placement is thus an easily overlooked, yet critical, point to consider.
+
+
+\begin{table}
+\small
+\makebox[\textwidth]{%
+\hspace{6pt}\begin{minipage}[t]{0.24\linewidth}
+	\vspace{0pt}
+	\begin{tabular}{|@{\hspace{0pt}}c@{\hspace{0pt}}|@{\hspace{1pt}}c@{\hspace{1pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|}
+		\hline
+		\scriptsize \bf Topology&\scriptsize \bf Si/Al&\scriptsize \bf Supercell\\\hline
+ABW&$1.0$&1$\times$1$\times$1\\\hline
+ACO&$1.0$&1$\times$1$\times$1\\\hline
+AEI&$1.0$&1$\times$1$\times$1\\\hline
+AEL&$1.0$&1$\times$1$\times$1\\\hline
+AEN&$1.0$&1$\times$1$\times$1\\\hline
+AET&$1.0$&1$\times$1$\times$1\\\hline
+AFG&$1.0$&1$\times$1$\times$1\\\hline
+AFI&$1.0$&1$\times$1$\times$1\\\hline
+AFN&$1.0$&1$\times$1$\times$1\\\hline
+AFO&$1.0$&1$\times$1$\times$1\\\hline
+AFR&$1.0$&2$\times$2$\times$4\\\hline
+AFS&$1.0$&1$\times$1$\times$1\\\hline
+AFT&$1.0$&1$\times$1$\times$1\\\hline
+AFV&$1.0$&3$\times$3$\times$2\\\hline
+AFX&$1.0$&1$\times$1$\times$1\\\hline
+AFY&$1.0$&1$\times$1$\times$1\\\hline
+AHT&$1.0$&1$\times$1$\times$1\\\hline
+ANA&$1.0$&1$\times$1$\times$1\\\hline
+ANO&$1.0$&1$\times$1$\times$1\\\hline
+APC&$1.0$&1$\times$1$\times$1\\\hline
+APD&$1.0$&1$\times$1$\times$1\\\hline
+AST&$1.0$&1$\times$1$\times$1\\\hline
+ASV&$1.0$&1$\times$1$\times$1\\\hline
+ATN&$1.0$&1$\times$1$\times$1\\\hline
+ATO&$1.0$&1$\times$1$\times$1\\\hline
+ATS&$1.0$&1$\times$1$\times$1\\\hline
+ATT&$1.0$&3$\times$4$\times$3\\\hline
+ATV&$1.0$&1$\times$1$\times$1\\\hline
+AVE&$1.0$&1$\times$1$\times$1\\\hline
+AVL&$1.0$&3$\times$3$\times$2\\\hline
+AWO&$1.0$&1$\times$1$\times$1\\\hline
+AWW&$1.0$&2$\times$2$\times$4\\\hline
+BCT&$1.0$&1$\times$1$\times$1\\\hline
+BEC&$1.29$&2$\times$2$\times$2\\\hline
+BIK&$1.4$&4$\times$2$\times$5\\\hline
+BOF&$1.4$&2$\times$1$\times$1\\\hline
+BOG&$1.4$&1$\times$1$\times$1\\\hline
+BOZ&$1.88$&1$\times$1$\times$1\\\hline
+BPH&$1.0$&1$\times$1$\times$1\\\hline
+BRE&$1.29$&4$\times$2$\times$4\\\hline
+BSV&$1.0$&1$\times$1$\times$1\\\hline
+CAN&$1.0$&1$\times$1$\times$1\\\hline
+CAS&$1.4$&1$\times$1$\times$1\\\hline
+CDO&$1.62$&4$\times$2$\times$2\\\hline
+CFI&$1.46$&2$\times$5$\times$1\\\hline
+CGF&$1.0$&2$\times$2$\times$4\\\hline
+CGS&$1.0$&1$\times$1$\times$1\\
+\end{tabular}
+\end{minipage}\hspace{2pt}
+\begin{minipage}[t]{0.24\linewidth}
+	\vspace{0pt}
+	\begin{tabular}{|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|}
+CHA&$1.0$&1$\times$1$\times$1\\\hline
+CON&$1.33$&1$\times$1$\times$1\\\hline
+CSV&$1.22$&1$\times$2$\times$1\\\hline
+CZP&$1.0$&1$\times$1$\times$1\\\hline
+DAC&$1.57$&1$\times$3$\times$2\\\hline
+DDR&$1.73$&1$\times$2$\times$1\\\hline
+DFO&$1.0$&2$\times$2$\times$2\\\hline
+DFT&$1.0$&4$\times$4$\times$3\\\hline
+DOH&$1.62$&1$\times$2$\times$1\\\hline
+DON&$1.29$&1$\times$1$\times$1\\\hline
+EAB&$1.0$&1$\times$1$\times$1\\\hline
+EDI&$1.0$&4$\times$4$\times$4\\\hline
+EEI&$1.44$&1$\times$1$\times$1\\\hline
+EMT&$1.0$&1$\times$1$\times$1\\\hline
+EON&$1.4$&2$\times$1$\times$1\\\hline
+EOS&$1.18$&1$\times$2$\times$2\\\hline
+EPI&$1.74$&4$\times$2$\times$3\\\hline
+ERI&$1.0$&1$\times$1$\times$1\\\hline
+ESV&$1.4$&1$\times$1$\times$1\\\hline
+ETL&$1.48$&2$\times$1$\times$1\\\hline
+ETR&$1.0$&1$\times$1$\times$1\\\hline
+ETV&$1.33$&1$\times$1$\times$1\\\hline
+EUO&$1.49$&1$\times$1$\times$1\\\hline
+EWF&$1.49$&2$\times$1$\times$1\\\hline
+EWO&$1.4$&2$\times$2$\times$5\\\hline
+EWS&$1.53$&1$\times$1$\times$1\\\hline
+EZT&$1.0$&1$\times$1$\times$1\\\hline
+FAR&$1.0$&1$\times$1$\times$1\\\hline
+FAU&$1.0$&1$\times$1$\times$1\\\hline
+FER&$1.57$&1$\times$1$\times$3\\\hline
+FRA&$1.0$&1$\times$1$\times$1\\\hline
+GIS&$1.0$&1$\times$1$\times$1\\\hline
+GIU&$1.0$&1$\times$1$\times$1\\\hline
+GME&$1.0$&1$\times$1$\times$1\\\hline
+GON&$1.29$&1$\times$1$\times$1\\\hline
+GOO&$1.0$&1$\times$1$\times$1\\\hline
+HEU&$1.25$&1$\times$1$\times$2\\\hline
+IFO&$1.0$&1$\times$1$\times$1\\\hline
+IFR&$1.29$&1$\times$1$\times$2\\\hline
+IFW&$1.29$&1$\times$1$\times$1\\\hline
+IFY&$1.0$&1$\times$1$\times$2\\\hline
+IHW&$1.55$&1$\times$1$\times$1\\\hline
+IMF&$1.55$&1$\times$1$\times$1\\\hline
+IRN&$1.19$&1$\times$1$\times$1\\\hline
+IRR&$1.6$&2$\times$2$\times$2\\\hline
+ISV&$1.31$&2$\times$2$\times$1\\\hline
+ITE&$1.56$&1$\times$2$\times$1\\\hline
+ITG&$1.33$&1$\times$1$\times$2\\
+\end{tabular}
+\end{minipage}\hspace{2pt}
+\begin{minipage}[t]{0.24\linewidth}
+\vspace{0pt}
+\begin{tabular}{|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|}
+ITH&$1.33$&1$\times$2$\times$1\\\hline
+ITR&$1.33$&1$\times$1$\times$1\\\hline
+ITT&$1.56$&2$\times$2$\times$3\\\hline
+ITW&$1.4$&1$\times$1$\times$1\\\hline
+IWR&$1.33$&2$\times$2$\times$2\\\hline
+IWS&$1.27$&1$\times$1$\times$2\\\hline
+IWV&$1.62$&1$\times$1$\times$2\\\hline
+IWW&$1.33$&1$\times$1$\times$1\\\hline
+JBW&$1.0$&5$\times$4$\times$3\\\hline
+JNT&$1.0$&1$\times$1$\times$1\\\hline
+JOZ&$1.5$&2$\times$1$\times$1\\\hline
+JRY&$1.0$&1$\times$1$\times$1\\\hline
+JSN&$1.0$&3$\times$4$\times$2\\\hline
+JSR&$1.67$&1$\times$1$\times$1\\\hline
+JST&$2.0$&1$\times$1$\times$1\\\hline
+JSW&$1.0$&1$\times$1$\times$1\\\hline
+JSY&$1.0$&1$\times$1$\times$1\\\hline
+JZO&$1.37$&1$\times$1$\times$1\\\hline
+JZT&$1.35$&1$\times$1$\times$1\\\hline
+KFI&$1.0$&1$\times$1$\times$1\\\hline
+LAU&$1.0$&2$\times$2$\times$4\\\hline
+LEV&$1.0$&3$\times$3$\times$2\\\hline
+LIO&$1.0$&1$\times$1$\times$1\\\hline
+LOS&$1.0$&1$\times$1$\times$1\\\hline
+LOV&$1.25$&2$\times$2$\times$1\\\hline
+LTA&$1.0$&2$\times$2$\times$2\\\hline
+LTF&$1.27$&1$\times$1$\times$4\\\hline
+LTJ&$1.0$&1$\times$1$\times$1\\\hline
+LTL&$1.0$&2$\times$2$\times$4\\\hline
+LTN&$1.0$&1$\times$1$\times$1\\\hline
+MAR&$1.0$&1$\times$1$\times$1\\\hline
+MAZ&$1.4$&1$\times$1$\times$2\\\hline
+MEI&$1.43$&1$\times$1$\times$1\\\hline
+MEL&$1.67$&1$\times$1$\times$1\\\hline
+MEP&$1.71$&1$\times$1$\times$1\\\hline
+MER&$1.0$&1$\times$1$\times$1\\\hline
+MFI&$1.67$&1$\times$1$\times$1\\\hline
+MFS&$1.45$&3$\times$1$\times$1\\\hline
+MON&$1.67$&2$\times$2$\times$1\\\hline
+MOR&$1.67$&1$\times$1$\times$2\\\hline
+MOZ&$1.0$&1$\times$1$\times$4\\\hline
+MRT&$1.0$&2$\times$4$\times$2\\\hline
+MSE&$1.55$&1$\times$1$\times$1\\\hline
+MSO&$1.0$&2$\times$2$\times$2\\\hline
+MTF&$1.44$&1$\times$1$\times$2\\\hline
+MTN&$1.72$&1$\times$1$\times$1\\\hline
+MTT&$1.4$&1$\times$1$\times$1\\\hline
+MTW&$1.33$&1$\times$5$\times$3\\
+\end{tabular}
+\end{minipage}\hspace{2pt}
+\begin{minipage}[t]{0.24\linewidth}
+\vspace{0pt}
+\begin{tabular}{|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|}
+MVY&$1.0$&1$\times$1$\times$1\\\hline
+MWF&$1.0$&1$\times$1$\times$1\\\hline
+MWW&$1.53$&2$\times$2$\times$1\\\hline
+NAB&$1.5$&2$\times$2$\times$1\\\hline
+NAT&$1.22$&2$\times$2$\times$4\\\hline
+NES&$1.52$&1$\times$1$\times$1\\\hline
+NON&$1.44$&1$\times$1$\times$1\\\hline
+NPO&$2.0$&4$\times$4$\times$5\\\hline
+NPT&$2.0$&2$\times$2$\times$2\\\hline
+NSI&$1.4$&2$\times$5$\times$3\\\hline
+OBW&$1.92$&1$\times$1$\times$1\\\hline
+OFF&$1.0$&3$\times$3$\times$4\\\hline
+OKO&$1.62$&1$\times$1$\times$1\\\hline
+OSI&$1.0$&1$\times$1$\times$1\\\hline
+OSO&$2.0$&1$\times$1$\times$1\\\hline
+OWE&$1.0$&2$\times$4$\times$3\\\hline
+PAU&$1.0$&1$\times$1$\times$1\\\hline
+PCR&$1.5$&1$\times$1$\times$1\\\hline
+PHI&$1.0$&1$\times$1$\times$1\\\hline
+PON&$1.0$&1$\times$1$\times$1\\\hline
+POR&$1.0$&1$\times$1$\times$1\\\hline
+POS&$1.29$&1$\times$1$\times$1\\\hline
+PSI&$1.0$&1$\times$1$\times$1\\\hline
+PTF&$1.5$&1$\times$1$\times$1\\\hline
+PTO&$1.4$&1$\times$1$\times$1\\\hline
+PTT&$1.0$&1$\times$1$\times$1\\\hline
+PTY&$1.5$&1$\times$1$\times$1\\\hline
+PUN&$1.25$&1$\times$1$\times$1\\\hline
+PWN&$1.0$&1$\times$1$\times$1\\\hline
+PWO&$1.5$&1$\times$1$\times$1\\\hline
+PWW&$1.5$&1$\times$1$\times$1\\\hline
+RFE&$1.4$&1$\times$1$\times$1\\\hline
+RHO&$1.0$&1$\times$1$\times$1\\\hline
+RRO&$1.25$&2$\times$1$\times$1\\\hline
+RSN&$1.59$&4$\times$1$\times$4\\\hline
+RTE&$1.4$&1$\times$1$\times$2\\\hline
+RTH&$1.53$&2$\times$1$\times$3\\\hline
+RUT&$1.57$&2$\times$2$\times$3\\\hline
+RWR&$1.6$&4$\times$4$\times$1\\\hline
+RWY&$3.0$&1$\times$1$\times$1\\\hline
+SAF&$1.0$&1$\times$1$\times$1\\\hline
+SAO&$1.0$&1$\times$1$\times$1\\\hline
+SAS&$1.0$&1$\times$1$\times$1\\\hline
+SAT&$1.0$&1$\times$1$\times$1\\\hline
+SAV&$1.0$&1$\times$1$\times$1\\\hline
+SBE&$1.0$&1$\times$1$\times$1\\\hline
+SBN&$1.5$&1$\times$2$\times$1\\\hline
+SBS&$1.0$&1$\times$1$\times$1\\
+\end{tabular}
+\end{minipage}\hspace{2pt}
+\begin{minipage}[t]{0.24\linewidth}
+\vspace{0pt}
+\begin{tabular}{|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|}
+SBT&$1.0$&1$\times$1$\times$1\\\hline
+SEW&$1.36$&1$\times$2$\times$1\\\hline
+SFE&$1.33$&1$\times$1$\times$1\\\hline
+SFF&$1.46$&2$\times$1$\times$2\\\hline
+SFG&$1.47$&1$\times$2$\times$2\\\hline
+SFH&$1.29$&5$\times$1$\times$2\\\hline
+SFN&$1.29$&1$\times$5$\times$2\\\hline
+SFO&$1.0$&2$\times$2$\times$4\\\hline
+SFS&$1.67$&1$\times$1$\times$1\\\hline
+SFW&$1.0$&1$\times$1$\times$1\\\hline
+SGT&$1.49$&2$\times$2$\times$1\\\hline
+SIV&$1.0$&1$\times$1$\times$1\\\hline
+SOD&$1.0$&1$\times$1$\times$1\\\hline
+SOF&$1.5$&1$\times$1$\times$1\\\hline
+SOR&$1.18$&1$\times$1$\times$2\\\hline
+SOS&$1.4$&2$\times$4$\times$3\\\hline
+SOV&$1.29$&1$\times$1$\times$1\\\hline
+SSF&$1.25$&2$\times$2$\times$2\\\hline
+SSY&$1.33$&1$\times$1$\times$1\\\hline
+STF&$1.46$&1$\times$1$\times$2\\\hline
+STI&$1.25$&1$\times$1$\times$1\\\hline
+STT&$1.46$&1$\times$1$\times$1\\\hline
+STW&$1.5$&1$\times$1$\times$1\\\hline
+SVV&$1.33$&1$\times$1$\times$1\\\hline
+SWY&$1.0$&1$\times$1$\times$1\\\hline
+SZR&$1.25$&1$\times$1$\times$2\\\hline
+TER&$1.35$&1$\times$1$\times$1\\\hline
+THO&$1.0$&2$\times$4$\times$4\\\hline
+TOL&$1.0$&1$\times$1$\times$1\\\hline
+TON&$1.4$&2$\times$2$\times$5\\\hline
+TSC&$1.0$&1$\times$1$\times$1\\\hline
+TUN&$1.53$&1$\times$1$\times$1\\\hline
+UEI&$1.0$&1$\times$1$\times$1\\\hline
+UFI&$1.29$&2$\times$2$\times$1\\\hline
+UOS&$1.18$&2$\times$4$\times$3\\\hline
+UOV&$1.38$&1$\times$1$\times$1\\\hline
+UOZ&$1.0$&1$\times$1$\times$1\\\hline
+USI&$1.0$&1$\times$1$\times$1\\\hline
+UTL&$1.62$&1$\times$2$\times$2\\\hline
+UWY&$1.37$&1$\times$2$\times$3\\\hline
+VET&$1.43$&1$\times$1$\times$1\\\hline
+VFI&$1.0$&1$\times$1$\times$1\\\hline
+VNI&$1.73$&3$\times$3$\times$1\\\hline
+VSV&$1.78$&4$\times$4$\times$1\\\hline
+WEI&$1.5$&1$\times$1$\times$1\\\hline
+YFI&$1.4$&1$\times$1$\times$1\\\hline
+YUG&$1.56$&3$\times$2$\times$4\\\hline
+ZON&$1.0$&4$\times$2$\times$2\\\hline
+	\end{tabular}
+\end{minipage}\hspace{-2em}
+}
+	\caption{Minimal Si/Al obtained with corresponding supercell for all non-interrupted topologies\label{table:zeo_sial}}
+%\end{minipage}
+\end{table}
 
 \subsection{Cations}
 
@@ -129,10 +408,6 @@ In this strategy, the coldest simulation is constantly exploring a local free en
 
 Naturally, its main downside is its computational cost, proportional to the number of simulations and thus effectively related to the difference between the highest and the lowest temperatures. The choice of intermediate temperatures must be guided by an initial discovery of the typical energies encountered by system at each temperature, which requires a few dedicated simulations prior to the parallel tempering. Finding the optimal number of simulations requires striking a balance with the proportion of accepted MC exchange steps, whose impact on the overall simulation convergence can be difficult to measure. Additionally, simulations with neighbour temperatures must regularly synchronize to attempt an exchange, which strongly limits the amount of parallelization usable in the implementation of parallel tempering.
 
-\subsubsection{The RASPA2 software}
-
-TODO:
-
 \subsubsection{Hybrid MC} % method of Marie Jeffroy
 
 Specifically in the case cationic zeolites, [Marie Jeffroy REF] proposes a simulation method to obtain both the placement of cations in the structure and the location of aluminium atoms across the T-sites. This consists in running an MC simulation where the cations are allowed all previously mentioned MC steps, while the aluminiums are only allowed exchanging positions with siliciums, or a restart step that randomly positions aluminiums and siliciums, both while obeying L\"owenstein's rule as explained in \autoref{mariejeffory_al}.
@@ -176,6 +451,14 @@ We observe slightly better results by sorting the bins according the the decreas
 
 All of the previously exposed methods rely on Monte-Carlo steps which may, or may not, be accepted, depending on the difference of energy between the two configurations. By far, the greatest computational cost of any of these methods lies in these energy computations; it is therefore crucial to be able to compute it efficiently.
 
+\subsubsection{The RASPA2 software}
+
+RASPA2 is an open-source software developed by [REF] for classical simulations of molecular systems. Although general purpose, it is mainly used with nanoporous materials and in particular for the study of adsorption and diffusion within. RASPA2 implements Monte-Carlo schemes with the Metropolis-Hastings algorithm to perform canonical simulations, but also grand canonical for adsorption (see \autoref{adsorption}), as well as parallel tempering. Furthermore, it includes Gibbs ensemble simulation, flexible guest species and frameworks, and many other functionalities which were not needed here.
+
+RASPA2 is written in C, a low-level programming language which allows reaching optimal performance, but is tedious to program in. It cannot be used on GPU and is single-threaded. In order to develop new simulation strategies in an easier setting, I re-implemented the algorithms used for both canonical and grand-canonical simulation of rigid species in rigid frameworks using the Julia programming language (see \autoref{julia}).
+
+The energy computation algorithms detailed herein are those which were implemented in this new code, but most of them follow that implemented in RASPA2. Moreover, RASPA2 was used to validate the new code, by checking that the simulations yielded the correct physical values (energies, adsorption capacities, and such). By contrast, the shooting star methodology presented before does not exist in RASPA2.
+
 \subsection{Force fields}
 
 The energy of a molecular structure results from the interaction of its constituent atoms, which are intrinsically quantum. At the molecular level, a popular method used is the quantum Density Functional Theory (DFT), which includes a variety of particular methods, each presenting its own compromise between precision and performance. Some alternatives include methods derived from molecular orbital theory. The number of energy computations for a single molecular simulation can be of the order of \qty{10000} however, which would be much too costly with such methods.
@@ -188,9 +471,15 @@ where $r$ is the distance between atoms. One alternative is the Buckingham poten
 \[r\mapsto A\exp\paren{-B\times r} - \frac C{r^6}\]
 The potential parameter $\varepsilon$, $\sigma$, $A$, $B$ or $C$ are part of the design of the force field.
 
+\subsection{Short-term interactions}
+
 Since the van der Waals term decays quickly towards zero, it is computationnally useful to set it to exactly zero beyond a cutoff distance. To do so while avoiding the introduction of unphysical forces, one possibility consists in shifting the formula by a constant, so that the function remains continuous at the cutoff. If no force is required, such as in the MC methods, it is possible to leave the the potential unshifted and discontinuous at the cutoff, but a constant tail correction can be added to the total energy to account for the missing interactions. In any case, knowing that the interaction becomes zero after the cutoff allows some computational optimizations, such as using cell lists in order to iterate over the relevant atom pairs only, instead of all atom pairs.
 
-For simplicity of the implementation, the dimensions of the simulated unit cell must be taken so that for any atoms $A$ and $B$, there is at most one periodic image of $B$ which is lower than the cutoff distance from atom $A$. This translates to the constraint that the orthogonal lengths of the unit cell must be as long as at least twice the cutoff. We take this cutoff as \qty{12}{\angstrom}, as is common in the literature [REF].
+For simplicity of the implementation, the dimensions of the simulated unit cell must be taken so that for any atoms $A$ and $B$, there is at most one periodic image of $B$ which is lower than the cutoff distance from atom $A$. This translates to the constraint that the orthogonal lengths of the unit cell must be as long as at least twice the cutoff. We take this cutoff as \qty{12}{\angstrom}, as is common in the literature [REF] and is the default in RASPA2.
+
+Given this constraint, the total energy of a configuration due to the van der Waals interaction can be computed by summing the contribution of each the pair of atoms which are closer than the cutoff distance. This can done naively with a double loop over all atoms, computing the distance of each pair and rejecting that above the threshold. Here, the distance considered is the periodic distance, \textit{i.e.} the smallest distance between periodic images of the two atoms, respective to the periodicity of the crystal. Computing it is up to 6 times more costly than without periodicity, and can become a computational bottleneck for simple enough force fields.
+
+To avoid unecessary distance computations, a possibility consists in binning the space of the unit cell, and skipping the pairs of atoms that belong to bins further than the cutoff distance. This idea underlies the principle of neighbour list which can be used to obtain the list of relevant pairs of atoms efficiently. We use the CellListMap.jl [10.1016/j.cpc.2022.108452] julia package for this purpose, although we only enable it when the cell is large enough since the naive approach can be more efficient in many cases where the orthogonal lengths of the cell are close to twice the cutoff distance.
 
 \subsection{Ewald summation}
 
@@ -218,7 +507,7 @@ Thus, the direct term is the potential resulting from the point charge minus thi
 \[-\nabla\Phi(\boldsymbol r) = 4\pi\rho(\boldsymbol r)\label{Poisson}\]
 which yields, after some simplification steps not detailed here:
 \[\Phi^\text{direct}_A(r) = q_A\frac{\text{erfc}(\alpha r)}r\]
-where $r$ is the distance to atom $A$ and $\text{erfc}$ is the complementary error function $\text{erfc}:x\mapsto 1 - \frac2{\sqrt\pi}\int_0^x~e^{-t^2}\text dt$. Since $\text{erfc}$ quickly decays towards $0$, the total direct potential at a given point can be computed by only considering the contribution of the closest charges around, so
+where $r$ is the distance to atom $A$ and $\text{erfc}$ is the complementary error function $\text{erfc}:x\mapsto 1 - \frac2{\sqrt\pi}\int_0^xe^{-t^2}\text dt$. Since $\text{erfc}$ quickly decays towards $0$, the total direct potential at a given point can be computed by only considering the contribution of the closest charges around, so
 \[\Phi^\text{direct}(\boldsymbol r) \approx \sum_{n=1}^N \frac{q_n}{\pnorm{\boldsymbol r - \boldsymbol r_n}}\paren{\text{erfc}\paren{\alpha \pnorm{\boldsymbol r - \boldsymbol r_n}}}\]
 where $\pnorm{\boldsymbol x}$ designates the distance to the origin of the closest periodic image of $\boldsymbol x$.
 
