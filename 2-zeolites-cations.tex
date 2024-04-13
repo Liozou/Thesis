@@ -65,7 +65,9 @@ To obtain the zeolite structures with random aluminium placements obeying L\"owe
     \item Configurations where the correct \SiAl ratio is reached are kept in a set. Each configuration is assigned a hash, which is simply a sequence of 0 if the T-atom is a Si or 1 otherwise, in a fixed order of the T-atom. To avoid considering symmetry-equivalent configurations as different, the signature of a configuration is computed as the lexicographically minimum of all the hashes corresponding to the application of a symmetry operation on the configuration. For each unique signature, a corresponding configuration is then retained, and the six models are taken at random among these configurations.
 \end{itemize}
 
-One last consideration is the choice of the supercell. It appears that, for a large number of zeolites topologies, the smallest unit cell cannot be filled with aluminiums so that it both obeys L\"owenstein's rule and reaches the minimal \SiAl ratio for that topology. In the case of LTA for instance, the smallest compatible cell is a $2\times2\times2$ supercell of the smallest unit cell. As a consequence, the greedy algorithm used before is actually attempted on several supercells, and the one leading to the smallest \SiAl ratio is retained. The full list of minimum \SiAl ratio found for each zeolite topology and the respective unit cell is presented in \cref{table:zeo_sial}.
+One last consideration is the choice of the supercell. It appears that, for a large number of zeolites topologies, the smallest unit cell cannot be filled with aluminiums so that it both obeys L\"owenstein's rule and reaches the minimal \SiAl ratio for that topology. In the case of LTA for instance, the smallest compatible cell is a $2\times2\times2$ supercell of the smallest unit cell. As a consequence, the greedy algorithm used before is actually attempted on several supercells, and the one leading to the smallest \SiAl ratio is retained.
+
+The full list of minimum \SiAl ratio found for each zeolite topology (except interrupted ones) and the respective supercell is presented in Table \ref{table:zeosial}. The supercell is considered with respect to the idealized framework available for each topology on the IZA-SC database\footnote{accessible at \url{https://europe.iza-structure.org/IZA-SC/ftc_table.php}}. This table presents the lowest \SiAl ratio found, but apart for the cases where it is $1$, the values here are not proven to be minimal, since the algorithm relies on random attempts. Similarly, the supercell used could be not minimal.
 
 It is worth mentioning that a previous screening study of adsorption in zeolite by [10.1021/acsami.0c20892] claimed to use the lowest possible \SiAl ratios to screen through zeolites, but failed to reach the ones presented here, systematically in the case where a supercell needed to be used. Another [10.1021/acs.jpcc.3c06115, 10.1021/acs.jpcc.4c00066] alluded to that issue in the case of LTA, yet failed to identify some other topologies (ATT, JBY, LEV, LTL, MRT, OFF) which could reach an \SiAl ratio of 1. The choice of the supercell during aluminium placement is thus an easily overlooked, yet critical, point to consider.
 
@@ -78,99 +80,99 @@ It is worth mentioning that a previous screening study of adsorption in zeolite 
 	\begin{tabular}{|@{\hspace{0pt}}c@{\hspace{0pt}}|@{\hspace{1pt}}c@{\hspace{1pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|}
 		\hline
 		\scriptsize \bf Topology&\scriptsize \bf Si/Al&\scriptsize \bf Supercell\\\hline
-ABW&$1.0$&1$\times$1$\times$1\\\hline
-ACO&$1.0$&1$\times$1$\times$1\\\hline
-AEI&$1.0$&1$\times$1$\times$1\\\hline
-AEL&$1.0$&1$\times$1$\times$1\\\hline
-AEN&$1.0$&1$\times$1$\times$1\\\hline
-AET&$1.0$&1$\times$1$\times$1\\\hline
-AFG&$1.0$&1$\times$1$\times$1\\\hline
-AFI&$1.0$&1$\times$1$\times$1\\\hline
-AFN&$1.0$&1$\times$1$\times$1\\\hline
-AFO&$1.0$&1$\times$1$\times$1\\\hline
-AFR&$1.0$&2$\times$2$\times$4\\\hline
-AFS&$1.0$&1$\times$1$\times$1\\\hline
-AFT&$1.0$&1$\times$1$\times$1\\\hline
-AFV&$1.0$&3$\times$3$\times$2\\\hline
-AFX&$1.0$&1$\times$1$\times$1\\\hline
-AFY&$1.0$&1$\times$1$\times$1\\\hline
-AHT&$1.0$&1$\times$1$\times$1\\\hline
-ANA&$1.0$&1$\times$1$\times$1\\\hline
-ANO&$1.0$&1$\times$1$\times$1\\\hline
-APC&$1.0$&1$\times$1$\times$1\\\hline
-APD&$1.0$&1$\times$1$\times$1\\\hline
-AST&$1.0$&1$\times$1$\times$1\\\hline
-ASV&$1.0$&1$\times$1$\times$1\\\hline
-ATN&$1.0$&1$\times$1$\times$1\\\hline
-ATO&$1.0$&1$\times$1$\times$1\\\hline
-ATS&$1.0$&1$\times$1$\times$1\\\hline
-ATT&$1.0$&3$\times$4$\times$3\\\hline
-ATV&$1.0$&1$\times$1$\times$1\\\hline
-AVE&$1.0$&1$\times$1$\times$1\\\hline
-AVL&$1.0$&3$\times$3$\times$2\\\hline
-AWO&$1.0$&1$\times$1$\times$1\\\hline
-AWW&$1.0$&2$\times$2$\times$4\\\hline
-BCT&$1.0$&1$\times$1$\times$1\\\hline
+ABW&$1$&1$\times$1$\times$1\\\hline
+ACO&$1$&1$\times$1$\times$1\\\hline
+AEI&$1$&1$\times$1$\times$1\\\hline
+AEL&$1$&1$\times$1$\times$1\\\hline
+AEN&$1$&1$\times$1$\times$1\\\hline
+AET&$1$&1$\times$1$\times$1\\\hline
+AFG&$1$&1$\times$1$\times$1\\\hline
+AFI&$1$&1$\times$1$\times$1\\\hline
+AFN&$1$&1$\times$1$\times$1\\\hline
+AFO&$1$&1$\times$1$\times$1\\\hline
+AFR&$1$&2$\times$2$\times$4\\\hline
+AFS&$1$&1$\times$1$\times$1\\\hline
+AFT&$1$&1$\times$1$\times$1\\\hline
+AFV&$1$&3$\times$3$\times$2\\\hline
+AFX&$1$&1$\times$1$\times$1\\\hline
+AFY&$1$&1$\times$1$\times$1\\\hline
+AHT&$1$&1$\times$1$\times$1\\\hline
+ANA&$1$&1$\times$1$\times$1\\\hline
+ANO&$1$&1$\times$1$\times$1\\\hline
+APC&$1$&1$\times$1$\times$1\\\hline
+APD&$1$&1$\times$1$\times$1\\\hline
+AST&$1$&1$\times$1$\times$1\\\hline
+ASV&$1$&1$\times$1$\times$1\\\hline
+ATN&$1$&1$\times$1$\times$1\\\hline
+ATO&$1$&1$\times$1$\times$1\\\hline
+ATS&$1$&1$\times$1$\times$1\\\hline
+ATT&$1$&3$\times$4$\times$3\\\hline
+ATV&$1$&1$\times$1$\times$1\\\hline
+AVE&$1$&1$\times$1$\times$1\\\hline
+AVL&$1$&3$\times$3$\times$2\\\hline
+AWO&$1$&1$\times$1$\times$1\\\hline
+AWW&$1$&2$\times$2$\times$4\\\hline
+BCT&$1$&1$\times$1$\times$1\\\hline
 BEC&$1.29$&2$\times$2$\times$2\\\hline
 BIK&$1.4$&4$\times$2$\times$5\\\hline
 BOF&$1.4$&2$\times$1$\times$1\\\hline
 BOG&$1.4$&1$\times$1$\times$1\\\hline
 BOZ&$1.88$&1$\times$1$\times$1\\\hline
-BPH&$1.0$&1$\times$1$\times$1\\\hline
+BPH&$1$&1$\times$1$\times$1\\\hline
 BRE&$1.29$&4$\times$2$\times$4\\\hline
-BSV&$1.0$&1$\times$1$\times$1\\\hline
-CAN&$1.0$&1$\times$1$\times$1\\\hline
+BSV&$1$&1$\times$1$\times$1\\\hline
+CAN&$1$&1$\times$1$\times$1\\\hline
 CAS&$1.4$&1$\times$1$\times$1\\\hline
 CDO&$1.62$&4$\times$2$\times$2\\\hline
 CFI&$1.46$&2$\times$5$\times$1\\\hline
-CGF&$1.0$&2$\times$2$\times$4\\\hline
-CGS&$1.0$&1$\times$1$\times$1\\
+CGF&$1$&2$\times$2$\times$4\\\hline
+CGS&$1$&1$\times$1$\times$1\\
 \end{tabular}
-\end{minipage}\hspace{2pt}
+\end{minipage}\hspace{4pt}
 \begin{minipage}[t]{0.24\linewidth}
 	\vspace{0pt}
 	\begin{tabular}{|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|}
-CHA&$1.0$&1$\times$1$\times$1\\\hline
+CHA&$1$&1$\times$1$\times$1\\\hline
 CON&$1.33$&1$\times$1$\times$1\\\hline
 CSV&$1.22$&1$\times$2$\times$1\\\hline
-CZP&$1.0$&1$\times$1$\times$1\\\hline
+CZP&$1$&1$\times$1$\times$1\\\hline
 DAC&$1.57$&1$\times$3$\times$2\\\hline
 DDR&$1.73$&1$\times$2$\times$1\\\hline
-DFO&$1.0$&2$\times$2$\times$2\\\hline
-DFT&$1.0$&4$\times$4$\times$3\\\hline
+DFO&$1$&2$\times$2$\times$2\\\hline
+DFT&$1$&4$\times$4$\times$3\\\hline
 DOH&$1.62$&1$\times$2$\times$1\\\hline
 DON&$1.29$&1$\times$1$\times$1\\\hline
-EAB&$1.0$&1$\times$1$\times$1\\\hline
-EDI&$1.0$&4$\times$4$\times$4\\\hline
+EAB&$1$&1$\times$1$\times$1\\\hline
+EDI&$1$&4$\times$4$\times$4\\\hline
 EEI&$1.44$&1$\times$1$\times$1\\\hline
-EMT&$1.0$&1$\times$1$\times$1\\\hline
+EMT&$1$&1$\times$1$\times$1\\\hline
 EON&$1.4$&2$\times$1$\times$1\\\hline
 EOS&$1.18$&1$\times$2$\times$2\\\hline
 EPI&$1.74$&4$\times$2$\times$3\\\hline
-ERI&$1.0$&1$\times$1$\times$1\\\hline
+ERI&$1$&1$\times$1$\times$1\\\hline
 ESV&$1.4$&1$\times$1$\times$1\\\hline
 ETL&$1.48$&2$\times$1$\times$1\\\hline
-ETR&$1.0$&1$\times$1$\times$1\\\hline
+ETR&$1$&1$\times$1$\times$1\\\hline
 ETV&$1.33$&1$\times$1$\times$1\\\hline
 EUO&$1.49$&1$\times$1$\times$1\\\hline
 EWF&$1.49$&2$\times$1$\times$1\\\hline
 EWO&$1.4$&2$\times$2$\times$5\\\hline
 EWS&$1.53$&1$\times$1$\times$1\\\hline
-EZT&$1.0$&1$\times$1$\times$1\\\hline
-FAR&$1.0$&1$\times$1$\times$1\\\hline
-FAU&$1.0$&1$\times$1$\times$1\\\hline
+EZT&$1$&1$\times$1$\times$1\\\hline
+FAR&$1$&1$\times$1$\times$1\\\hline
+FAU&$1$&1$\times$1$\times$1\\\hline
 FER&$1.57$&1$\times$1$\times$3\\\hline
-FRA&$1.0$&1$\times$1$\times$1\\\hline
-GIS&$1.0$&1$\times$1$\times$1\\\hline
-GIU&$1.0$&1$\times$1$\times$1\\\hline
-GME&$1.0$&1$\times$1$\times$1\\\hline
+FRA&$1$&1$\times$1$\times$1\\\hline
+GIS&$1$&1$\times$1$\times$1\\\hline
+GIU&$1$&1$\times$1$\times$1\\\hline
+GME&$1$&1$\times$1$\times$1\\\hline
 GON&$1.29$&1$\times$1$\times$1\\\hline
-GOO&$1.0$&1$\times$1$\times$1\\\hline
+GOO&$1$&1$\times$1$\times$1\\\hline
 HEU&$1.25$&1$\times$1$\times$2\\\hline
-IFO&$1.0$&1$\times$1$\times$1\\\hline
+IFO&$1$&1$\times$1$\times$1\\\hline
 IFR&$1.29$&1$\times$1$\times$2\\\hline
 IFW&$1.29$&1$\times$1$\times$1\\\hline
-IFY&$1.0$&1$\times$1$\times$2\\\hline
+IFY&$1$&1$\times$1$\times$2\\\hline
 IHW&$1.55$&1$\times$1$\times$1\\\hline
 IMF&$1.55$&1$\times$1$\times$1\\\hline
 IRN&$1.19$&1$\times$1$\times$1\\\hline
@@ -179,7 +181,7 @@ ISV&$1.31$&2$\times$2$\times$1\\\hline
 ITE&$1.56$&1$\times$2$\times$1\\\hline
 ITG&$1.33$&1$\times$1$\times$2\\
 \end{tabular}
-\end{minipage}\hspace{2pt}
+\end{minipage}\hspace{0pt}
 \begin{minipage}[t]{0.24\linewidth}
 \vspace{0pt}
 \begin{tabular}{|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|}
@@ -191,42 +193,42 @@ IWR&$1.33$&2$\times$2$\times$2\\\hline
 IWS&$1.27$&1$\times$1$\times$2\\\hline
 IWV&$1.62$&1$\times$1$\times$2\\\hline
 IWW&$1.33$&1$\times$1$\times$1\\\hline
-JBW&$1.0$&5$\times$4$\times$3\\\hline
-JNT&$1.0$&1$\times$1$\times$1\\\hline
+JBW&$1$&5$\times$4$\times$3\\\hline
+JNT&$1$&1$\times$1$\times$1\\\hline
 JOZ&$1.5$&2$\times$1$\times$1\\\hline
-JRY&$1.0$&1$\times$1$\times$1\\\hline
-JSN&$1.0$&3$\times$4$\times$2\\\hline
+JRY&$1$&1$\times$1$\times$1\\\hline
+JSN&$1$&3$\times$4$\times$2\\\hline
 JSR&$1.67$&1$\times$1$\times$1\\\hline
-JST&$2.0$&1$\times$1$\times$1\\\hline
-JSW&$1.0$&1$\times$1$\times$1\\\hline
-JSY&$1.0$&1$\times$1$\times$1\\\hline
+JST&$2$&1$\times$1$\times$1\\\hline
+JSW&$1$&1$\times$1$\times$1\\\hline
+JSY&$1$&1$\times$1$\times$1\\\hline
 JZO&$1.37$&1$\times$1$\times$1\\\hline
 JZT&$1.35$&1$\times$1$\times$1\\\hline
-KFI&$1.0$&1$\times$1$\times$1\\\hline
-LAU&$1.0$&2$\times$2$\times$4\\\hline
-LEV&$1.0$&3$\times$3$\times$2\\\hline
-LIO&$1.0$&1$\times$1$\times$1\\\hline
-LOS&$1.0$&1$\times$1$\times$1\\\hline
+KFI&$1$&1$\times$1$\times$1\\\hline
+LAU&$1$&2$\times$2$\times$4\\\hline
+LEV&$1$&3$\times$3$\times$2\\\hline
+LIO&$1$&1$\times$1$\times$1\\\hline
+LOS&$1$&1$\times$1$\times$1\\\hline
 LOV&$1.25$&2$\times$2$\times$1\\\hline
-LTA&$1.0$&2$\times$2$\times$2\\\hline
+LTA&$1$&2$\times$2$\times$2\\\hline
 LTF&$1.27$&1$\times$1$\times$4\\\hline
-LTJ&$1.0$&1$\times$1$\times$1\\\hline
-LTL&$1.0$&2$\times$2$\times$4\\\hline
-LTN&$1.0$&1$\times$1$\times$1\\\hline
-MAR&$1.0$&1$\times$1$\times$1\\\hline
+LTJ&$1$&1$\times$1$\times$1\\\hline
+LTL&$1$&2$\times$2$\times$4\\\hline
+LTN&$1$&1$\times$1$\times$1\\\hline
+MAR&$1$&1$\times$1$\times$1\\\hline
 MAZ&$1.4$&1$\times$1$\times$2\\\hline
 MEI&$1.43$&1$\times$1$\times$1\\\hline
 MEL&$1.67$&1$\times$1$\times$1\\\hline
 MEP&$1.71$&1$\times$1$\times$1\\\hline
-MER&$1.0$&1$\times$1$\times$1\\\hline
+MER&$1$&1$\times$1$\times$1\\\hline
 MFI&$1.67$&1$\times$1$\times$1\\\hline
 MFS&$1.45$&3$\times$1$\times$1\\\hline
 MON&$1.67$&2$\times$2$\times$1\\\hline
 MOR&$1.67$&1$\times$1$\times$2\\\hline
-MOZ&$1.0$&1$\times$1$\times$4\\\hline
-MRT&$1.0$&2$\times$4$\times$2\\\hline
+MOZ&$1$&1$\times$1$\times$4\\\hline
+MRT&$1$&2$\times$4$\times$2\\\hline
 MSE&$1.55$&1$\times$1$\times$1\\\hline
-MSO&$1.0$&2$\times$2$\times$2\\\hline
+MSO&$1$&2$\times$2$\times$2\\\hline
 MTF&$1.44$&1$\times$1$\times$2\\\hline
 MTN&$1.72$&1$\times$1$\times$1\\\hline
 MTT&$1.4$&1$\times$1$\times$1\\\hline
@@ -235,73 +237,73 @@ MTW&$1.33$&1$\times$5$\times$3\\
 \end{minipage}\hspace{2pt}
 \begin{minipage}[t]{0.24\linewidth}
 \vspace{0pt}
-\begin{tabular}{|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|}
-MVY&$1.0$&1$\times$1$\times$1\\\hline
-MWF&$1.0$&1$\times$1$\times$1\\\hline
+\begin{tabular}{|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{5pt}}|}
+MVY&$1$&1$\times$1$\times$1\\\hline
+MWF&$1$&1$\times$1$\times$1\\\hline
 MWW&$1.53$&2$\times$2$\times$1\\\hline
 NAB&$1.5$&2$\times$2$\times$1\\\hline
 NAT&$1.22$&2$\times$2$\times$4\\\hline
 NES&$1.52$&1$\times$1$\times$1\\\hline
 NON&$1.44$&1$\times$1$\times$1\\\hline
-NPO&$2.0$&4$\times$4$\times$5\\\hline
-NPT&$2.0$&2$\times$2$\times$2\\\hline
+NPO&$2$&4$\times$4$\times$5\\\hline
+NPT&$2$&2$\times$2$\times$2\\\hline
 NSI&$1.4$&2$\times$5$\times$3\\\hline
 OBW&$1.92$&1$\times$1$\times$1\\\hline
-OFF&$1.0$&3$\times$3$\times$4\\\hline
+OFF&$1$&3$\times$3$\times$4\\\hline
 OKO&$1.62$&1$\times$1$\times$1\\\hline
-OSI&$1.0$&1$\times$1$\times$1\\\hline
-OSO&$2.0$&1$\times$1$\times$1\\\hline
-OWE&$1.0$&2$\times$4$\times$3\\\hline
-PAU&$1.0$&1$\times$1$\times$1\\\hline
+OSI&$1$&1$\times$1$\times$1\\\hline
+OSO&$2$&1$\times$1$\times$1\\\hline
+OWE&$1$&2$\times$4$\times$3\\\hline
+PAU&$1$&1$\times$1$\times$1\\\hline
 PCR&$1.5$&1$\times$1$\times$1\\\hline
-PHI&$1.0$&1$\times$1$\times$1\\\hline
-PON&$1.0$&1$\times$1$\times$1\\\hline
-POR&$1.0$&1$\times$1$\times$1\\\hline
+PHI&$1$&1$\times$1$\times$1\\\hline
+PON&$1$&1$\times$1$\times$1\\\hline
+POR&$1$&1$\times$1$\times$1\\\hline
 POS&$1.29$&1$\times$1$\times$1\\\hline
-PSI&$1.0$&1$\times$1$\times$1\\\hline
+PSI&$1$&1$\times$1$\times$1\\\hline
 PTF&$1.5$&1$\times$1$\times$1\\\hline
 PTO&$1.4$&1$\times$1$\times$1\\\hline
-PTT&$1.0$&1$\times$1$\times$1\\\hline
+PTT&$1$&1$\times$1$\times$1\\\hline
 PTY&$1.5$&1$\times$1$\times$1\\\hline
 PUN&$1.25$&1$\times$1$\times$1\\\hline
-PWN&$1.0$&1$\times$1$\times$1\\\hline
+PWN&$1$&1$\times$1$\times$1\\\hline
 PWO&$1.5$&1$\times$1$\times$1\\\hline
 PWW&$1.5$&1$\times$1$\times$1\\\hline
 RFE&$1.4$&1$\times$1$\times$1\\\hline
-RHO&$1.0$&1$\times$1$\times$1\\\hline
+RHO&$1$&1$\times$1$\times$1\\\hline
 RRO&$1.25$&2$\times$1$\times$1\\\hline
 RSN&$1.59$&4$\times$1$\times$4\\\hline
 RTE&$1.4$&1$\times$1$\times$2\\\hline
 RTH&$1.53$&2$\times$1$\times$3\\\hline
 RUT&$1.57$&2$\times$2$\times$3\\\hline
 RWR&$1.6$&4$\times$4$\times$1\\\hline
-RWY&$3.0$&1$\times$1$\times$1\\\hline
-SAF&$1.0$&1$\times$1$\times$1\\\hline
-SAO&$1.0$&1$\times$1$\times$1\\\hline
-SAS&$1.0$&1$\times$1$\times$1\\\hline
-SAT&$1.0$&1$\times$1$\times$1\\\hline
-SAV&$1.0$&1$\times$1$\times$1\\\hline
-SBE&$1.0$&1$\times$1$\times$1\\\hline
+RWY&$3$&1$\times$1$\times$1\\\hline
+SAF&$1$&1$\times$1$\times$1\\\hline
+SAO&$1$&1$\times$1$\times$1\\\hline
+SAS&$1$&1$\times$1$\times$1\\\hline
+SAT&$1$&1$\times$1$\times$1\\\hline
+SAV&$1$&1$\times$1$\times$1\\\hline
+SBE&$1$&1$\times$1$\times$1\\\hline
 SBN&$1.5$&1$\times$2$\times$1\\\hline
-SBS&$1.0$&1$\times$1$\times$1\\
+SBS&$1$&1$\times$1$\times$1\\
 \end{tabular}
-\end{minipage}\hspace{2pt}
+\end{minipage}\hspace{7pt}
 \begin{minipage}[t]{0.24\linewidth}
 \vspace{0pt}
-\begin{tabular}{|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|}
-SBT&$1.0$&1$\times$1$\times$1\\\hline
+\begin{tabular}{|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{5pt}}|}
+SBT&$1$&1$\times$1$\times$1\\\hline
 SEW&$1.36$&1$\times$2$\times$1\\\hline
 SFE&$1.33$&1$\times$1$\times$1\\\hline
 SFF&$1.46$&2$\times$1$\times$2\\\hline
 SFG&$1.47$&1$\times$2$\times$2\\\hline
 SFH&$1.29$&5$\times$1$\times$2\\\hline
 SFN&$1.29$&1$\times$5$\times$2\\\hline
-SFO&$1.0$&2$\times$2$\times$4\\\hline
+SFO&$1$&2$\times$2$\times$4\\\hline
 SFS&$1.67$&1$\times$1$\times$1\\\hline
-SFW&$1.0$&1$\times$1$\times$1\\\hline
+SFW&$1$&1$\times$1$\times$1\\\hline
 SGT&$1.49$&2$\times$2$\times$1\\\hline
-SIV&$1.0$&1$\times$1$\times$1\\\hline
-SOD&$1.0$&1$\times$1$\times$1\\\hline
+SIV&$1$&1$\times$1$\times$1\\\hline
+SOD&$1$&1$\times$1$\times$1\\\hline
 SOF&$1.5$&1$\times$1$\times$1\\\hline
 SOR&$1.18$&1$\times$1$\times$2\\\hline
 SOS&$1.4$&2$\times$4$\times$3\\\hline
@@ -313,47 +315,46 @@ STI&$1.25$&1$\times$1$\times$1\\\hline
 STT&$1.46$&1$\times$1$\times$1\\\hline
 STW&$1.5$&1$\times$1$\times$1\\\hline
 SVV&$1.33$&1$\times$1$\times$1\\\hline
-SWY&$1.0$&1$\times$1$\times$1\\\hline
+SWY&$1$&1$\times$1$\times$1\\\hline
 SZR&$1.25$&1$\times$1$\times$2\\\hline
 TER&$1.35$&1$\times$1$\times$1\\\hline
-THO&$1.0$&2$\times$4$\times$4\\\hline
-TOL&$1.0$&1$\times$1$\times$1\\\hline
+THO&$1$&2$\times$4$\times$4\\\hline
+TOL&$1$&1$\times$1$\times$1\\\hline
 TON&$1.4$&2$\times$2$\times$5\\\hline
-TSC&$1.0$&1$\times$1$\times$1\\\hline
+TSC&$1$&1$\times$1$\times$1\\\hline
 TUN&$1.53$&1$\times$1$\times$1\\\hline
-UEI&$1.0$&1$\times$1$\times$1\\\hline
+UEI&$1$&1$\times$1$\times$1\\\hline
 UFI&$1.29$&2$\times$2$\times$1\\\hline
 UOS&$1.18$&2$\times$4$\times$3\\\hline
 UOV&$1.38$&1$\times$1$\times$1\\\hline
-UOZ&$1.0$&1$\times$1$\times$1\\\hline
-USI&$1.0$&1$\times$1$\times$1\\\hline
+UOZ&$1$&1$\times$1$\times$1\\\hline
+USI&$1$&1$\times$1$\times$1\\\hline
 UTL&$1.62$&1$\times$2$\times$2\\\hline
 UWY&$1.37$&1$\times$2$\times$3\\\hline
 VET&$1.43$&1$\times$1$\times$1\\\hline
-VFI&$1.0$&1$\times$1$\times$1\\\hline
+VFI&$1$&1$\times$1$\times$1\\\hline
 VNI&$1.73$&3$\times$3$\times$1\\\hline
 VSV&$1.78$&4$\times$4$\times$1\\\hline
 WEI&$1.5$&1$\times$1$\times$1\\\hline
 YFI&$1.4$&1$\times$1$\times$1\\\hline
 YUG&$1.56$&3$\times$2$\times$4\\\hline
-ZON&$1.0$&4$\times$2$\times$2\\\hline
+ZON&$1$&4$\times$2$\times$2\\\hline
 	\end{tabular}
 \end{minipage}\hspace{-2em}
 }
-	\caption{Minimal Si/Al obtained with corresponding supercell for all non-interrupted topologies\label{table:zeo_sial}}
+\normalsize
+	\caption{Minimal Si/Al obtained with corresponding supercell for all non-interrupted topologies}
+	\label{table:zeosial}
 %\end{minipage}
 \end{table}
 
 \subsection{Cations}
 
-The electroneutrality of the framework requires that each negative introduced by an Al substitution be compensated by the introduction of a cation in the framework. In many cases, \ce{Na^+} is used during synthesis; it is sometimes replaced by other cations in later steps.
+The electroneutrality of the framework requires that each negative introduced by an Al substitution be compensated by the introduction of a cation in the framework. In many cases, \ce{Na^+} or \ce{H^+} are used during synthesis; they are sometimes replaced by other cations in later steps.
 
-These cations have a primordial role for adsorption processes, because they constitute privileged adsorption sites for many small gases. In order to perform numerical simulation of the adsorption process, it is thus necessary to have a model of the zeolite that places its cations in the correct positions. Fortunately, and opposite to the previous case of aluminiums, X-ray diffraction is a convenient technique which can be used to obtain the crystallographic sites in which the cations are located, as well as the respective occupancy of each such site.
+These cations have a primordial role for adsorption processes, because they constitute privileged adsorption sites for many small gases. The precise mechanism by which they contribute to the overall adsorption capacity of a material depends on their nature, their location, and the nature of the guest molecule however. Moreover, in addition to simple one-to-one adsorption cases of a small molecule on a cation, X-ray spectroscopy evidences the presence of adsorption complexes involving several cations and guest molecules at the same time [10.1039/C2CP23237E]. Finally, the very nature of the cations present in the structure can be quite diverse, ranging from monovalent alkali to polyvalent metal ions, and even molecular ions such as many of the organic structure directing agents (OSDAs) used during zeolite synthesis.
 
-\subsubsection{Diversity of cases}
-
-
-\subsubsection{Experimental information}
+In order to perform numerical simulation of the adsorption process, it is thus necessary to have a model of the zeolite that places its cations in the correct positions. Fortunately, and opposite to the previous case of aluminiums, X-ray diffraction is a convenient technique which can be used to obtain the crystallographic sites in which the cations are located, as well as the respective occupancy of each such site.
 
 
 \section{Prediction of cation placement}
@@ -362,7 +363,7 @@ While experimental cation maps are available on some zeolite structures, two sem
 
 \subsection{Current methodologies}
 
-To obtain equilibrium data, such as average positions, on molecular systems, there are two general simulation frameworks which can be used: molecular dynamics and Monte-Carlo (MC) simulation. We only used MC and its variations, because they are the only strategy available to study a variable number of molecules, which is necessary for the simulation of adsorption as we will explain in more details in \autoref{gcmc}.
+To obtain equilibrium data, such as average positions, on molecular systems, there are two general simulation frameworks which can be used: molecular dynamics and Monte-Carlo (MC) simulation. We only used MC and its variations, because they are the only strategy available to study a variable number of molecules, which is necessary for the simulation of adsorption as we will explain in more details in \autoref{gcmc}. The possible use of molecular dynamics and its variants will be discussed later in \autoref{metadynamics}.
 
 \subsubsection{Canonical Monte-Carlo}
 % mention ergodicity
@@ -408,11 +409,15 @@ In this strategy, the coldest simulation is constantly exploring a local free en
 
 Naturally, its main downside is its computational cost, proportional to the number of simulations and thus effectively related to the difference between the highest and the lowest temperatures. The choice of intermediate temperatures must be guided by an initial discovery of the typical energies encountered by system at each temperature, which requires a few dedicated simulations prior to the parallel tempering. Finding the optimal number of simulations requires striking a balance with the proportion of accepted MC exchange steps, whose impact on the overall simulation convergence can be difficult to measure. Additionally, simulations with neighbour temperatures must regularly synchronize to attempt an exchange, which strongly limits the amount of parallelization usable in the implementation of parallel tempering.
 
-\subsubsection{Hybrid MC} % method of Marie Jeffroy
+\subsubsection{Combined aluminium and cation placement} % method of Marie Jeffroy
 
 Specifically in the case cationic zeolites, [Marie Jeffroy REF] proposes a simulation method to obtain both the placement of cations in the structure and the location of aluminium atoms across the T-sites. This consists in running an MC simulation where the cations are allowed all previously mentioned MC steps, while the aluminiums are only allowed exchanging positions with siliciums, or a restart step that randomly positions aluminiums and siliciums, both while obeying L\"owenstein's rule as explained in \autoref{mariejeffory_al}.
 
-In order to be computationally efficient, this scheme 
+The statistical ensemble simulated in this setting includes both aluminium and cations, which means that the distribution sampled through such a simulation method represents the equilibrium for both species. From a chemical point of view, this situation is representative of a framework whose synthesis was done with that very cation, and was thermodynamically-driven. While this does correspond to reality in some cases, there is also evidence that the synthesis is kinetically-driven in many other occurences: for such situation, obtaining the aluminium positions from statistical equilibrium is not representative of the actual framework. And in yet other situations, the cation is exchanged post-synthesis, which decorrelates the aluminium placement in the framework from the cation used for adsorption purposes.
+
+Nonetheless, even in those cases, there is no less value in the aluminium placement obtained from such a hybrid strategy than from random sampling of the T-atoms. In fact, by virtue of the added dimensions of the free energy landscape, a kinetically trapped cation may move more freely following the rearrangement of the aluminiums in the structure, which can make the entire simulation converge more efficiently. If not for the hope of obtaining more relevant aluminium placements, this combined strategy remains valuable for its diminished computationally cost compared to parallel tempering.
+
+Unfortunately, the fact that the framework is not strictly constant as before prevents the use of precomputed energy grid, later discussed in \autoref{energygrid}. This was not a problem in the context of [Marie Jeffroy]'s study because the force field they used was such that a silicium-aluminium swap would not change the van der Waals interactions, but this is not the case of most force fields, including the one we use in our study [BoulfelfelSholl2021]. Being unable to precompute the short-term energy contribution of the framework would thus make the simulations significantly slower, tipping the balance against the use of this method.
 
 \subsection{Shooting star methodology}
 
@@ -507,7 +512,7 @@ Thus, the direct term is the potential resulting from the point charge minus thi
 \[-\nabla\Phi(\boldsymbol r) = 4\pi\rho(\boldsymbol r)\label{Poisson}\]
 which yields, after some simplification steps not detailed here:
 \[\Phi^\text{direct}_A(r) = q_A\frac{\text{erfc}(\alpha r)}r\]
-where $r$ is the distance to atom $A$ and $\text{erfc}$ is the complementary error function $\text{erfc}:x\mapsto 1 - \frac2{\sqrt\pi}\int_0^xe^{-t^2}\text dt$. Since $\text{erfc}$ quickly decays towards $0$, the total direct potential at a given point can be computed by only considering the contribution of the closest charges around, so
+where $r$ is the distance to atom $A$ and $\text{erfc}$ is the complementary error function $\text{erfc} = 1 - \text{erf}$, with $\text{erf}:x\mapsto\frac2{\sqrt\pi}\int_0^xe^{-t^2}\text dt$. Since $\text{erfc}$ quickly decays towards $0$, the total direct potential at a given point can be computed by only considering the contribution of the closest charges around, so
 \[\Phi^\text{direct}(\boldsymbol r) \approx \sum_{n=1}^N \frac{q_n}{\pnorm{\boldsymbol r - \boldsymbol r_n}}\paren{\text{erfc}\paren{\alpha \pnorm{\boldsymbol r - \boldsymbol r_n}}}\]
 where $\pnorm{\boldsymbol x}$ designates the distance to the origin of the closest periodic image of $\boldsymbol x$.
 
@@ -519,7 +524,7 @@ Its Fourier decomposition over the periodic unit cell of volume $V$ is:
 \[\begin{split}
 \hat\rho^\text{reciprocal}(\boldsymbol k) &= \frac1V\int_V e^{-i\boldsymbol k\cdot\boldsymbol r} \rho^\text{reciprocal}(\boldsymbol r)\text d\boldsymbol r
 \\&= \frac1V\int_\Omega e^{-i\boldsymbol k\cdot\boldsymbol r} \sum_{n=1}^N \frac{q_n}{4\pi\varepsilon_0} \paren{\frac\alpha{\sqrt\pi}}^3\exp\paren{-\alpha^2\norm{\boldsymbol r_n + \boldsymbol r}^2} \text d\boldsymbol r
-\\&= \frac{2\pi\alpha^3}{V\pi^{3/2}} \sum_{n=1}^N \frac{q_n}{4\pi\varepsilon_0} e^{-i\boldsymbol k\cdot\boldsymbol r_n} \int_0^\infty \norm{\boldsymbol{r'}}^2\exp\paren{-\alpha^2 \norm{\boldsymbol{r'}}^2}\int_0^\pi e^{-i\boldsymbol k\cdot\boldsymbol{r'}} \sin(\theta) \text d \theta \text d \boldsymbol{r'}
+\\&= \frac{2\pi\alpha^3}{V\pi^{3/2}} \sum_{n=1}^N \frac{q_n}{4\pi\varepsilon_0} e^{-i\boldsymbol k\cdot\boldsymbol r_n} \int_0^\infty \norm{\boldsymbol{r}'}^2\exp\paren{-\alpha^2 \norm{\boldsymbol{r}'}^2}\int_0^\pi e^{-i\boldsymbol k\cdot\boldsymbol{r}'} \sin(\theta) \text d \theta \text d \boldsymbol{r}'
 \\&= \frac1{4\pi\varepsilon_0V}\exp\paren{\frac{-k^2}{4\alpha^2}}\sum_{n=1}^N q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n}\end{split}\]
 after several simplification steps not detailed here. Using Poisson's law (\autoref{Poisson}), the electric potential due to the Gaussians can then finally be expressed as:
 \[\Phi^\text{reciprocal}(\boldsymbol r) = \frac{1}{\varepsilon_0V}\sum_{\boldsymbol k\neq \boldsymbol 0}\sum_{n=1}^N \frac{q_n}{k^2} e^{i\boldsymbol k\cdot\paren{\boldsymbol r - \boldsymbol r_n}}\exp\paren{\frac{-k^2}{4\alpha^2}}\label{eq:reciprocal}\]
@@ -551,6 +556,8 @@ Different algorithms that solve a particular problem generally differ in the spe
 
 \subsubsection{Energy grid}
 
+\label{energygrid}
+
 In the case of simulations involving a rigid framework, the most obvious precomputation that can be done is that of the short-term interactions of the guest species with the framework atoms. Indeed, such interactions only depend on the nature and the position of the guest atom, so it is possible to store them on an energy grid.
 
 More precisely, fore each possible guest atom, the unit cell of the framework is divided into a regular grid, with a set spacing between consecutive points. We use \qty{0.15}{\angstrom}, which is fine enough to be accurate but not too fine to avoid using too much memory. For each grid point, the sum of the interactions of all framework atoms with a guest atom in that position is stored at that point. The grid is then written to disk.
@@ -577,6 +584,8 @@ To do so, the simplest strategy consists in making a boolean grid, aligned with 
 
 In addition to its use as computational optimization, such boolean grids can also be used to mark some parts of the framework as inaccessible, irrespective of the corresponding energy. This is useful when small window size prevents a species -- for instance a gas molecule -- from entering a pore -- for instance the sodalite cages in FAU zeolites. Indeed, without explicitly blocking the pocket, an MC move could make a species appear in the pore, whereas it should be kinetically impossible to enter. This strategy will thus be used when studying the adsorption of gases in zeolites (see \autoref{adsorption}), but for the small cations under study here, there is no need to additionally block any part of the frameworks.
 
+RASPA2 only implements blocking for the latter case -- \textit{i.e.} explicit pocket removal. It does not use a boolean grid: instead, the blocked space is described as a combination of blocking spheres. For each trial move, the distance between the atoms of the moved guest and the center of each sphere is computed: if one is below its radius, the move is rejected. This approach requires less precomputation and thus less memory than storing the boolean grids, but its cost is much greater, and increases with the number of blocking spheres, preventing it from being used as an optimization like before. It is thus less efficient than the approach I implemented.
+
 \subsubsection{Optimizations for computing the difference of energies}
 
 A simulation that follows the Metropolis-Hastings algorithm walks across configurations, each pair of contiguous states being separated by a single MC move. In this context, computing the energy of each trial configuration to compare it to the previous one is wasteful: the only part of the energy impacted by the MC move is that which stems from the moved species. Instead of computing the energy of the trial configuration, it is thus better to directly compute the energy difference due to the move.
@@ -584,10 +593,10 @@ A simulation that follows the Metropolis-Hastings algorithm walks across configu
 For the short-term interactions, this is straightforward: the energy difference is simply the sum of the interactions of the species at the new position minus that at its previous position. If there are $N$ species, moving one thus costs $O(N)$ computations for these terms, instead of $O(N^2)$ required to compute this energy the first time. The direct part of the Ewald summation follows the same principle.
 
 For the reciprocal part, \autoref{eq:reciprocal_decomposed} can be revisited by removing the first constant term, and singling out the atoms $n$ for the moved species:
-\[\Delta\Phi^\text{reciprocal}(\boldsymbol{r}) = \frac1{\varepsilon_0V}\sum_{\boldsymbol{k}\neq\boldsymbol{0}} \kappa_{\boldsymbol k}e^{i\boldsymbol k\cdot\boldsymbol{r}} \sum_{n\text{ moved}}q_n\paren{e^{-i\boldsymbol k\cdot\boldsymbol{r'}_n} - e^{-i\boldsymbol k\cdot\boldsymbol r_n}}\]
-where $\boldsymbol{r'}$ is the position after the move and $\boldsymbol{r}$ before.
+\[\Delta\Phi^\text{reciprocal}(\boldsymbol{r}) = \frac1{\varepsilon_0V}\sum_{\boldsymbol{k}\neq\boldsymbol{0}} \kappa_{\boldsymbol k}e^{i\boldsymbol k\cdot\boldsymbol{r}} \sum_{n\text{ moved}}q_n\paren{e^{-i\boldsymbol k\cdot\boldsymbol{r}'_n} - e^{-i\boldsymbol k\cdot\boldsymbol r_n}}\]
+where $\boldsymbol{r}'$ is the position after the move and $\boldsymbol{r}$ before.
 
-In order to allow computing this efficiently, each term $e^{-i\boldsymbol k\cdot\boldsymbol r_n}$ is thus stored in memory (instead of recomputing it each time). The new values $e^{-i\boldsymbol k\cdot\boldsymbol{r'}_n}$ computed for the trial move are also temporarily kept in memory, so they can be used to replace the previous ones if the trial move is accepted.
+In order to allow computing this efficiently, each term $e^{-i\boldsymbol k\cdot\boldsymbol r_n}$ is thus stored in memory (instead of recomputing it each time). The new values $e^{-i\boldsymbol k\cdot\boldsymbol{r}'_n}$ computed for the trial move are also temporarily kept in memory, so they can be used to replace the previous ones if the trial move is accepted. RASPA2 does not implement this optimization, and simply recomputes the $e^{-i\boldsymbol k\cdot\boldsymbol r_n}$ terms each time, which is slower but requires less memory.
 
 % \begin{figure}[ht]
 %   \centering
@@ -608,6 +617,8 @@ In order to allow computing this efficiently, each term $e^{-i\boldsymbol k\cdot
 
 
 \section{Possible alternatives}
+
+\label{metadynamics}
 
 Molecular dynamics (MD) could also be used to place cations in zeolites. Generally speaking, the principle of MD consists in running a simulation where the particles follow Newton's laws of motion, with forces based on force fields like for MC schemes. The simulation is divided in time steps, between which the forces are computed on each particle to derive their position at the next time step. Hence, the trajectories of the particles in MD follow a physical path.
 
