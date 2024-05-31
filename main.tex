@@ -2,6 +2,7 @@
 
 % Template and LaTeX structure adapted from:
 % Guillaume Fraux PhD thesis -- (C) 2019
+% Emmanuel Ren PhD thesis -- (C) 2023
 % Distributed under CC-BY-SA-NC license 4.0
 % Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
 
@@ -120,7 +121,7 @@
  \renewenvironment{flushepinormal}{}{\vspace*{-\baselineskip}}
 
 % Need to be loaded after hyperref
-\usepackage[noabbrev]{cleveref}
+\usepackage[noabbrev,capitalize,nameinlink]{cleveref}
 % Not capitalized by default, use \Cref to capitalize
 % Interesting options: [noabbrev,capitalize,nameinlink]
 
@@ -459,9 +460,9 @@
 
     % \subfile{1-topology}
     \subfile{2-zeolites-cations}
-    % \subfile{3-gridmc}
+    \subfile{3-gridmc}
     % \subfile{4-mdft}
-    % \subfile{5-database}
+    \subfile{5-database}
 
     % \input{conclusion}
 
