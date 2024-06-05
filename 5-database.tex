@@ -16,7 +16,7 @@ The converse strategy consists in doing screening studies, in which a vast array
 
 Most zeolite screening studies focus on all-silica zeolites, an approach that sidesteps the issue of placing cations. However, most zeolite adsorption applications require cationic zeolites, since cations critically increase the adsorption capacity of the materials.
 
-Even among the few studies which tackle cationic zeolites across topologies and \SiAl ratios, not all properly place cations in the framework, although it is known that this can lead to incorrect subsequent adsorption measurements [REF]. For example, [10.1021/acs.langmuir.2c03089] targets 57 different topologies with 5 different possible cations, but fails to mention where these are placed before the start of the GCMC simulations, likely resulting in them being trapped in a non-optimal placement. [10.1038/NMAT3336] also screens cationic zeolites, but places cations at the so-called ``minimum energy positions'' instead of using a robust method like parallel tempering; they also use a force field made for FAU zeolites only, which is inadequate to screen other zeolites. 
+Even among the few studies which tackle cationic zeolites across topologies and \SiAl ratios, not all properly place cations in the framework, although it is known that this can lead to incorrect subsequent adsorption measurements [REF]. For example, [10.1021/acs.langmuir.2c03089] targets 57 different topologies with 5 different possible cations, but fails to mention where these are placed before the start of the Grand Canonical Monte-Carlo (GCMC) simulations, likely resulting in them being trapped in a non-optimal placement. [10.1038/NMAT3336] also screens cationic zeolites, but places cations at the so-called ``minimum energy positions'' instead of using a robust method like parallel tempering; they also use a force field made for FAU zeolites only, which is inadequate to screen other zeolites.
 We are only aware of the works of Sholl [REF], which tackles many zeolite with various \SiAl ratios for screening purposes, that properly places cations through parallel tempering.
 
 In this chapter, we explain how we constitute a database of cationic zeolite structures and how it can be used for isotherm prediction.
@@ -53,7 +53,7 @@ By reproducing the experiment with a reference gas (usually \ce{N_2} or \ce{Ar})
 
 Some more anecdotic isotherm measurement techniques including impedance spectroscopy [REF] as well as NMR [REF] allow obtaining directly the absolute adsorption, but these methods are much too costly to be used routinely.
 
-The adsorption capacity can be predicted numerically through Grand Canonical Monte-Carlo (GCMC) simulations, as explained in \cref{GCMC}. Beyond the limits due to the precision of the energy computation, either from a force field or from DFT, and convergence of the simulations, those are also dependent on a model of the adsorbent which cannot take into account the complexity of real materials. In the case of zeolites, the location of the aluminium and of the cations has already been discussed through \cref{cationzeolites}, but more generally, all kinds of defects and small crystal size effects can lead to experimental isotherms differing from the simulated counterparts. This limits the accuracy of individual numerical simulation compared to precise experimental adsorbents, but they remain useful to extract tendencies and direct the search for new adsorbents, which will be experimentally tested eventually.
+The adsorption capacity can be predicted numerically through GCMC simulations, as explained in \cref{GCMC}. Beyond the limits due to the precision of the energy computation, either from a force field or from DFT, and convergence of the simulations, those are also dependent on a model of the adsorbent which cannot take into account the complexity of real materials. In the case of zeolites, the location of the aluminium and of the cations has already been discussed through \cref{cationzeolites}, but more generally, all kinds of defects and small crystal size effects can lead to experimental isotherms differing from the simulated counterparts. This limits the accuracy of individual numerical simulation compared to precise experimental adsorbents, but they remain useful to extract tendencies and direct the search for new adsorbents, which will be experimentally tested eventually.
 
 \section{Database constitution}
 
@@ -85,7 +85,14 @@ Overall, \num{14268} different structures with both aluminium and cations placed
 
 \section{Prediction}
 
+Using the structures from the database, it is possible to study the adsorption behaviour of zeolites at scale, across topologies and \SiAl ratios. To do so, one simply needs to run a GCMC simulation for each combination of zeolite structure (including \SiAl ratio, aluminium placement, nature and placement of the cations), temperature, pressure, and gas.
+
+In order to investigate the relationship between the topology of zeolite and their adsorption properties, we attempted to build a predictive model that could output a plausible isotherm for each combination of zeolite topology, \SiAl ratio and temperature, using \ce{Na^+} as cation and \ce{CO_2} or \ce{N_2} as gas.
+
 \subsection{Isotherm fitting}
+
+
+
 
 \subsection{Simple models}
 
