@@ -283,9 +283,6 @@
     }
     {\item}
 
-% Use \[ and \] for all equations, and make all equations numbered
-\def\[{\begin{equation}}
-\def\]{\end{equation}}
 
 % Partial TOC formatting for chapters
 \newcommand{\printpartialtoc}{%
@@ -367,7 +364,7 @@
 
 %code
 \usepackage{listings}
-\usepackage{xcolor}
+\usepackage[dvipsnames,table]{xcolor}
 \definecolor{codekey}{rgb}{0.149,0.5451,0.8235}
 \definecolor{codecomm}{rgb}{0.3961,0.4824,0.5137}
 \definecolor{codenum}{rgb}{0.8275,0.2118,0.5098}
@@ -425,6 +422,10 @@
 \bibliography{thesis.bib,publications.bib}
 
 \addto\captionsenglish{\renewcommand{\contentsname}{Table of contents}}
+
+% Use \[ and \] for all equations, and make all equations numbered
+\def\[{\begin{equation}}
+\def\]{\end{equation}}
 
 \begin{document}
     \pagenumbering{roman}

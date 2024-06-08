@@ -41,6 +41,8 @@ The other end of the pressure spectrum is more complex. When adsorption occurs o
 
 \subsection{Experimental observation and numerical prediction}
 
+\label{experimentalisotherm}
+
 Experimentally, adsorption isotherms are drawn by progressively increasing the input pressure of the adsorbate in the material at the fixed temperature, and measuring the amount adsorbed. The desorption isotherm follows up by progressively decreasing the input pressure, and similarly measuring the amount of adsorbate.
 
 The measurement itself usually consists in either of the three following methods:
@@ -62,6 +64,8 @@ Finding general tendencies in the adsorption behaviour across zeolites requires 
 	\item Aluminium placement. Start by finding the minimum \SiAl ratio by replacing as many silicium with aluminium atoms as possible, with random exchanges and restarts. Check multiple supercell sizes. Then, starting from these filled structures, replace some aluminium by silicium atoms at random and do more exchange steps to generate 6 aluminium placements for each target \SiAl ratio.
 	\item Cation placement, using either parallel tempering or shooting star simulations. The only cation used is sodium.
 \end{enumerate}
+
+For the entire database, we used the same force field which is that developed by [REF BoulfelfelSholl2021] for adsorption of small gases on cationic zeolites with mobile cations.
 
 \subsection{Aluminium placement}
 
@@ -87,14 +91,123 @@ Overall, \num{14268} different structures with both aluminium and cations placed
 
 Using the structures from the database, it is possible to study the adsorption behaviour of zeolites at scale, across topologies and \SiAl ratios. To do so, one simply needs to run a GCMC simulation for each combination of zeolite structure (including \SiAl ratio, aluminium placement, nature and placement of the cations), temperature, pressure, and gas.
 
-In order to investigate the relationship between the topology of zeolite and their adsorption properties, we attempted to build a predictive model that could output a plausible isotherm for each combination of zeolite topology, \SiAl ratio and temperature, using \ce{Na^+} as cation and \ce{CO_2} or \ce{N_2} as gas.
+In order to investigate the relationship between the topology of zeolites and their adsorption properties, we attempted to build a predictive model that could output a plausible isotherm for each combination of three parameters, which are 1) the zeolite topology, 2) the \SiAl ratio and 3) the temperature, using \ce{Na^+} as cation and either \ce{CO_2} or \ce{N_2} as gas.
+
+\subsection{Why isotherms?}
+
+Adsorption isotherms are often used for the characterization of experimental structures. The technique consists in measuring the isotherm using one of the methods presented in \cref{experimentalisotherm}, then fitting the obtained curve against a set of pre-computed isotherms, called the kernels. Each kernel is computed based on a pore geometry (\textit{i.e.} its shape, like a slit or a sphere, and its size) and the thermodynamical properties of the gas, often modeled using simple fluid theory. Fitting the isotherm then corresponds to finding coefficient on each kernel such that the sum of the kernels weighted by the coefficients yields the best approximation of the isotherm. The best fit thus provides the repartition of pore geometries based on their corresponding coefficients.
+
+Another typical context of use for isotherm fitting is for the identification of a material, or the evaluation of its purity or degree of crystallization. To do so, a simple method consists in measuring one or more isotherms and comparing them to those obtained on a reference structure, to check if they match. In general data science, two curves can be compared by computing their root-mean-square deviation, but this does not provide much physical meaning to the comparison, and requires that both isotherms have points measured at the same pressures. More often, the reference isotherm has been fitted against one model, hence the isotherms of the experimental structure can be fitted against the same model, so that the coefficients of the model, which carry physical meaning, can be compared.
+
+In our setting, the goal is quite different since we aim at predicting the adsorption capacity from a theoretical structure, instead of an experimental one. The concept of isotherm is actually not strictly necessary to this goal: one could imagine making an black-box model that directly outputs the adsorption capacity given the three parameters (topology, \SiAl ratio, temperature) as well as the gas pressure. This approach, however, leads to a model that cannot be physically interpreted, and that offers no guarantee on the general shape of the isotherms, with the risk of them being unphysical. On the contrary, making a model that directly predicts the coefficients of a given isotherm model from the three parameters yields a result that already embeds the physics of adsorption through the isotherm mode.
+
+To make such a model, the first step thus consists in fitting the simulated isotherm against a given adsorption model, in order to obtain the coefficients associated with each triplet of parameters. Retrieving the relation between the parameters and the coefficient then becomes a matter of data science.
+
+\subsection{Adsorption models}
+
+The literature is rife with adsorption models, either grounded in theory or empirical ones. The precise choice of a model for an isotherm stems from nature of the adsorption when known, otherwise the shape of the isotherm, the nature of the material or even the scientific community. Since we use isotherm models simply as a mean for extracting a common mathematical descriptor of the isotherms across numerous settings, our only criterion is that the model should be rich enough to accurately represent the isotherms. Beyond that, the simpler the model, \textit{i.e.} the smaller the number of coefficients necessary to represent an isotherm, the better it will be for prediction.
+
+Next are the isotherm models which were investigated. This list is not exhaustive, but it covers a sizeable proportion of the most commonly used models for small gas adsorption in zeolites.
+
+\subsubsection{Langmuir}
+
+The simplest adsorption model corresponds to a physical situation where the adsorbate behaves as an ideal gas, binds with the adsorbent in a reversible reaction of equilibrium constant $\beta$. In that setting, the Langmuir adsorption model states that the fraction of occupied adsorption sites is $\beta P/(1+\beta P)$ where $P$ is the pressure, hence the total adsorption capacity is:
+\[n_\text{Langmuir}(P) = \alpha\frac{\beta P}{1+\beta P}\]
+where $\alpha$ is the maximum population of the site.
+
+This very simple model is not accurate for zeolites however. One of the reasons is that zeolites contain multiple adsorption sites, both spatially -- there are multiple adsorption reactions happening simultaneously -- and energetically -- they have different values of $\beta$.
+
+\subsubsection{$N$-site Langmuir}
+
+One simple way to circumvent the previous issues consists in simply summing multiple Langmuir adsorption models. This physically assumes some kind of independence between the different adsorption sites, which is debatable, and the general formula is
+\[n_{N-\text{site Langmuir}}(P) = \sum_{i=1}^N \alpha_i\frac{\beta_i P}{1+\beta_i P}\]
+
+Such a general model can be made to fit any isotherm, simply by increasing the number of sites $N$ until reaching a high enough complexity of the model. In practice, $N=3$ is good enough to fit many isotherms because it the fit can be optimized across 6 coefficients, although the underlying physical model may not be accurate at all.
+
+\subsubsection{Freundlich}
+
+This simple empirical model is commonly used when the adsorption is known to happen on a heterogeneous surface, and depends on two parameters $A$ and $\gamma$:
+\[n_\text{Freundlich}(P) = A\times P^\gamma\]
+
+Beyond its simplicity, the main limit of the model is its behaviour at high temperature: the model diverges to $+\infty$ whereas, in practice, adsorption reaches saturation (before the highly condensed phase).
+
+\subsubsection{Sips}
+
+The Sips model combines both Langmuir and Freundlich isotherms, with the following formula:
+\[n_\text{Sips}(P) = \alpha\frac{(\beta P)^\gamma}{1+(\beta P)^\gamma}\]
+
+This model has two limit regimes: at low pressure, it is equivalent to the Freundlich model while at high pressure, it reaches a plateau similarly to the Langmuir model. It also reduces to the Langmuir model in the particular case of $\gamma = 1$.
+
+\subsubsection{Toth}
+
+The Toth model is another empirical variation of the Langmuir model:
+\[n_\text{Toth}(P) = \alpha\frac{\beta P}{\paren{1 + (\beta P)^\gamma}^{1/\gamma}}\]
+
+Like the Sips model, it reduces to the Langmuir model for $\gamma = 1$, and reaches a plateau at high pressure. A slight difference with the Sips model is the adsorption capacity at low pressure, which becomes proportional to $P$, which obeys Henry's law, whereas both Freundlich and Sips models have a dependency in $P^\gamma$.
+
+\subsubsection{Redlich-Peterson}
+
+Like the Sips model, the Redlich-Peterson model combines both Langmuir and Freundlich models:
+\[n_\text{Redlich-Peterson} = \alpha\frac{P}{1+ (\beta P)^\gamma}\]
+
+It also follows Henry's law by reducing to a linear function of $P$ at low pressure, but its behaviour at high pressure is similar to Freundlich's, making it only adapted to pressure regions below the saturation point.
+
+\subsubsection{Jensen-Seaton}
+
+By adding a fourth parameter, Jensen and Seaton [REF 10.1021/la9509460] propose an adsorption model that present both Henry's law linear behaviour at low pressure, as well as a non-constant affine behaviour at high pressure that models the compressibility region.
+\[n_\text{Jensen-Seaton} = \alpha P\times\paren{1 + \paren{\frac{\alpha P}{\delta(1 + \beta P)}}^\gamma}^{-1/\gamma}\]
+
+It has been used to accurately described the isotherm of \ce{CO_2} adsorption in some FAU zeolites, among others.
+
+\subsubsection{Sips-Toth}
+
+A custom-made adsorption model, absent from the literature, consists in using a fourth parameter $\delta$ to act as a continuous switch between the Toth model ($\delta = 0$) and the Sips model ($\delta \to +\infty$):
+\[n_\text{Sips-Toth} = \alpha\times\paren{\frac{(\beta P)^\gamma}{1 + (\beta P)^\gamma}}^{\frac{1 + \gamma\delta P}{\gamma(1 + \delta P)}}\]
+
+Like its two building blocks, this model collapses to a simple Langmuir isotherm when $\gamma = 1$, and reaches a plateau at high pressure. It also obeys Henry's law at low pressure.
+
+\subsubsection{Summary}
+
+\Cref{table:adsorptionmodels} summarizes the key properties of the previously presented isotherm models. The number of coefficients characterizes the complexity of the model. Its behaviour at low pressure should obey Henry's law, while it should be affine at high pressure to correctly model the compressibility phase, or at least behave as a plateau otherwise to account for the stationary phase at intermediate pressures.
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		\bf Name & \bf Coefficients & \bf Henry's law at low $P$ & \bf Behaviour at high $P$\\\hline
+		Linear & 1 & \cellcolor{red!25}No & \cellcolor{green!25}Affine\\\hline
+		$N$-site Langmuir & $2N$ & \cellcolor{green!25}Yes & \cellcolor{yellow!25}Plateau \\\hline
+		Freundlich & 2 & \cellcolor{red!25} No & \cellcolor{red!25}Polynomial \\\hline
+		Sips & 3 & \cellcolor{red!25}No & \cellcolor{yellow!25}Plateau \\\hline
+		Toth & 3 & \cellcolor{green!25}Yes & \cellcolor{yellow!25}Plateau \\\hline
+		Redlich-Peterson & 3 & \cellcolor{green!25}Yes & \cellcolor{red!25}Polynomial \\\hline
+		Jensen-Seaton & 4 & \cellcolor{green!25}Yes & \cellcolor{green!25}Affine \\\hline
+		Sips-Toth & 4 & \cellcolor{green!25}Yes & \cellcolor{yellow!25}Plateau \\\hline
+	\end{tabular}
+	\caption{Main characteristics of different adsorption models}\label{table:adsorptionmodels}
+\end{table}
+
+Several of these models can be combined by simply adding them together. For this purpose, one extra dummy model was added, called ``Linear'', which simply consists in doing a linear regression of the isotherm:
+\[n_\text{Linear} = \zeta\times P\]
+
+Of course, this model does not fit any actual isotherm by itself, but it can be added to any model that reaches a plateau at high pressure to fix its behaviour for the compressibility phase, by making it affine as expected.
 
 \subsection{Isotherm fitting}
 
+In practice, fitting an isotherm means finding the parameters $\alpha$, $\beta$, $\gamma$, \ldots of the model such that the theoretical isotherm resulting from the model is as close as possible to the input one. This closeness can be properly defined through the root-mean-square deviation for instance. Finding the best parameters can thus be formulated as an optimization problem, \textit{i.e.} a problem of the form
+\[\text{minimize }f(\alpha, \beta, \gamma)\\\text{such that }\alpha>0, \beta>0, 0<\gamma<2\]
+for example, where $f$ represents the deviation described before.
 
+Unfortunately, the expressions of the different adsorption models make this problem non-convex, which is a category of optimization problems generally considered difficult. To solve it, we use the \texttt{BlackBoxOptim.jl} Julia package to do global optimization. Crucially, this package does not rely on $f$ being differentiable, since that would require finding the derivative of the deviation with respect to the parameters for all investigated adsorption models and their combination.
+
+\texttt{BlackBoxOptim.jl} uses meta-heuristic and stochastic algorithms to perform the actual optimization, but it needs a starting point, \textit{i.e.} an initial value for the parameters, to work. The result often depends on the quality of this initial point: the closer it is to the optimum, the better the result.
+
+
+One approximate solution consists in linearizing the formulas of the adsorption models, solving the optimization problem on this simple formula through linear regression
 
 
 \subsection{Simple models}
+
 
 \subsection{Machine learning}
 
