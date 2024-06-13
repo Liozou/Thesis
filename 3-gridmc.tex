@@ -6,11 +6,38 @@
 \chapter{Molecular simulation of adsorption}
 \vspace*{-1\baselineskip}
 
+Adsorption is the physical phenomenon by which a molecule, the adsorbate, attaches to a surface, the adsorbent. One particular application of adsorption in the industry is for gas separation, by using an adsorbent that specifically binds one constituent of the target gas mixture more than the other.
+
+In this chapter, we detail the nature of this phenomenon in the case of small gases in zeolites. We then explain the usual techniques which are used for its numerical simulation, as well as a possible alternative.
+
 \section{Molecular description}
 
-\subsection{Adsorption sites}
+\subsection{Physisorption and chemisorption}
 
-\subsection{Small gases}
+The atomic nature of adsorption depends on the kind of chemical interaction the supports it. On the one hand, if the adsorbate forms a strong (\textit{i.e.} covalent, sometimes ionic) bond with the adsorbent, then the adsorption is called a chemisorption, because it involves a chemical reaction. In that case, the surface is modified. On the other hand, if the adsorbate and adsorbent are only bond by a weak interaction, the adsorption is called a physisorption and the surface is left intact.
+
+Chemisorption involves a stronger bond that physisorption, and is thus less reversible. Since it changes the surface of the adsorbent, it cannot be used industrially to separate large amounts of gas, as the adsorbent would need to be provided in equivalently large amount. It can however be used in the industry as an intermediate step of a catalytic cycle that ends up regenerating the surface. In our case however, we will implicitly refer to physisorption when mentioning adsorption.
+
+\subsection{Adsorption sites in crystalline materials}
+
+%At the atomic scale, the movement of species is driven by quantum mechanics. While the exact formulation of Schr\"odinger's equation cannot be solved exactly for more than a few particles, it has long been approximated to give a global understanding of the relevant phenomenons. In this context, the forces that play a key role in the non-bonded interactions of species are usually divided into two components: the charges of the species, which contribute a Coulomb term that evolves in $\frac1r$ with the distance between two particles, and a Van der Waals term that decays to zero much faster.
+
+An adsorption site designates a particular space where the adsorbate is likely to remain trapped on the surface of the adsorbent. In other words, the interaction between the adsorbate and the adsorbent is maximally attractive when the adsorbate is located in one of the adsorption sites.
+
+In the case of crystalline materials, adsorption sites can be identified through spectroscopy
+%TODO expand and add examples
+
+The position of the adsorption site depends on the adsorbent, but also the adsorbate. At very low density for example, a small polar molecule like \ce{H_2O} will preferentially adsorb in locations where it can orient itself to maximize the stabilizing Coulomb interaction of the framework. A large apolar molecule like a xylene on the other hand, will adsorb in locations that maximize its Van der Waals interactions with the adsorbent. Such sites are not necessarily related.
+
+Moreover, the location of the adsorption sites becomes less relevant when the density of the adsorbate becomes high. Indeed, the adsorbate-adsorbate interactions can play a key role in the global adsorption capacity of a material, and the stronger these interactions, the more the internal structure of the adsorbate will reorganize to accommodate these interactions, which may displace some molecules from the ideal adsorption site.
+
+Overall, the situation is quite different from the cationic sites, discussed in \cref{sitehopping}
+
+\subsection{Small gases in zeolites}
+
+Small gases such as \ce{CO_2}, \ce{N_2}, \ce{O_2}, \ce{CH_4} or \ce{Ar}, among others, are typical adsorbates that need to be separated for industrial purposes. In general, molecular sieves like zeolites can be used for this purpose
+
+Given their rather similar sizes
 
 
 \section{Grand Canonical Monte-Carlo}

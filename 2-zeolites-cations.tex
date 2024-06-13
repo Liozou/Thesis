@@ -438,6 +438,12 @@ Nonetheless, even in those cases, there is no less value in the aluminium placem
 
 Unfortunately, the fact that the framework is not strictly constant as before prevents the use of precomputed energy grid, later discussed in \cref{energygrid}. This was not a problem in the context of [Marie Jeffroy]'s study because the force field they used was such that a silicium-aluminium swap would not change the van der Waals interactions, but this is not the case of most force fields, including the one we use in our study [BoulfelfelSholl2021]. Being unable to precompute the short-term energy contribution of the framework would thus make the simulations significantly slower, tipping the balance against the use of this method.
 
+\subsection{Site-hopping}
+
+\label{sitehopping}
+
+%TODO: explain site hopping, as well as the notion of a cationic site in general
+
 \subsection{Shooting star methodology}
 
 Previously exposed methods such as canonical MC, simulated annealing or parallel tempering focus on making the system (or at least, one of its replicas) reach equilibrium after a certain number of initial steps, so that the rest of the simulation occurs at equilibrium. This is crucial for the problem of sampling the equilibrium distribution of states in general. For the case of cation placement in zeolites however, the observed crystallographic positioning of the cations indicates that this distribution is sharply peaked: only a discrete number of sites can be occupied, and the question is to find their positions and occupancy. As a consequence, we can use another, simpler, strategy, which is less efficient for the actual sampling of the distribution, but can uncover relevant local minima faster.
@@ -467,9 +473,15 @@ The first step consists in dividing the space by a regular grid, whose voxels ha
 
 In the second step, the bins are sorted by decreasing order of their value. Each voxel is then taken in order: if it is closer than a set distance to a previously recorded site, then the location of the site is updated as the average of its current position and that of the voxel, weighted by the respective density of both; the density of the voxel is then aded to that of the site. Otherwise, if it is far enough from all existing sites, it is added to the (initially empty) list of recorded sites, along with its density. This yields a series of sites and their respective occupancy. To be more efficient, the main loop early stops when the density of the inquired voxels go below a threshold value, taken as the maximum density of all bins divided by 100: as a consequence, the occupancies are corrected by a multiplicative factor so that the sum of the occupancies of all sites correspond to the number of cations. We note that this should not be required in theory, but it is the necessary fix to a double discretization artifact, once inherent to the MC scheme, and one due to our binning.
 
-We observe slightly better results by sorting the bins according the the decreasing order their smoothed counterparts, where smoothing is done by convolving the density map by a small Gaussian, of standard deviation the size of the diagonal of a voxel. Indeed, this erases some small statistical fluctuations that may change the precise order of the voxels.
+We observe slightly better results by sorting the bins according the decreasing order their smoothed counterparts, where smoothing is done by convolving the density map by a small Gaussian, of standard deviation the size of the diagonal of a voxel. Indeed, this erases some small statistical fluctuations that may change the precise order of the voxels.
 
-\subsubsection{Validation}
+\subsubsection{Direct site population}
+
+%TODO
+
+\subsubsection{Population combined with site hopping}
+
+%TODO
 
 \section{Energy computation}\label{energy_computation}
 
@@ -484,6 +496,8 @@ RASPA2 is written in C, a low-level programming language which allows reaching o
 The energy computation algorithms detailed herein are those which were implemented in this new code, but most of them follow that implemented in RASPA2. Moreover, RASPA2 was used to validate the new code, by checking that the simulations yielded the correct physical values (energies, adsorption capacities, and such). By contrast, the shooting star methodology presented before does not exist in RASPA2.
 
 \subsection{Force fields}
+
+\label{forcefields}
 
 The energy of a molecular structure results from the interaction of its constituent atoms, which are intrinsically quantum. At the molecular level, a popular method used is the quantum Density Functional Theory (DFT), which includes a variety of particular methods, each presenting its own compromise between precision and performance. Some alternatives include methods derived from molecular orbital theory. The number of energy computations for a single molecular simulation can be of the order of \qty{10000} however, which would be much too costly with such methods.
 
@@ -634,6 +648,9 @@ In order to allow computing this efficiently, each term $e^{-i\boldsymbol k\cdot
 % \end{figure}
 % \footnotetext[1]{Available on Github at \url{https://github.com/foo}}
 
+\subsubsection{Site-hopping precomputations}
+
+%TODO
 
 \section{Possible alternatives}
 
