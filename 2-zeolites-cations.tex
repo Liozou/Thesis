@@ -370,18 +370,20 @@ While experimental cation maps are available on some zeolite structures, two sem
 
 \subsection{Current methodologies}
 
-To obtain equilibrium data, such as average positions, on molecular systems, there are two general simulation frameworks which can be used: molecular dynamics and Monte-Carlo (MC) simulation. We only used MC and its variations, because they are the only strategy available to study a variable number of molecules, which is necessary for the simulation of adsorption as we will explain in more details in \cref{gcmc}. The possible use of molecular dynamics and its variants will be discussed later in \cref{metadynamics}.
+To obtain equilibrium data, such as average positions, on molecular systems, there are two general simulation frameworks which can be used: molecular dynamics and Monte-Carlo (MC) simulation. We only used MC and its variations, because they are the only strategy available to study a variable number of molecules, which is necessary for the simulation of adsorption as we will explain in more details in \cref{GCMC}. The possible use of molecular dynamics and its variants will be discussed later in \cref{metadynamics}.
 
 \subsubsection{Canonical Monte-Carlo}
 % mention ergodicity
 
-The Monte-Carlo (MC) method designates a large variety of algorithms which all converge towards their result by performing multiple random samplings. A wide subset of these form the Markov Chain Monte-Carlo (MCMC) schemes, which are a class of algorithms that aim at sampling a target probability distribution. In the context of statistical physics, such methods provide practical ways of obtaining macroscopic observable values from the simulation of the microscopic behaviour of particles. Indeed, an observable $\mathcal O$ can be computed as the ensemble average of its microscopic counterpart $\left<o\right>$, which can be computed as an integral over the configuration space. For example, in the canonical ensemble where the number of particles, the external temperature and the volume of the system is fixed, \[\mathcal O = \left<o\right> = \frac1Z\int\text d{\boldsymbol p} o\left({\boldsymbol p}\right)\exp\left(-\beta U\left({\boldsymbol p}\right)\right)\] where $ U\left({\boldsymbol p}\right)$ is the energy of configuration $\boldsymbol p$ and $Z$ is the partition function. In other words, $\mathcal O$ can be computed as an integral of values of $o$ on a probability distribution of $\boldsymbol p$ given by $p\mapsto \frac1Z\exp\left(-\beta U\left({\boldsymbol p}\right)\right)$.
+The Monte-Carlo (MC) method designates a large variety of algorithms which all converge towards their result by performing multiple random samplings. A wide subset of these form the Markov Chain Monte-Carlo (MCMC) schemes, which are a class of algorithms that aim at sampling a target probability distribution. In the context of statistical physics, such methods provide practical ways of obtaining macroscopic observable values from the simulation of the microscopic behaviour of particles. Indeed, an observable $\mathcal O$ can be computed as the ensemble average of its microscopic counterpart $\left<o\right>$, which can be computed as an integral over the configuration space. For example, in the canonical ensemble where the number of particles, the external temperature and the volume of the system is fixed, \[\mathcal O = \left<o\right> = \frac1Z\int\!\text d{\boldsymbol p}\  o\left({\boldsymbol p}\right)\exp\left(-\beta U\left({\boldsymbol p}\right)\right)\label{eq:canonicalensemble}\] where $ U\left({\boldsymbol p}\right)$ is the energy of configuration $\boldsymbol p$ and $Z$ is the partition function. In other words, $\mathcal O$ can be computed as an integral of values of $o$ on a probability distribution of $\boldsymbol p$ given by $p\mapsto \frac1Z\exp\left(-\beta U\left({\boldsymbol p}\right)\right)$.
 
 The direct evaluation of this probability distribution is impossible in general, because of the partition function $Z$ whose value cannot be computed. Instead, the MCMC method gives a way to directly evaluate the observable $\mathcal O$ by providing a sequence of configurations $\boldsymbol p$ that follows the same probability distribution as the target. The integral can then be computed as simply the average value of $o$ on this specific set of configurations $\boldsymbol p$.
 
 \label{metropolis}
 
-The Metropolis-Hastings algorithm is the most common MCMC scheme used to provide such a sequence of configurations. It consists in starting from an initial state, \textit{i.e.} an initial position for all the mobile particles of the system, and making it evolve through a sequence of steps. At each step, a trial move, \textit{i.e.}, a modification of the state, is attempted and may, or may not, be accepted with a certain probability. In the case of a simulation in the canonical ensemble, the difference of energy $\Delta E$ between after and before the move gives the probability $\min\left(1, \exp\left(-\beta \Delta E\right)\right)$ that the move be accepted. Intuitively, this means that any move that decreases the energy of the system is accepted, while the others are accepted with a probability that decreases as the energy difference increases, sharply at low temperature and more slowly at high temperature. In the limit of infinite temperature, all the moves are accepted; at zero temperature, only the moves that decrease the energy are. The details on how to compute energy are deferred to \cref{energy_computation}.
+The Metropolis-Hastings algorithm is the most common MCMC scheme used to provide such a sequence of configurations. It consists in starting from an initial state, \textit{i.e.} an initial position for all the mobile particles of the system, and making it evolve through a sequence of steps. At each step, a trial move, \textit{i.e.}, a modification of the state, is attempted and may, or may not, be accepted with a certain probability. In the case of a simulation in the canonical ensemble, the difference of energy $\Delta E$ between after and before the move gives the probability
+\[P_\text{accept}(\Delta E) = \min\left(1, \exp\left(-\beta \Delta E\right)\right)\label{eq:MCcanonicalaccept}\]
+that the move be accepted. Intuitively, this means that any move that decreases the energy of the system is accepted, while the others are accepted with a probability that decreases as the energy difference increases, sharply at low temperature and more slowly at high temperature. In the limit of infinite temperature, all the moves are accepted; at zero temperature, only the moves that decrease the energy are. The details on how to compute energy are deferred to \cref{energy_computation}.
 
 To avoid drift, the algorithm obeys detailed balance which, conceptually, represents the microreversibility of the simulated physical processes. In practise, this means that, for each MC move that brings the system from configuration ${\boldsymbol p}_\mathcal{A}$ to ${\boldsymbol p}_\mathcal{B}$, there must exist a ``converse'' MC moves that can bring the system from $\mathcal{B}$ to $\mathcal{A}$ such that $\pi_\mathcal{A} P_{\mathcal{A}\to \mathcal{B}} = \pi_\mathcal{B} P_{\mathcal{B}\to \mathcal{A}}$ where $\pi_\mathcal{X}$ is the stationary probability of state ${\boldsymbol p}_\mathcal{X}$ and $P_{\mathcal{X}\to \mathcal{Y}}$ is the probability of the move from ${\boldsymbol p}_\mathcal{X}$ to ${\boldsymbol p}_\mathcal{Y}$. In the canonical ensemble, $\pi_\mathcal{X}$ is equal to to $\frac1Z\exp\left(-\beta U\left({\boldsymbol p}_\mathcal{X}\right)\right)$, while the probability of transition is $\min\left(1, \exp\left(-\beta \Delta E\right)\right)$. Hence, detailed balance simply translates to the algorithmic condition that the probability of choosing the trial move $\mathcal{A}\to \mathcal{B}$ must be equal to that of choosing the trial move $\mathcal{B}\to \mathcal{A}$, irrespective of the probability of accepting these moves.
 
@@ -511,13 +513,13 @@ The potential parameter $\varepsilon$, $\sigma$, $A$, $B$ or $C$ are part of the
 
 \subsection{Short-term interactions}
 
-Since the van der Waals term decays quickly towards zero, it is computationnally useful to set it to exactly zero beyond a cutoff distance. To do so while avoiding the introduction of unphysical forces, one possibility consists in shifting the formula by a constant, so that the function remains continuous at the cutoff. If no force is required, such as in the MC methods, it is possible to leave the the potential unshifted and discontinuous at the cutoff, but a constant tail correction can be added to the total energy to account for the missing interactions. In any case, knowing that the interaction becomes zero after the cutoff allows some computational optimizations, such as using cell lists in order to iterate over the relevant atom pairs only, instead of all atom pairs.
+Since the van der Waals term decays quickly towards zero, it is computationnally useful to set it to exactly zero beyond a cutoff distance. To do so while avoiding the introduction of unphysical forces, one possibility consists in shifting the formula by a constant, so that the function remains continuous at the cutoff. If no force is required, such as in the MC methods, it is possible to leave the potential unshifted and discontinuous at the cutoff; a tail correction is then added to the total energy to account for the missing interactions. In any case, knowing that the interaction becomes zero after the cutoff allows some computational optimizations, such as using cell lists in order to iterate over the relevant atom pairs only, instead of all atom pairs.
 
 For simplicity of the implementation, the dimensions of the simulated unit cell must be taken so that for any atoms $A$ and $B$, there is at most one periodic image of $B$ which is lower than the cutoff distance from atom $A$. This translates to the constraint that the orthogonal lengths of the unit cell must be as long as at least twice the cutoff. We take this cutoff as \qty{12}{\angstrom}, as is common in the literature [REF] and is the default in RASPA2.
 
 Given this constraint, the total energy of a configuration due to the van der Waals interaction can be computed by summing the contribution of each the pair of atoms which are closer than the cutoff distance. This can done naively with a double loop over all atoms, computing the distance of each pair and rejecting that above the threshold. Here, the distance considered is the periodic distance, \textit{i.e.} the smallest distance between periodic images of the two atoms, respective to the periodicity of the crystal. Computing it is up to 6 times more costly than without periodicity, and can become a computational bottleneck for simple enough force fields.
 
-To avoid unecessary distance computations, a possibility consists in binning the space of the unit cell, and skipping the pairs of atoms that belong to bins further than the cutoff distance. This idea underlies the principle of neighbour list which can be used to obtain the list of relevant pairs of atoms efficiently. We use the CellListMap.jl [10.1016/j.cpc.2022.108452] julia package for this purpose, although we only enable it when the cell is large enough since the naive approach can be more efficient in many cases where the orthogonal lengths of the cell are close to twice the cutoff distance.
+To avoid unecessary distance computations, a possibility consists in binning the space of the unit cell, and skipping the pairs of atoms that belong to bins further than the cutoff distance. This idea underlies the principle of neighbour list which can be used to obtain the list of relevant pairs of atoms efficiently. We use the CellListMap.jl [10.1016/j.cpc.2022.108452] julia package for this purpose, although we only enable it when the cell is large enough. Indeed, the naive approach can actually be more efficient in many cases where the orthogonal lengths of the cell are close to twice the cutoff distance.
 
 \subsection{Ewald summation}
 
@@ -562,7 +564,7 @@ Its Fourier decomposition over the periodic unit cell of volume $V$ is:
 after several simplification steps not detailed here. Using Poisson's law (\cref{Poisson}), the electric potential due to the Gaussians can then finally be expressed as:
 \[\Phi^\text{reciprocal}(\boldsymbol r) = \frac{1}{\varepsilon_0V}\sum_{\boldsymbol k\neq \boldsymbol 0}\sum_{n=1}^N \frac{q_n}{k^2} e^{i\boldsymbol k\cdot\paren{\boldsymbol r - \boldsymbol r_n}}\exp\paren{\frac{-k^2}{4\alpha^2}}\label{eq:reciprocal}\]
 
-The term $\kappa_{\boldsymbol{k}} = \frac1{k^2}\exp\paren{-k^2/(4\alpha^2)}$ decays fast, so the sum over $\boldsymbol{k}\neq\boldsymbol{0}$ is actually computed as a sum over a finite number of values of $\boldsymbol{k}$. These values are chosen so that for any $\boldsymbol{k}$ not retained, $\kappa_{\boldsymbol{k}}$ is below the target precision of the computation.
+The term $\kappa_{\boldsymbol{k}} = \frac1{k^2}\exp\paren{-k^2/(4\alpha^2)}$ decays fast, so the sum over $\boldsymbol{k}\neq\boldsymbol{0}$ is actually computed as a sum over a finite number of values of $\boldsymbol{k}$ close to $\boldsymbol{0}$. These values are chosen so that the remaining sum of $\kappa_{\boldsymbol{k}}$ for any $\boldsymbol{k}$ not retained is below the target precision of the computation.
 
 \subsubsection{Self-interaction term}
 
@@ -580,8 +582,11 @@ Combining the last three terms, we obtain the overall Coulomb energy:
 \[\begin{split}
 E^\text{Coulomb} &= \sum_{\boldsymbol l} \sum_{n=1}^N\sum_{\substack{m=1\\m\not\smile n}}^n \frac{q_n q_m}{8\pi\varepsilon_0}\frac{\text{erfc}\paren{\alpha\norm{\boldsymbol r_n - \boldsymbol r_m + \boldsymbol l}}}{\norm{\boldsymbol r_n - \boldsymbol r_m + \boldsymbol l}}
 \\&+ \frac1{2\varepsilon_0V} \sum_{\boldsymbol{k}\neq\boldsymbol{0}}\sum_{n=1}^N\sum_{m=1}^N \frac{q_n q_m}{k^2}e^{i\boldsymbol k\cdot\paren{\boldsymbol r_m - \boldsymbol r_n}}\exp\paren{\frac{-k^2}{4\alpha^2}}
-\\&- \sum_{n=1}^N\frac{2\alpha q_n}{\sqrt\pi} - \frac12\sum_{n=1}^N\sum_{\substack{m=1\\m\smile n,\ m\neq n}}^N \frac{q_n q_m}{4\pi\varepsilon_0}\frac{\text{erf}\paren{\pnorm{\boldsymbol r_n - \boldsymbol r_m}}}{\pnorm{\boldsymbol r_n - \boldsymbol r_m}}
+\\&- \xcancel{\sum_{n=1}^N\frac{2\alpha q_n}{\sqrt\pi}}
+- \frac12\sum_{n=1}^N\sum_{\substack{m=1\\m\smile n,\ m\neq n}}^N \frac{q_n q_m}{4\pi\varepsilon_0}\frac{\text{erf}\paren{\pnorm{\boldsymbol r_n - \boldsymbol r_m}}}{\pnorm{\boldsymbol r_n - \boldsymbol r_m}}
 \end{split}\]
+
+The term summing the $2\alpha q_n/\sqrt\pi$ cancels out because the overall system needs to be electrically neutral to carry a physical meaning, so the sum of all $q_n$ is 0. This invariant is checked in the code to avoid any error.
 
 \subsection{Precomputation}
 
@@ -601,13 +606,50 @@ During the simulation, in order to compute the short-term interactions between t
 
 Short-term interactions that can be stored in grids include the short-term direct part of the Ewald summation. The reciprocal term cannot however be simply stored as such.
 
-Yet, it is still possible to precompute a large part of the reciprocal interaction which is due to the framework. Looking back at \cref{eq:reciprocal}, the list of relevant $\boldsymbol{k}$, associated to their factor $\exp\paren{-k^2/\paren{4\alpha^2}}/k^2$, is computed once and for all. For each atom $n$, the factors $\exp\paren{\boldsymbol{k}\cdot\boldsymbol{r}_n}$ are also computed once. Hence, \cref{eq:reciprocal} can be rewritten as
-\[\begin{split}\Phi^\text{reciprocal}(\boldsymbol r) &= \frac{1}{\varepsilon_0V}\sum_{\boldsymbol k\neq \boldsymbol 0}e^{i\boldsymbol{k}\cdot\boldsymbol{r}}\underbrace{\frac1{k^2}\exp\paren{\frac{-k^2}{4\alpha^2}}\left(\sum_{n\text{ framework}} q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n}\right.}_\text{precomputed part}\left. + \sum_{n\text{ guest}} q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n}\right)
-\\&= \frac1{\varepsilon_0V}\sum_{\boldsymbol k\neq \boldsymbol 0} \kappa_{\boldsymbol k} F_{\boldsymbol k} e^{i\boldsymbol{k}\cdot\boldsymbol{r}} \ +\  \frac1{\varepsilon_0V}\sum_{\boldsymbol k\neq \boldsymbol 0} \kappa_{\boldsymbol k} e^{i\boldsymbol{k}\cdot\boldsymbol{r}} \sum_{n\text{ guest}} q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n}
-\label{eq:reciprocal_decomposed}\end{split}\]
-where $\kappa_{\boldsymbol k} = \frac1{k^2}\exp\paren{-k^2/(4\alpha^2)}$ and $F_{\boldsymbol k} = \sum\limits_{n\text{ framework}} q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n}$ are precomputed terms.
+Yet, it is still possible to precompute a large part of the reciprocal interaction which is due to the framework. To take the potential given by \cref{eq:reciprocal} back to the energy, it is useful to introduce the sums:
+\[S_{\boldsymbol k} = \sum_{n=1}^N q_n e^{-i\boldsymbol k\cdot \boldsymbol r_n}\]
+for each $\boldsymbol k$. With this notation, the contribution of the reciprocal term to the energy is
+\[\begin{split}
+E^\text{reciprocal} &= \frac12\sum_{m=1}^N q_m \Phi^\text{reciprocal}(\boldsymbol{r}_m)
+\\&= \frac1{2\varepsilon_0V} \sum_{m=1}^N q_m \sum_{\boldsymbol{k}} \kappa_{\boldsymbol k} e^{i\boldsymbol k\cdot\boldsymbol r_m}S_{\boldsymbol{k}} \quad\text{ then using }\overline{S_{\boldsymbol{k}}} = \sum_{m=1}^N q_me^{i\boldsymbol k\cdot\boldsymbol r_m}
+\\&= \frac1{2\varepsilon_0V} \sum_{\boldsymbol{k}} \kappa_{\boldsymbol k} \overline{S_{\boldsymbol{k}}} \times S_{\boldsymbol{k}}
+= \frac1{\varepsilon_0V} \sum_{\boldsymbol{k}} \kappa_{\boldsymbol k} \norm{S_{\boldsymbol{k}}}^2
+\end{split}\]
+
+Hence, to avoid redundant computations, the list of relevant $\boldsymbol{k}$, associated to their factor $\kappa_{\boldsymbol k} = \exp\paren{-k^2/\paren{4\alpha^2}}/k^2$, is computed once and for all. For each atom $n$ of the framework, the factors $q_n\exp\paren{i\boldsymbol{k}\cdot\boldsymbol{r}_n}$ are also computed once.
+Distinguishing between the atoms of the framework and the guests allow separating $S_{\boldsymbol k}$ into $S_{\boldsymbol k}^\text{framework} + S_{\boldsymbol k}^\text{guest}$, so that finally, the energy can be computed as
+\[E^\text{reciprocal} = \underbrace{
+	\frac1{2\varepsilon_0V} \sum_{\boldsymbol k} \kappa_{\boldsymbol k}\norm{S_{\boldsymbol k}^\text{framework}}^2 + \frac1{2\varepsilon_0V} \sum_{\boldsymbol k}\kappa_{\boldsymbol k} \left(\overline{S_{\boldsymbol k}^\text{framework}}\right.
+}_\text{precomputed part}
++ \left.\overline{S_{\boldsymbol k}^\text{guest}}\right) \times S_{\boldsymbol k}^\text{guest}\label{eq:reciprocal_decomposed}\]
+
+%Hence, \cref{eq:reciprocal} can be rewritten as
+%\[\begin{split}\Phi^\text{reciprocal}(\boldsymbol r) &= \frac{1}{\varepsilon_0V}\sum_{\boldsymbol k\neq \boldsymbol 0}e^{i\boldsymbol{k}\cdot\boldsymbol{r}}\underbrace{\frac1{k^2}\exp\paren{\frac{-k^2}{4\alpha^2}}\left(\sum_{n\text{ framework}} q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n}\right.}_\text{precomputed part}\left. + \sum_{n\text{ guest}} q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n}\right)
+%\\&= \frac1{\varepsilon_0V}\sum_{\boldsymbol k\neq \boldsymbol 0} \kappa_{\boldsymbol k} F_{\boldsymbol k} e^{i\boldsymbol{k}\cdot\boldsymbol{r}} \ +\  \frac1{\varepsilon_0V}\sum_{\boldsymbol k\neq \boldsymbol 0} \kappa_{\boldsymbol k} e^{i\boldsymbol{k}\cdot\boldsymbol{r}} \sum_{n\text{ guest}} q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n}
+%\label{eq:reciprocal_decomposed}\end{split}\]
+%where $\kappa_{\boldsymbol k} = \frac1{k^2}\exp\paren{-k^2/(4\alpha^2)}$ and $F_{\boldsymbol k} = \sum\limits_{n\text{ framework}} q_n e^{-i\boldsymbol k\cdot\boldsymbol r_n}$ are precomputed terms.
 
 Finally, the entire self-interaction term can be computed once for all, since it does not depend on the configuration. This is only the case here because the simulated moleculses are rigid bodies; for deformable structures, the self-interaction term depends on the actual conformation of the guests, which may depend on the state.
+
+\subsubsection{Optimizations for computing the difference of energies}
+
+\label{energydifference}
+
+A simulation that follows the Metropolis-Hastings algorithm walks across configurations, each pair of contiguous states being separated by a single MC move. In this context, computing the energy of each trial configuration to compare it to the previous one is wasteful: the only part of the energy impacted by the MC move is that which stems from the moved species. Instead of computing the energy of the trial configuration, it is thus better to directly compute the energy difference due to the move.
+
+For the short-term interactions, this is straightforward: the energy difference is simply the sum of the interactions of the species at the new position minus that at its previous position. If there are $N$ species, moving one thus costs $O(N)$ computations for these terms, instead of $O(N^2)$ required to compute this energy the first time. The direct part of the Ewald summation follows the same principle.
+
+For the reciprocal part, the difference in energy is derived from \cref{eq:reciprocal_decomposed} by removing the first constant term and computing:
+\[\Delta E^\text{reciprocal} = \frac1{2\varepsilon_0V} \sum_{\boldsymbol k}\kappa_{\boldsymbol k} \left(
+\overline{S_{\boldsymbol k}^\text{framework}}\times\Delta S_{\boldsymbol k}^\text{guest} +
+\Delta \norm{S_{\boldsymbol k}^\text{guest}}^2
+\right)\label{eq:reciprocal_move}\]
+%\[\Delta_\text{move}\Phi^\text{reciprocal}(\boldsymbol{r}) = \frac1{\varepsilon_0V}\sum_{\boldsymbol{k}\neq\boldsymbol{0}} \kappa_{\boldsymbol k}e^{i\boldsymbol k\cdot\boldsymbol{r}} \sum_{n\text{ moved}}q_n\paren{e^{-i\boldsymbol k\cdot\boldsymbol{r}'_n} - e^{-i\boldsymbol k\cdot\boldsymbol r_n}}\]
+Since both values of $S_{\boldsymbol k}^\text{guest}2$ need to be computed before and after the move to take the difference of their norm, it is actually equally efficient to directly compute both values of $E^\text{reciprocal}$ before and after the move, directly following \cref{eq:reciprocal_decomposed}, and taking the difference, instead of the previous formulation.
+
+In order to allow computing this efficiently, each term $q_ne^{-i\boldsymbol k\cdot\boldsymbol r_n}$ is thus stored in memory (instead of recomputing it each time). The new values $q_ne^{-i\boldsymbol k\cdot\boldsymbol{r}'_n}$ computed for the trial move are also temporarily kept in memory, so they can be used to replace the previous ones if the trial move is accepted. Finally, the value of each $S_{\boldsymbol{k}}^\text{guest}$ is also kept in memory, so that it can be updated by reusing the previous computation.
+
+RASPA2 does not implement this optimization, and simply recomputes the $e^{-i\boldsymbol k\cdot\boldsymbol r_n}$ terms each time, which is slower but requires less memory.
 
 \subsubsection{Blocking pockets}
 
@@ -618,35 +660,6 @@ To do so, the simplest strategy consists in making a boolean grid, aligned with 
 In addition to its use as computational optimization, such boolean grids can also be used to mark some parts of the framework as inaccessible, irrespective of the corresponding energy. This is useful when small window size prevents a species -- for instance a gas molecule -- from entering a pore -- for instance the sodalite cages in LTA zeolites [10.1021/ja953856q]. Indeed, without explicitly blocking the pocket, an MC move could make a species appear in the pore, whereas it should be kinetically impossible to enter. This strategy will thus be used when studying the adsorption of gases in zeolites (see \cref{adsorption}), but for the small cations under study here, there is no need to additionally block any part of the frameworks.
 
 RASPA2 only implements blocking for the latter case -- \textit{i.e.} explicit pocket removal. It does not use a boolean grid: instead, the blocked space is described as a combination of blocking spheres. For each trial move, the distance between the atoms of the moved guest and the center of each sphere is computed: if one is below its radius, the move is rejected. This approach requires less precomputation and thus less memory than storing the boolean grids, but its cost is much greater, and increases with the number of blocking spheres, preventing it from being used as an optimization like before. It is thus less efficient than the approach I implemented.
-
-\subsubsection{Optimizations for computing the difference of energies}
-
-A simulation that follows the Metropolis-Hastings algorithm walks across configurations, each pair of contiguous states being separated by a single MC move. In this context, computing the energy of each trial configuration to compare it to the previous one is wasteful: the only part of the energy impacted by the MC move is that which stems from the moved species. Instead of computing the energy of the trial configuration, it is thus better to directly compute the energy difference due to the move.
-
-For the short-term interactions, this is straightforward: the energy difference is simply the sum of the interactions of the species at the new position minus that at its previous position. If there are $N$ species, moving one thus costs $O(N)$ computations for these terms, instead of $O(N^2)$ required to compute this energy the first time. The direct part of the Ewald summation follows the same principle.
-
-For the reciprocal part, \cref{eq:reciprocal_decomposed} can be revisited by removing the first constant term, and singling out the atoms $n$ for the moved species:
-\[\Delta\Phi^\text{reciprocal}(\boldsymbol{r}) = \frac1{\varepsilon_0V}\sum_{\boldsymbol{k}\neq\boldsymbol{0}} \kappa_{\boldsymbol k}e^{i\boldsymbol k\cdot\boldsymbol{r}} \sum_{n\text{ moved}}q_n\paren{e^{-i\boldsymbol k\cdot\boldsymbol{r}'_n} - e^{-i\boldsymbol k\cdot\boldsymbol r_n}}\]
-where $\boldsymbol{r}'$ is the position after the move and $\boldsymbol{r}$ before.
-
-In order to allow computing this efficiently, each term $e^{-i\boldsymbol k\cdot\boldsymbol r_n}$ is thus stored in memory (instead of recomputing it each time). The new values $e^{-i\boldsymbol k\cdot\boldsymbol{r}'_n}$ computed for the trial move are also temporarily kept in memory, so they can be used to replace the previous ones if the trial move is accepted. RASPA2 does not implement this optimization, and simply recomputes the $e^{-i\boldsymbol k\cdot\boldsymbol r_n}$ terms each time, which is slower but requires less memory.
-
-% \begin{figure}[ht]
-%   \centering
-%   \begin{subfigure}[b]{0.45\textwidth}
-%     \centering
-%     \includegraphics[height=0.7\textwidth]{figures/something.pdf}
-%     \caption{Experimental}
-%   \end{subfigure}
-%   \hfill
-%   \begin{subfigure}[b]{0.45\textwidth}
-%     \centering
-%     \includegraphics[height=0.7\textwidth]{figures/else.pdf}
-%     \caption{Theoretical calculation}
-%   \end{subfigure}
-%   \caption{Illustration of something (a) else (b). See also\textsuperscript{1} by Ref.~\cite{foo}. }\label{something_else}
-% \end{figure}
-% \footnotetext[1]{Available on Github at \url{https://github.com/foo}}
 
 \subsubsection{Site-hopping precomputations}
 
