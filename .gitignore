@@ -284,5 +284,5 @@ TSWLatexianTemp*
 
 .vscode*
 
-figures/isotherms/*.png
-figures/isotherms/*.svg
+figures/*/*.png
+figures/*/*.svg
