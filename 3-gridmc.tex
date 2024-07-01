@@ -108,10 +108,77 @@ Both algorithmic strategies have their merit, and warrant a trial to check which
 
 \section{GCMC on a grid}
 
+Even with an efficient implementation, regular GCMC simulation remain resource-consuming, especially in the context of a large scale material screening. Improving this performance is thus valuable, especially if the precision cost can be controlled.
+
 \subsection{Principle}
+
+Similar to the methods exposed in \cref{precomputations}, a typical strategy for reducing the computational cost consists in precomputing as much as possible, to decrease the workload of the main loop of the algorithm. In the case of GCMC, the main computation occurring at each move trial is that of the interactions between species, both in direct and reciprocal spaces. Since the configuration space for the molecules in the unit cell of the framework is continuous, and thus infinite, it is impossible to precompute all the possible pair interactions.
+
+However, that space can be discretized: to do so, the mobile species are forced to occupy one position each among a fixed set of possibilities. The conceptually simplest set is a regular grid: each molecule must reside atop one grid point. For polyatomic species, like all gases of interest with the exception of rare gases, this definition is incomplete however. There are thus three options: 
+\begin{enumerate}
+	\item the grid can include additional dimensions to account for the orientation of the molecule. In that case there must be a fixed convention dictating which atom of the molecule is placed on the grid point. That atom, called the ``bead'', is typically that around which the rotation MC move operates.
+	\item each grid point can come with an associated fixed orientation of the molecule sitting on it. In that case, the lowest energy orientation with respect to the framework is probably the most reasonable choice, but it may grossly misrepresent the actual orientation of the molecules if those are mostly driven by the interaction with other molecules.
+	\item the molecule can be represented as a single point sitting on the grid, with no orientation. In that case, the interaction energy of the molecule with the framework can be taken as the average of the energies corresponding to the different orientations and, likewise, the molecule-molecule interactions can be computed by taking averages over the orientation of both molecules. These averages could be either arithmetic or Boltzmann averages, depending on the interpretation: a Boltzmann average implicitly assumes that the molecules are at equilibrium, which is not very well defined for a single molecule sitting on a grid point, while an arithmetic average implies has an orientation independent of the corresponding energy, which is not exact either.
+\end{enumerate}
+
+Our study is restricted to small gases of the air which are all linear and centrosymmetric: \ce{CO_2}, \ce{N_2}, \ce{O_2}, etc., so the bead is conventionally chosen as the center of the molecule. Choosing an orientation thus amounts to choosing a direction for a rod (the molecule) across possible angles. To accurately cover this configuration space while limiting the number of used angles, we use a Lebedev grid, which is a set of $N_l$ points $(\theta_i,\varphi_i)$ on the surface of the sphere such that the integral of a function $f$ can be well approximated by the sum
+\[I[f] = \int_0^\pi sin(\theta)\text d\theta \int_0^{2\pi}\text d\varphi f(\theta, \varphi)\ \approx\ 4\pi\sum_{i=1}^{N_l} w_if(\theta_i,\varphi_i)\]
+with the appropriate weights $w_i$. The values of $w_i$, $\theta_i$ and $\varphi_i$ have been precomputed once and for all for different values of $N_l$. Because of orthogonality constraints on the Lebedev points, not all values of $N_l$ are possible: the ones which are usable in my code are $N_l =$ 6, 14, 26, 38, 50, 74, 86, 110, 146, 170, 194, 230, 266, 302, 350, 434, 590, 770, 974, 1202, 1454, 1730, 2030, 2354, 2702, 3074, 3470, 3890, 4334, 4802, 5294 and 5810, allowing for any fine-tuning of the precision level. Only half of these points are actually used since the both the target gases and the Lebedev grids are centrosymmetric.
+
+The number of possible configurations of a molecule is $\alpha\times a\times b\times c$ where $(a,b,c)$ is the size of the spatial grid and $\alpha$ is either $N_l$ in the first of the three options above, or 1 for the second and third option. Since we use a Van der Waals cutoff of \qty{12}\angstrom, the framework with the smallest grid will necessarily have its perpendicular lengths greater or equal to $2\times\qty{12}\angstrom = \qty{24}\angstrom$. Thus, with a distance of \qty{0.2}{\angstrom} between two grid points, $a$, $b$ and $c$ are greater or equal to than $120$ so the size of the configuration space is at least $\alpha\times120^3$.
+
+The goal of the grid MC approach is to reduce the amount of computations done at each step, to accelerate the GCMC simulations, by precomputing the pair interactions between grid points. The number of pair interactions to precompute is thus, in theory, at least $\paren{\alpha\times120^3}^2/2 = \alpha^2\times120^6/2$. It can actually be reduced further with translation symmetry considerations: the interaction between grid points $(x_1,y_1,z_1,\theta_1)$ and $(x_2,y_2,z_2,\theta_2)$ is identical to that between grid points $(x_1+\Delta,y_1+\Delta,z_1+\Delta,\theta_1)$ and $(x_2+\Delta,y_2+\Delta,z_2+\Delta,\theta_2)$ for any $\Delta$. It is thus sufficient to precompute the interaction between $(0,0,0,\theta)$ and all other grid points, so the minimum number of precomputations is actually $\alpha^2\times 120^3 \approx \alpha^2\times 2\cdot10^6$. Each precomputation yields an energy, represented by a floating-point number, which takes \qty8B of space, and the typical RAM of a computer is on the order of \qty{10}{GB}, so the maximum value of $\alpha$ is approximately $\sqrt{10^{10}/\paren{8\times 2\cdot10^6}} = 25$ for the smallest possible spatial grid.
+
+In conclusion, using explicit angles is theoretically doable only for small enough materials and by using the smallest numbers of angles, otherwise the precomputation results cannot be stored in memory. Moreover, we expect the numerical cost of the precomputations to be considerable itself, since it requires $\alpha^2\times 2\cdot10^6$ pair interaction computations. This is similar to the cost of simulating a system of $N = \alpha^2$ particles in interaction across one million MC steps, which is a typical GCMC simulation length, since each MC trial move requires computing $2N$ pair interactions ($N$ for the particle before the move, $N$ for the particle after).
 
 \subsection{Validation}
 
-\subsection{Limits and perspectives}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\columnwidth]{figures/gcmc/gridmc_Ar_MFI.pdf}
+	\caption{Adsorption isotherm of Ar on silicic MFI obtained with different simulation strategies. The black line is the RASPA implementation of GCMC while the orange line is our implementation.}\label{fig:gridMC-ArMFI}
+\end{figure}
+
+To check the validity of this simulation strategy, we start by comparing the loading of Ar in a zeolite obtained by regular GCMC and through this grid MC approach. The result for zeolite MFI is presented on \cref{fig:gridMC-ArMFI}, using a grid step size of \qty{0.2}{\angstrom}. The perfect superposition of the three isotherms indicate that the grid MC simulation method is apt to reproduce the adsorption property of noble gas in zeolites with great accuracy, even at high pressure.
+
+With more complex molecules, angles have to be taken into account, using either of the two last options among the three presented before. Their comparison is illustrated with the adsorption of \ce{CO_2} in FAU in \cref{fig:gridMC-pair}, shows that averaging orientations (option 3) provide more qualitative results compared to selecting one single orientation per grid point (option 2). Yet, none manage to qualitatively reproduce the adsorption behavior at intermediate to high pressures.
+
+\begin{figure}
+	\centering
+	\begin{subfigure}{0.93\columnwidth}
+		\centering
+		\includegraphics[width=0.86\columnwidth]{figures/gcmc/gridmc_CO2_FAU_comparison_pair.pdf}
+		\subcaption{Influence of the molecule-molecule interaction strategy. ``single angle'' refers to option 2, while for option 3, the fixed framework-molecule interaction strategy is the Boltzmann average.}\label{fig:gridMC-pair}
+	\end{subfigure}
+	
+	\vfill
+	\begin{subfigure}{0.93\columnwidth}
+		\centering
+		\includegraphics[width=0.86\columnwidth]{figures/gcmc/gridmc_CO2_FAU_comparison_framework.pdf}
+		\subcaption{Influence of the framework-molecule interaction strategy with option 3. The fixed molecule-molecule interaction strategy is the arithmetic average. ``lowest energy'' refers to taking the minimum instead of taking an average.}\label{fig:gridMC-framework}
+	\end{subfigure}
+	
+	\caption{Adsorption isotherm of \ce{CO_2} on silicic FAU obtained with different grid MC strategies.}\label{fig:gridMC-comparison}
+\end{figure}
+
+
+As evoked previously, the nature of the angular averaging, either arithmetic or Boltzmannian, of energies stems from a hypothesis on the distribution of microstates, neither of which is actually valid. The influence of this choice on the simulated loading of \ce{CO_2} in FAU is presented in \cref{fig:gridMC-comparison}.
+
+In \cref{fig:gridMC-pair}, it appears that the choice of averaging for the molecule-molecule interaction has little influence on the result until the high pressures. Unsurprisingly, the Boltzmann average, which favors attractive interaction, increases the loading compared the arithmetic average, but the general trend is very similar and neither appear to be particularly more right than the other.
+
+On the other hand, \cref{fig:gridMC-framework} illustrates the drastic difference in the choice of averaging for the framework-molecule interaction. Only the Boltzmann average yields an isotherm closely following that of the reference GCMC simulation at low pressures: the arithmetic averaging of angles yields a large underestimation of the loading, while taking only the lowest energy across angles yields a large overestimation.
+
+From these observations, it appears that the molecules of \ce{CO_2} preferentially orient themselves according to the interactions with the framework at low pressure, which should be obvious since low pressures correspond to a regime where molecule-molecule interactions are negligible. More importantly, irrespective of the pressure regime, the entropic contribution is paramount: the molecules do not simply orient themselves according to the lowest energy configuration, but freely rotate in accordance with Boltzmann distribution.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\columnwidth]{figures/gcmc/gridmc_CO2_FAU_comparison_size.pdf}
+	\caption{Adsorption isotherm of \ce{CO_2} on silicic FAU obtained with different grid MC step sizes}\label{fig:gridMC-sizes}
+\end{figure}
+
+Regarding the numerical method itself, the main limit is the behaviour at intermediate and high pressure, which significantly parts from expectation. While this necessarily stems from the use of a grid, it does not depend on the grid step size: \cref{fig:gridMC-sizes} shows the evolution of the isotherm using option 3 with Boltzmann averaging for framework-molecule interactions and arithmetic averaging for molecule-molecule interactions. The isotherm does not evolve much when the grid step size is small enough, which points to the fact the issue lies in the nature of the simulation method itself.
+
+\subsection{Numerical aspects}
+
 
 \end{document}
