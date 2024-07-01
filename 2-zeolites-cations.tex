@@ -368,7 +368,7 @@ In order to perform numerical simulation of the adsorption process, it is thus n
 
 While experimental cation maps are available on some zeolite structures, two seminal problems remain. First, when screening through a large amount of zeolite topologies and \SiAl ratio, only a small fraction of structures have their experimental cation map available. Second, even with the crystallographic sites, not all cation repartitions that obey the given occupancies have the same energy. For example, the site I and I' of FAU being very close to one another, the occupation of a site I prevents either of the neighbouring sites I' from being occupied at the same time. Deciding on the exact location of cations in a zeolite model is thus no trivial matter.
 
-\subsection{Current methodologies}
+\subsection{Methodologies}
 
 To obtain equilibrium data, such as average positions, on molecular systems, there are two general simulation frameworks which can be used: molecular dynamics and Monte-Carlo (MC) simulation. We only used MC and its variations, because they are the only strategy available to study a variable number of molecules, which is necessary for the simulation of adsorption as we will explain in more details in \cref{GCMC}. The possible use of molecular dynamics and its variants will be discussed later in \cref{metadynamics}.
 
@@ -407,20 +407,48 @@ where $i$ is the number of the current cycle (starting at 1), $T_\text{ratio}$ (
 
 At the beginning of each step, an MC move is chosen at random. In our simulations, all three moves (translation, rotation and reinsertion) are chosen equiprobably. For the particular case of the movement of mono-atomic species, such as most cations in zeolites, the rotation MC move is useless and thus not used, while the reinsertion move collapses to a simple translation with infinite $d_{\max}$, both moves being chosen equiprobably.
 
-The Metropolis-Hastings algorithm thus provides a way to walk through the configuration space. By privileging moves that decrease energy, the system spends more steps in low energy regions; by yet allowing opposite moves sometimes, the scheme ensures that all the configuration space is eventually visited. Hence, the algorithm guarantees ergodicity: in an infinitely long simulation, the fraction of steps spent in a part of the configuration space is proportional to its volume. Finding the space with the lowest energy, and thus the largest probability and volume, should then simply be a matter of running the simulation long enough for the state to fall in the deepest energy pit.
+The Metropolis-Hastings algorithm thus provides a way to walk through the configuration space. By privileging moves that decrease energy, the system spends more steps in low energy regions; by yet allowing opposite moves sometimes, the scheme ensures that all the configuration space is eventually visited. Hence, the algorithm guarantees ergodicity: in an infinitely long simulation, the fraction of steps spent in a part of the configuration space is proportional to its volume. %Finding the space with the lowest energy, and thus the largest probability and volume, should then simply be a matter of running the simulation long enough for the state to fall in the deepest energy pit.
 
+
+\subsubsection{Combined aluminium and cation placement} % method of Marie Jeffroy
+
+Specifically in the case cationic zeolites, [Marie Jeffroy REF] proposes a simulation method to obtain both the placement of cations in the structure and the location of aluminium atoms across the T-sites. This consists in running an MC simulation where the cations are allowed all previously mentioned MC steps, while the aluminiums are only allowed exchanging positions with siliciums, or a restart step that randomly positions aluminiums and siliciums, both while obeying L\"owenstein's rule as explained in \cref{mariejeffory_al}.
+
+The statistical ensemble simulated in this setting includes both aluminium and cations, which means that the distribution sampled through such a simulation method represents the equilibrium for both species. From a chemical point of view, this situation is representative of a framework whose synthesis was done with that very cation, and was thermodynamically-driven. While this does correspond to reality in some cases, there is also evidence that the synthesis is kinetically-driven in many other occurences: for such situation, obtaining the aluminium positions from statistical equilibrium is not representative of the actual framework. And in yet other situations, the cation is exchanged post-synthesis, which decorrelates the aluminium placement in the framework from the cation used for adsorption purposes.
+
+Nonetheless, even in those cases, there is no less value in the aluminium placement obtained from such a hybrid strategy than from random sampling of the T-atoms. In fact, by virtue of the added dimensions of the free energy landscape, a kinetically trapped cation may move more freely following the rearrangement of the aluminiums in the structure, which can make the entire simulation converge more efficiently. If not for the hope of obtaining more relevant aluminium placements, this combined strategy remains valuable for its diminished computationally cost compared to parallel tempering, explained later in \cref{paralleltempering}.
+
+Unfortunately, the fact that the framework is not strictly constant as before prevents the use of precomputed energy grid, later discussed in \cref{energygrid}. This was not a problem in the context of [Marie Jeffroy]'s study because the force field they used was such that a silicium-aluminium swap would not change the van der Waals interactions, but this is not the case of most force fields, including the one we use in our study [BoulfelfelSholl2021]. Being unable to precompute the short-term energy contribution of the framework would thus make the simulations significantly slower, tipping the balance against the use of this method.
+
+\subsubsection{Site-hopping}
+
+\label{sitehopping}
+
+Cations are free to move in a canonical MC simulation with translation moves, but some reconfigurations can be problematic. In particular, the cations may not have enough energy to overcome the barriers inherent to the structure of the zeolitic framework in any reasonable simulation time. For example, a cation trapped in the site I of a FAU zeolite will never manage escape into a site III in a room-temperature simulation of reasonable length without a reinsertion move: this simply comes from the high activation barrier it needs to overcome while physically moving out of the sodalite cage. Reinsertion moves are thus useful to allow large configuration movements to occur without having to pass through physical energy barriers.
+
+However, reinsertion consists in attempting to displace a cation to a random position in the framework, which, in the vast majority of cases, ends up rejected because it is too energetically unfavorable. A better move would consist in displacing the cation towards a favorable position, to increase the likelihood of the move being accepted: this is called biasing, which requires unbiasing the acceptation rate to maintain micro-reversibility.
+
+Taking this idea to the extreme, all cations can be forced to sit on one of a fixed set of possible positions, called a site, and to only move by hopping onto another of these positions, irrespective of the distance with the previous position. One hop is then accepted or rejected based on the Metropolis-Hastings criterion, like any other MC simulation. This ``site-hopping'' approach entirely bypasses the issue of spatial energy barrier since the cations directly hop onto a site, without having to move through an unfavorable region to access it. Hence, it makes this kind of simulation particularly well adapted to sharp energy landscapes, like that of cations in zeolites.
+
+A major constraint of this simulation method however, is that it requires knowing the cationic sites, which is precisely the purpose of the current development. One could weaken this constraint by allowing many pseudo-sites, for instance taking all the points of a regular grid, but this basically amounts to reverting to reinsertion moves without sites, which defeats the purpose of this protocol. Site hopping is thus useful in the later stages of cation placement, once the positions of the sites have already been identified, in order to evaluate their population.
+
+
+\subsection{Meta-algorithms}
+
+The previous algorithms allow sampling the configuration space at a fixed temperature. However, even with reinsertion or site-hopping, only one particle can move at a time, which is sometimes not enough. For instance, in FAU zeolites, filling both sites I' when starting from an initial configuration where only the central site I is occupied requires that both the central cation move to the edge of the cage and that an external cation be set in the opposite window. Since both movements require passing through an activation barrier, the probability of it happening naturally is low, and thus requires particularly long simulation times to be observed. More generally, collective movements can remain difficult.
+
+To circumvent this issue, the temperature of the simulation can be raised: this mechanically makes all MC steps more likely to be accepted, so higher-energy regions become more reachable. At the same time, a simulation at a hot temperature is much less likely to explore the details of the energy landscape enough to fall into the energy minima of interest, since the accessible configuration space became so much larger. Several meta-algorithms rely on the previously explained algorithms but use different temperatures in different settings, to attempt finding the optimal compromise between wide and detailed explorations.
 
 \subsubsection{Simulated annealing}
 
-Unfortunately, simply doing canonical MC at room temperature does not provide the cations with enough energy to overcome the barriers inherent to the structure of the zeolitic framework in any reasonable time. For example, a cation trapped in the site I of FAU will never manage escape into a site III in a room-temperature simulation of reasonable length without a reinsertion move: this simply comes from the high activation barrier it needs to overcome while physically moving out of the sodalite cage. Reinsertion moves are thus useful to allow large configuration movements to occur without having to pass through physical energy barriers.
+The simplest idea consists in running the simulation while smoothly varying the temperature between cold and hot, alternating between increasing and decreasing phases, possibly interspersed with plateaus. This is called simulated annealing, because of the similarity with the recrystallization method used in metallurgy.
 
-However, a reinsertion can only move one particle at a time, which is sometimes not enough. For instance, the population of two sites I' from an initial configuration where only the central site I is occupied, requires that both the central cation move to the edge of the cage and that an external cation be set in the opposite window. Since both movements require passing through an activation barrier, the probability of it happening naturally is low, and thus requires particularly long simulation times to be observed.
-
-To circumvent this issue, the temperature of the simulation can be raised: this mechanically makes all MC steps more likely to be accepted, so higher-energy regions become more reachable. At the same time, a simulation at a hot temperature is much less likely to explore the details of the energy landscape enough to fall into the energy minima of interest, since the accessible configuration space became so much larger. A compromise thus consists in performing simulated annealing, which is simply a simulation in which the temperature varies between cold and hot, alternating between increasing and decreasing phases, possibly interspersed with plateaus.
 
 % TODO: comment, illustrate.
 
 \subsubsection{Parallel tempering}
+
+\label{paralleltempering}
 
 Simulated annealing explores the configuration space by alternating between cold phases, where the exploration is detailed but localized, and hot phases, where the exploration is fast but superficial. Parallel tempering, also called ``replica exchange'' proposes doing both phases at the same time.
 
@@ -430,27 +458,9 @@ In this strategy, the coldest simulation is constantly exploring a local free en
 
 Naturally, its main downside is its computational cost, proportional to the number of simulations and thus effectively related to the difference between the highest and the lowest temperatures. The choice of intermediate temperatures must be guided by an initial discovery of the typical energies encountered by system at each temperature, which requires a few dedicated simulations prior to the parallel tempering. Finding the optimal number of simulations requires striking a balance with the proportion of accepted MC exchange steps, whose impact on the overall simulation convergence can be difficult to measure. Additionally, simulations with neighbour temperatures must regularly synchronize to attempt an exchange, which strongly limits the amount of parallelization usable in the implementation of parallel tempering.
 
-\subsubsection{Combined aluminium and cation placement} % method of Marie Jeffroy
+\subsubsection{Shooting star methodology}
 
-Specifically in the case cationic zeolites, [Marie Jeffroy REF] proposes a simulation method to obtain both the placement of cations in the structure and the location of aluminium atoms across the T-sites. This consists in running an MC simulation where the cations are allowed all previously mentioned MC steps, while the aluminiums are only allowed exchanging positions with siliciums, or a restart step that randomly positions aluminiums and siliciums, both while obeying L\"owenstein's rule as explained in \cref{mariejeffory_al}.
-
-The statistical ensemble simulated in this setting includes both aluminium and cations, which means that the distribution sampled through such a simulation method represents the equilibrium for both species. From a chemical point of view, this situation is representative of a framework whose synthesis was done with that very cation, and was thermodynamically-driven. While this does correspond to reality in some cases, there is also evidence that the synthesis is kinetically-driven in many other occurences: for such situation, obtaining the aluminium positions from statistical equilibrium is not representative of the actual framework. And in yet other situations, the cation is exchanged post-synthesis, which decorrelates the aluminium placement in the framework from the cation used for adsorption purposes.
-
-Nonetheless, even in those cases, there is no less value in the aluminium placement obtained from such a hybrid strategy than from random sampling of the T-atoms. In fact, by virtue of the added dimensions of the free energy landscape, a kinetically trapped cation may move more freely following the rearrangement of the aluminiums in the structure, which can make the entire simulation converge more efficiently. If not for the hope of obtaining more relevant aluminium placements, this combined strategy remains valuable for its diminished computationally cost compared to parallel tempering.
-
-Unfortunately, the fact that the framework is not strictly constant as before prevents the use of precomputed energy grid, later discussed in \cref{energygrid}. This was not a problem in the context of [Marie Jeffroy]'s study because the force field they used was such that a silicium-aluminium swap would not change the van der Waals interactions, but this is not the case of most force fields, including the one we use in our study [BoulfelfelSholl2021]. Being unable to precompute the short-term energy contribution of the framework would thus make the simulations significantly slower, tipping the balance against the use of this method.
-
-\subsection{Site-hopping}
-
-\label{sitehopping}
-
-%TODO: explain site hopping, as well as the notion of a cationic site in general
-
-\subsection{Shooting star methodology}
-
-Previously exposed methods such as canonical MC, simulated annealing or parallel tempering focus on making the system (or at least, one of its replicas) reach equilibrium after a certain number of initial steps, so that the rest of the simulation occurs at equilibrium. This is crucial for the problem of sampling the equilibrium distribution of states in general. For the case of cation placement in zeolites however, the observed crystallographic positioning of the cations indicates that this distribution is sharply peaked: only a discrete number of sites can be occupied, and the question is to find their positions and occupancy. As a consequence, we can use another, simpler, strategy, which is less efficient for the actual sampling of the distribution, but can uncover relevant local minima faster.
-
-\subsubsection{Principle}
+Previously exposed methods such as simple canonical MC, simulated annealing or parallel tempering focus on making the system (or at least, one of its replicas) reach equilibrium after a certain number of initial steps, so that the rest of the simulation occurs at equilibrium. This is crucial for the problem of sampling the equilibrium distribution of states in general. For the case of cation placement in zeolites however, the observed crystallographic positioning of the cations indicates that this distribution is sharply peaked: only a discrete number of sites can be occupied, and the question is to find their positions and occupancy. As a consequence, we can use another, simpler, strategy, which is potentially less efficient for the actual sampling of the distribution, but can uncover relevant local minima faster.
 
 This new methodology takes the same simulation elements as the ones previously detailed, but arranges them in a different fashion. We call it ``shooting star'' because it can be decomposed into one hot simulation, like the bright head of the meteor, and a series of cold simulations that stem from it, like the cooling incandescent debris left in its wake.
 
@@ -463,13 +473,15 @@ Similar to the previous accelerated methodologies, only a fraction of the explor
 In terms of parameters, the shooting star method requires choosing $T_\text{hot}$ the hot temperature, $T_\text{cold}$ the cold one, $N_\text{cold}$ the total number of cold simulations to launch, the previously mentioned $M_\text{init}$, $M_\text{prod}$ and $\Delta_\text{spawn}$, as well as the number $N_\text{init}$ of initial steps of the hot simulation before launching the first cold simulation. Of all these parameters, $T_\text{cold}$, $N_\text{init}$ and $N_\text{prod} = M_\text{prod}\times N_\text{cold}$ must also be chosen for a single canonical MC simulation and $\Delta_\text{spawn}$ can always be taken around 100 (its value has little effect on overall performance and quality as long as it is not too low nor too high). The extra parameters $T_\text{hot}$ is equivalent to the hottest temperature used in simulated annealing and parallel tempering. Finally, $M_\text{init}$ must be evaluated by an initial run, similar to how the intermediate temperatures used in parallel tempering are obtained or the slope and plateau lengths of simulated annealing are usually chosen. The complexity of the overall setup is thus similar to that of simulated annealing.
 
 
-\subsubsection{Extraction of sites from densities}
+\subsection{Extraction of sites and population from simulation}
 
-To perform gas adsorption prediction, what is needed is a model of the cationic zeolite. With this perspective, the previous simulations can be used to simply provide their cation configurations with the lowest energy, in order to obtain such a model.
+%To perform gas adsorption prediction, what is needed is a model of the cationic zeolite. With this perspective, the previous simulation strategies can be used to simply provide their cation configurations with the lowest energy, in order to obtain such a model.
 
-It is interesting however to evaluate the shooting star methodology as a new general meta-algorithm to simulate systems in sharp energy landscapes. In order to do so, we need a comparison point that can assess the validity of the pseudo-simulation obtained by gluing together all the production steps of the cold simulations. Such a comparison point is the experimental cation localization that can be obtained by X-ray diffraction on zeolite samples with known topology and \SiAl ratio.
+%It is interesting however to evaluate the shooting star methodology as a new general meta-algorithm to simulate systems in sharp energy landscapes. In order to do so, we need a comparison point that can assess the validity of the pseudo-simulation obtained by gluing together all the production steps of the cold simulations. Such a comparison point is the experimental cation localization that can be obtained by X-ray diffraction on zeolite samples with known topology and \SiAl ratio.
 
-The shooting star (or other) simulation method yields a sequence of cation configurations sampled at room temperature. This sequence can be flattened into a map of the zeolite framework, with one additional point at each position occupied by a cation in one of the steps. Looking at this map allows qualitatively identifying the crystallographic sites as the zones where the density of points is the highest. In order to get quantitative information on the site localization and population, we devise a clustering algorithm that extract the sites from the previous density map.
+\subsubsection{Cation site locations from density}
+
+Assuming we do not know the position of the cation sites, a canonical MC simulation (possibly with shooting star or another meta-algorithm) yields a sequence of cation configurations sampled at room temperature. This sequence can be flattened into a map of the zeolite framework, with one additional point at each position occupied by a cation in one of the steps. Looking at this map allows qualitatively identifying the crystallographic sites as the zones where the density of points is the highest. In order to get quantitative information on the site localization and population, we devise a clustering algorithm that extract the sites from the previous density map.
 
 The first step consists in dividing the space by a regular grid, whose voxels have the same angles as the unit cell but possibly different lengths, taken to be closest to a target value around \qty{0.15}{\angstrom}. To each voxel is then attributed the number of cations encountered within across the recorded simulation steps. This first step thus bins the density onto a regular grid.
 
@@ -589,6 +601,8 @@ E^\text{Coulomb} &= \sum_{\boldsymbol l} \sum_{n=1}^N\sum_{\substack{m=1\\m\not\
 The term summing the $2\alpha q_n/\sqrt\pi$ cancels out because the overall system needs to be electrically neutral to carry a physical meaning, so the sum of all $q_n$ is 0. This invariant is checked in the code to avoid any error.
 
 \subsection{Precomputation}
+
+\label{precomputations}
 
 Different algorithms that solve a particular problem generally differ in the specific space-time tradeoff they choose. Obtaining the energy of a configuration presents the same possibility: while entirely computing the energy from scratch requires a set amount of computation, it is possible to make subsequent computations faster at the cost of a greater memory footprint of the algorithm, by storing some intermediate results which can be reused afterwards.
 
