@@ -200,6 +200,27 @@ From these observations, it appears that the molecules of \ce{CO_2} preferential
 
 Regarding the numerical method itself, the main limit is the behaviour at intermediate and high pressure, which significantly parts from expectation. While this necessarily stems from the use of a grid, it does not depend on the grid step size: \cref{fig:gridMC-sizes} shows the evolution of the isotherm using option 3 with Boltzmann averaging for framework-molecule interactions and arithmetic averaging for molecule-molecule interactions. The isotherm does not evolve much when the grid step size is small enough, which points to the fact the issue lies in the nature of the simulation method itself.
 
-\subsection{Numerical aspects}
+\subsection{Computational aspects}
+
+The main interest of the grid MC approach is that all pair interaction energies can be precomputed, which makes each trial move much less computationally costly, and thus the overall simulation much faster. Indeed, the variation of energy due to a single MC trial move can be expressed as
+\[\Delta E^\text{grid MC} = \left\{\begin{split}
+	\delta(N+1, \boldsymbol r)\ &\text{if insertion of a new molecule at }\boldsymbol r\\
+	-\delta(i, \boldsymbol r)\ &\text{if deletion of the molecule }i\text{ at }\boldsymbol r\\
+	\delta(i, \boldsymbol r') - \delta(i, \boldsymbol r)\ &\text{if move of the molecule }i\text{ from }\boldsymbol r\text{ to }\boldsymbol r'
+\end{split}\right.\]
+where $N$ is the number of molecules in the system and
+\[\delta(i, \boldsymbol r) = \text{framework}(\boldsymbol r) + \sum_{j\neq i} \text{interaction}(\boldsymbol r, \boldsymbol r_j) + \text{tc}_\text{framework} + (2N+1)\text{tc}_\text{interaction}\]
+
+The different terms above are all precomputed for the different values of the grid point $\boldsymbol r$:
+\begin{itemize}
+	\item $\text{framework}(\boldsymbol r)$ refers to the framework-molecule interaction, which is computed once and for all according to either of the three options discussed before.
+	\item $\text{interaction}(\boldsymbol r, \boldsymbol r')$ is the interaction between two molecules, one at $\boldsymbol r$ and the other at $\boldsymbol r'$.
+	\item $\text{tc}_\text{framework}$ is the tail correction for the atoms of the framework and the atoms of the molecule, and $\text{tc}_\text{interaction}$ is the tail correction for the atoms of two molecules interacting.
+\end{itemize}
+
+The tail correction terms as stored as simple numbers, $\text{framework}(\boldsymbol r)$ is stored as a tridimensional array of energies, $\boldsymbol r$ being mapped to a triplet of integers indexing the grid points. The term that takes the most time to precompute, $\text{interaction}(\boldsymbol r, \boldsymbol r')$, is stored in a custom data structure made of a tridimensional index array, along the energy data, in a list. Due to translation symmetry, the query of the interaction between $\boldsymbol r$ and $\boldsymbol r'$ becomes that between the origin and $\boldsymbol r - \boldsymbol r'$. The corresponding triplet of integers maps to an index in the tridimensional array, and that index is the one used to retrieve the energy from the energy list. The index can also be 0, to indicate that the interaction energy is zero (i.e. beyond the cutoff): this way, the energy list only stores relevant values.
+
+The precomputation itself is also optimized, to avoid making it the dominant computational cost of running grid MC simulations. To do so, the framework interactions computation benefits from all the precomputations explained in \cref{precomputations}, in particular the tabulated atomic grids. For the molecule-molecule interaction averaged over the angles, the energy is interpolated from a linear grid: the interaction energy is computed by putting the bead of the first molecule at the origin and the other at a distance $d$, where $d$ increments from 0 to the cutoff distance by steps of one fifth of the average MC grid step. The interpolation is done with cubic splines through the \texttt{BasicInterpolators.jl} [REF] julia package.
+
 
 \end{document}
