@@ -94,13 +94,35 @@ In terms of programming, the fugacity coefficient can directly be obtained from 
 
 \subsection{Computational aspects}
 
-Compared to canonical MC, the efficient implementation of GCMC poses the additional challenge of changing the number of particles across the simulation. This requires almost no accommodation for the computations that operate in the real space, \textit{i.e.} framework pre-computed grids, and pairwise interactions (including the direct part of Ewald summation). For these, the only adaptation consists in making the neighbour lists resizable, which is already implemented in \texttt{CellListMap.jl}, and otherwise keeping the list of atoms in the system up to date, to correctly check each pair of atoms. The direct part of Ewald summation falls in this category.
+Compared to canonical MC, the efficient implementation of GCMC poses the additional challenge of changing the number of particles across the simulation. This requires almost no accommodation for the computations that operate in the real space, \textit{i.e.} framework pre-computed grids, and pairwise interactions (including the direct part of Ewald summation). For these, the only adaptation consists in making the neighbour lists resizable, which is already implemented in \texttt{CellListMap.jl}, and otherwise keeping the list of atoms in the system up to date, to correctly check each pair of atoms.
 
-The reciprocal-space part of Ewald summation requires adapting the optimization described in \cref{energydifference} to account for the possible introduction or removal of a species. For such a move, both values of $S_{\boldsymbol k} = \sum_n q_ne^{i\boldsymbol k\cdot\boldsymbol r_n}$ before and after the swap need to be computed, exactly like in \cref{eq:reciprocal_move}. Likewise, the value before the swap is already stored in memory, but the computation of the new value is slightly different: instead of computing the difference as $\sum_n q_n\paren{e^{i\boldsymbol k\cdot\boldsymbol r'_n} - e^{i\boldsymbol k\cdot\boldsymbol r_n}}$, the difference is now $\pm\sum_{n\text{ swapped}} q_n e^{i\boldsymbol k\cdot\boldsymbol r_n}$. In the case of a deletion, each element of the latter is already stored in memory, whereas in the case of an insertion, this new computation is stored in a temporary place, like for any other trial move, ready to be stored permanently if the move is accepted.
+\subsubsection{Ewald summation}
+
+Although the direct part of Ewald summation can be treated like the other short-range pair interactions, the reciprocal-space part of Ewald summation requires adapting the optimization described in \cref{energydifference} to account for the possible introduction or removal of a species. For such a move, both values of $S_{\boldsymbol k} = \sum_n q_ne^{i\boldsymbol k\cdot\boldsymbol r_n}$ before and after the swap need to be computed, exactly like in \cref{eq:reciprocal_move}. Likewise, the value before the swap is already stored in memory, but the computation of the new value is slightly different: instead of computing the difference as $\sum_n q_n\paren{e^{i\boldsymbol k\cdot\boldsymbol r'_n} - e^{i\boldsymbol k\cdot\boldsymbol r_n}}$, the difference is now $\pm\sum_{n\text{ swapped}} q_n e^{i\boldsymbol k\cdot\boldsymbol r_n}$. In the case of a deletion, each element of the latter is already stored in memory, whereas in the case of an insertion, this new computation is stored in a temporary place, like for any other trial move, ready to be stored permanently if the move is accepted.
 
 The self-interaction term is no longer constant: each new molecule contributes a term equal to $\sum_m\frac{q_n q_m}{4\pi\varepsilon_0}\text{erf}\paren{\pnorm{\boldsymbol r_n - \boldsymbol r_m}}/\pnorm{\boldsymbol r_n - \boldsymbol r_m}$ where $m$ iterates over the atoms of the molecule. This term is computed once for each kind of molecules and stored, so that the contribution of the self-interaction term can be updated with a single addition or subtraction when a swap move occurs. Of course, any molecule whose number can vary must be electrically neutral to ensure the the overall system remains electrically neutral; this is also enforced in the code.
 
-Another difference is the tail correction, which is not constant anymore either. %TODO
+\subsubsection{Tail correction}
+
+\label{tailcorrection}
+
+Another difference is the tail correction, which is not constant anymore either. The tail correction [REF 10.1021/acs.jctc.9b00586] is an approximation of the energy resulting from the pair interactions further than the cutoff: if the pair interaction is shifted in the force field, then this energy is null, but otherwise it needs to be taken into account.
+
+To do so, a useful ansatz consists in assuming that the radial distribution function $g(r)$ is equal to 1 beyond the cutoff distance $r_c$, for all species. In turn, this allows analytically deriving the energy resulting from the average interaction of particles beyond the cutoff. For example, two particles interacting with a Lennard-Jones potential (see \cref{eq:LJ}) yield, for a unit cell volume $V$ and cutoff distance $r_c$, a tail correction of:
+\[\frac{8\pi}{3V}\varepsilon\sigma^3\times\paren{\frac13\paren{\frac{\sigma}{r_c}}^9 - \paren{\frac{\sigma}{r_c}}^3}\]
+Similarly, two particles interacting with a Buckingham potential (see \cref{eq:Buckingham}) yield a tail correction of:
+\[\frac{2\pi}V \paren{A\exp(-Br_c)\times\frac{2 + Br_c(2 + Br_c)}{B^3} - \frac C{3r_c^3}}\]
+
+All tail corrections $\text{tc}_{A,B}$ between one atom of kind $A$ and one of kind $B$ are precomputed for the given framework volume $V$ and cutoff $r_c$, but the total tail correction is the sum
+\[\text{tc} = \sum_A\sum_B N_AN_B\text{tc}_{A,B}\]
+where $N_A$ and $N_B$ are the number of atoms of kind $i$ and $j$. Knowing the number of each atom kind per molecule, it is thus possible to precompute the tail correction $\text{tc}(i,j)$ associated with each pair of molecule kinds $(i,j)$, as well as the tail correction $\text{tc}(i)$ due to the interaction of one molecule of kind $i$ and the framework. Those terms being precomputed, the total tail correction can be expressed as
+\[\text{tc} = \text{tc}_\text{framework} + \sum_i \paren{n_i\text{tc}(i) + n_i^2\text{tc}(i,i)} + \sum_i\sum_{j\neq i} n_in_j\text{tc}(i,j)\]
+where $\text{tc}_\text{framework}$ is the constant tail correction due to the interaction of the framework atoms with each other, and $n_i$, $n_j$ are the number of molecules of kinds $i$ and $j$.
+
+Finally, the evolution of the tail correction when adding ($+$) or removing ($-$) one particle of kind $i$ is thus
+\[\Delta_{\pm}\text{tc} = \pm\text{tc}(i) \pm\paren{2n_i\pm1}\text{tc}(i,i) \pm 2\sum_{j\neq i} n_j\text{tc}(i,j)\]
+
+\subsubsection{Resizable lists}
 
 Overall, having a variable number of species requires extra bookkeeping, to make sure that all atoms are accounted for. To maximize performance in current computers, the data structures must have good cache locality: this means that, when memory needs to be read, it should be done in contiguous accesses as much as possible. For this purpose, the positions of the atoms, the $\kappa_{\boldsymbol k}$ factors, the precomputed $q_ne^{i\boldsymbol k\cdot \boldsymbol r_n}$ and $S_{\boldsymbol k}$, the self-interaction terms, etc., are all stored in tight arrays, with the appropriate indexing for each. When an atom is removed, there are two choices: either leave a gap in the array, and keep track separately of which parts of the array actually refer to a valid data if need be, or move the contents of the array to fill the gap.
 
@@ -179,6 +201,5 @@ From these observations, it appears that the molecules of \ce{CO_2} preferential
 Regarding the numerical method itself, the main limit is the behaviour at intermediate and high pressure, which significantly parts from expectation. While this necessarily stems from the use of a grid, it does not depend on the grid step size: \cref{fig:gridMC-sizes} shows the evolution of the isotherm using option 3 with Boltzmann averaging for framework-molecule interactions and arithmetic averaging for molecule-molecule interactions. The isotherm does not evolve much when the grid step size is small enough, which points to the fact the issue lies in the nature of the simulation method itself.
 
 \subsection{Numerical aspects}
-
 
 \end{document}
