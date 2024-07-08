@@ -91,7 +91,7 @@
 
 % Remove spacing between list items
 % https://tex.stackexchange.com/a/10689/225087
-%\usepackage{enumitem}
+\usepackage{enumitem}
 %\setlist{nosep} % or \setlist{noitemsep} to leave space around whole list
 
 
@@ -357,12 +357,27 @@
 %\def\MLPc{\mbox{MLP(crystal)}\xspace}
 
 % Added by LZ
+\usepackage{stmaryrd}
 \newcommand{\paren}[1]{\left(#1\right)}
 \newcommand{\abs}[1]{\left|#1\right|}
 \newcommand{\norm}[1]{\left\|#1\right\|}
 \newcommand{\pnorm}[1]{\left\|#1\right\|_\text{p}}
 \newcommand{\der}[2]{#1^{\left(#2\right)}}
+\renewcommand{\brack}[1]{\left\llbracket#1\right\rrbracket}
+\newcommand{\set}[2]{\left\{#1\,\middle|\,#2\right\}}
 \newcommand{\SiAl}{\mbox{Si\,/Al}\xspace}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\transp}{{}^t\!}
+\renewcommand{\cal}[1]{\mathcal{#1}}
+\newcommand{\OZ}{0_{\Z^3}}
+\newcommand{\OQ}{0_{\Q^3}}
+\newenvironment{disj}[1]{\left\{\begin{array}{#1}} {\end{array}\right.}
+\renewcommand{\t}{\text}
+\definecolor{freespeechmagenta}{RGB}{255, 58, 221}
 
 %code
 \usepackage{listings}
@@ -461,7 +476,7 @@
     \input{notations}
     % \input{intro}
 
-    % \subfile{1-topology}
+    \subfile{1-topology}
     \subfile{2-zeolites-cations}
     \subfile{3-gridmc}
     % \subfile{4-mdft}
