@@ -378,6 +378,18 @@
 \newenvironment{disj}[1]{\left\{\begin{array}{#1}} {\end{array}\right.}
 \renewcommand{\t}{\text}
 \definecolor{freespeechmagenta}{RGB}{255, 58, 221}
+% Boxed minipage
+\newsavebox{\fminipagebox}
+\NewDocumentEnvironment{fminipage}{m O{\fboxsep}}
+{\par\kern#2\noindent\begin{lrbox}{\fminipagebox}
+		\begin{minipage}{#1}\ignorespaces}
+		{\end{minipage}\end{lrbox}%
+	\makebox[#1]{%
+		\kern\dimexpr-\fboxsep-\fboxrule\relax
+		\fbox{\usebox{\fminipagebox}}%
+		\kern\dimexpr-\fboxsep-\fboxrule\relax
+	}\par\kern#2
+}
 
 %code
 \usepackage{listings}
@@ -425,8 +437,9 @@
 % PSL cover page
 \usepackage{psl-cover}
 \pslassetspath{figures/psl}
-% \otherinstitute{le CEA Marcoule}
-% \logootherinstitute{figures/psl/logo-cea.pdf}
+% the following is not included since it is not a "cotutelle" but a Cifre
+%\otherinstitute{Air Liquide}
+%\logootherinstitute{figures/psl/airliquide.pdf}
 
 \title{Développements méthodologiques pour la simulation de l'adsorption des gaz simples dans les matériaux nanoporeux}
 \entitle{Methodology developments for the simulation of simple gas adsorption in nanoporous materials}
@@ -460,6 +473,8 @@
 
     \input{remerciements}
 
+    \selectlanguage{english}
+
     \begingroup
         \addtocontents{toc}{\protect\thispagestyle{empty}}
         \pagestyle{empty}
@@ -469,7 +484,6 @@
         \clearpage
     \endgroup
 
-    \selectlanguage{english}
     \pagestyle{fancy}
     \pagenumbering{arabic}
 
