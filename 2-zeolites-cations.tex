@@ -68,9 +68,9 @@ To obtain the zeolite structures with random aluminium placements obeying L\"owe
         \item The position update follows the principle of Marie Jeffroy's MC scheme but disregarding the energy change: one Si and one Al are exchanged at random if the resulting structure still follows L\"owenstein's rule.
         \item The number of Al atoms is modified if the current \SiAl ratio does not correspond to the target: if it is too high, an Al is converted into a Si, and otherwise a Si that has no Al neighbour is converted into an Al.
     \end{itemize}
-    \item Since the situation can be blocked (see [FIGURE]), the algorithm sometimes restart from scratch, or sometimes does a partial restart by converting multiple Al atoms into Si.
+    \item Since the situation can be blocked (see \cref{fig:blocked_situation}), the algorithm sometimes restart from scratch, or sometimes does a partial restart by converting multiple Al atoms into Si.
     \item Configurations where the correct \SiAl ratio is reached are kept in a set. Each configuration is assigned a hash, which is simply a sequence of 0 if the T-atom is a Si or 1 otherwise, in a fixed order of the T-atom. To avoid considering symmetry-equivalent configurations as different, the signature of a configuration is computed as the lexicographically minimum of all the hashes corresponding to the application of a symmetry operation on the configuration. For each unique signature, a corresponding configuration is then retained, and the six models are taken at random among these configurations.
-\end{itemize}
+\end{itemize}\label{aluminiumhash}
 
 One last consideration is the choice of the supercell. It appears that, for a large number of zeolites topologies, the smallest unit cell cannot be filled with aluminiums so that it both obeys L\"owenstein's rule and reaches the minimal \SiAl ratio for that topology. In the case of LTA for instance, the smallest compatible cell is a $2\times2\times2$ supercell of the smallest unit cell. As a consequence, the greedy algorithm used before is actually attempted on several supercells, and the one leading to the smallest \SiAl ratio is retained.
 
@@ -364,15 +364,15 @@ These cations have a primordial role for adsorption processes, because they cons
 In order to perform numerical simulation of the adsorption process, it is thus necessary to have a model of the zeolite that places its cations in the correct positions. Fortunately, and opposite to the previous case of aluminiums, X-ray diffraction is a convenient technique which can be used to obtain the crystallographic sites in which the cations are located, as well as the respective occupancy of each such site.
 
 
-\section{Prediction of cation placement}
+\section{Methodology for the prediction of cation placement}
 
 While experimental cation maps are available on some zeolite structures, two seminal problems remain. First, when screening through a large amount of zeolite topologies and \SiAl ratio, only a small fraction of structures have their experimental cation map available. Second, even with the crystallographic sites, not all cation repartitions that obey the given occupancies have the same energy. For example, the site I and I' of FAU being very close to one another, the occupation of a site I prevents either of the neighbouring sites I' from being occupied at the same time. Deciding on the exact location of cations in a zeolite model is thus no trivial matter.
 
-\subsection{Methodologies}
+\subsection{Underlying algorithms}
 
 To obtain equilibrium data, such as average positions, on molecular systems, there are two general simulation frameworks which can be used: molecular dynamics and Monte-Carlo (MC) simulation. We only used MC and its variations, because they are the only strategy available to study a variable number of molecules, which is necessary for the simulation of adsorption as we will explain in more details in \cref{GCMC}. The possible use of molecular dynamics and its variants will be discussed later in \cref{metadynamics}.
 
-\subsubsection{Canonical Monte-Carlo}
+\subsubsection{Canonical Monte-Carlo direct simulation}
 % mention ergodicity
 
 The Monte-Carlo (MC) method designates a large variety of algorithms which all converge towards their result by performing multiple random samplings. A wide subset of these form the Markov Chain Monte-Carlo (MCMC) schemes, which are a class of algorithms that aim at sampling a target probability distribution. In the context of statistical physics, such methods provide practical ways of obtaining macroscopic observable values from the simulation of the microscopic behaviour of particles. Indeed, an observable $\mathcal O$ can be computed as the ensemble average of its microscopic counterpart $\left<o\right>$, which can be computed as an integral over the configuration space. For example, in the canonical ensemble where the number of particles, the external temperature and the volume of the system is fixed, \[\mathcal O = \left<o\right> = \frac1Z\int\!\text d{\boldsymbol p}\  o\left({\boldsymbol p}\right)\exp\left(-\beta U\left({\boldsymbol p}\right)\right)\label{eq:canonicalensemble}\] where $ U\left({\boldsymbol p}\right)$ is the energy of configuration $\boldsymbol p$ and $Z$ is the partition function. In other words, $\mathcal O$ can be computed as an integral of values of $o$ on a probability distribution of $\boldsymbol p$ given by $p\mapsto \frac1Z\exp\left(-\beta U\left({\boldsymbol p}\right)\right)$.
@@ -468,34 +468,105 @@ The first element is the exploration of the phase space. In order to fully explo
 
 The second element is the local minima exploration, which is grafted onto the previous one: every $\Delta_{\text{spawn}}$ cycles of the hot simulation, a snapshot of its current configuration is taken and used as the starting point for a cold simulation, \textit{i.e.} another canonical MC simulation that runs at room temperature. $\Delta_{\text{spawn}}$ is chosen so that two consecutive starting points should be uncorrelated. The higher the temperature of the hot simulation, the less correlated its consecutive steps are, so $\Delta_{\text{spawn}}$ can actually be very low. Each cold simulation runs for $M_\text{init}$ initial steps, that allow the system to cool down, and $M_\text{prod}$ production steps at the target room temperature.
 
-Similar to the previous accelerated methodologies, only a fraction of the explored states can actually be used to perform statistics. In the case of simulated annealing, it corresponded to the cold regions of the simulation; for parallel tempering, only the coldest replica is useful to obtain statistics at that temperature; for the current methodology, the relevant steps are the production of the cold simulation. The main advantage of the shooting star resides in the efficient exploration of the configuration space, rooted in the hot simulation that is independent from the cold ones. Conversely, it lacks the physical meaning of simulated annealing -- which is the numerical counterpart to the annealing process used in metallurgy -- or the time-reversibility of parallel tempering and bare canonical MC.
+Similar to the previous accelerated methodologies, only a fraction of the explored states can actually be used to perform statistics. In the case of simulated annealing, it corresponded to the cold regions of the simulation; for parallel tempering, only the coldest replica is useful to obtain statistics at that temperature; for the current methodology, the relevant steps are the production of the cold simulation. The main advantage of the ``shooting star'' protocol resides in the efficient exploration of the configuration space, rooted in the hot simulation that is independent from the cold ones. Conversely, it lacks the physical meaning of simulated annealing -- which is the numerical counterpart to the annealing process used in metallurgy -- or the time-reversibility of parallel tempering and bare canonical MC.
 
-In terms of parameters, the shooting star method requires choosing $T_\text{hot}$ the hot temperature, $T_\text{cold}$ the cold one, $N_\text{cold}$ the total number of cold simulations to launch, the previously mentioned $M_\text{init}$, $M_\text{prod}$ and $\Delta_\text{spawn}$, as well as the number $N_\text{init}$ of initial steps of the hot simulation before launching the first cold simulation. Of all these parameters, $T_\text{cold}$, $N_\text{init}$ and $N_\text{prod} = M_\text{prod}\times N_\text{cold}$ must also be chosen for a single canonical MC simulation and $\Delta_\text{spawn}$ can always be taken around 100 (its value has little effect on overall performance and quality as long as it is not too low nor too high). The extra parameters $T_\text{hot}$ is equivalent to the hottest temperature used in simulated annealing and parallel tempering. Finally, $M_\text{init}$ must be evaluated by an initial run, similar to how the intermediate temperatures used in parallel tempering are obtained or the slope and plateau lengths of simulated annealing are usually chosen. The complexity of the overall setup is thus similar to that of simulated annealing.
+In terms of parameters, the ``shooting star'' method requires choosing $T_\text{hot}$ the hot temperature, $T_\text{cold}$ the cold one, $N_\text{cold}$ the total number of cold simulations to launch, the previously mentioned $M_\text{init}$, $M_\text{prod}$ and $\Delta_\text{spawn}$, as well as the number $N_\text{init}$ of initial steps of the hot simulation before launching the first cold simulation. Of all these parameters, $T_\text{cold}$, $N_\text{init}$ and $N_\text{prod} = M_\text{prod}\times N_\text{cold}$ must also be chosen for a single canonical MC simulation and $\Delta_\text{spawn}$ can always be taken around 100 (its value has little effect on overall performance and quality as long as it is not too low nor too high). The extra parameters $T_\text{hot}$ is equivalent to the hottest temperature used in simulated annealing and parallel tempering. Finally, $M_\text{init}$ must be evaluated by an initial run, similar to how the intermediate temperatures used in parallel tempering are obtained or the slope and plateau lengths of simulated annealing are usually chosen. The complexity of the overall setup is thus similar to that of simulated annealing.
 
 
 \subsection{Extraction of sites and population from simulation}
 
+\label{siteextraction}
+
 %To perform gas adsorption prediction, what is needed is a model of the cationic zeolite. With this perspective, the previous simulation strategies can be used to simply provide their cation configurations with the lowest energy, in order to obtain such a model.
 
-%It is interesting however to evaluate the shooting star methodology as a new general meta-algorithm to simulate systems in sharp energy landscapes. In order to do so, we need a comparison point that can assess the validity of the pseudo-simulation obtained by gluing together all the production steps of the cold simulations. Such a comparison point is the experimental cation localization that can be obtained by X-ray diffraction on zeolite samples with known topology and \SiAl ratio.
+%It is interesting however to evaluate the ``shooting star'' methodology as a new general meta-algorithm to simulate systems in sharp energy landscapes. In order to do so, we need a comparison point that can assess the validity of the pseudo-simulation obtained by gluing together all the production steps of the cold simulations. Such a comparison point is the experimental cation localization that can be obtained by X-ray diffraction on zeolite samples with known topology and \SiAl ratio.
 
-\subsubsection{Cation site locations from density}
+Assuming we do not know the position of the cation sites, a canonical MC simulation (possibly with ``shooting star'' or another meta-algorithm) yields a sequence of cation configurations sampled at room temperature. This sequence can be flattened into a map of the zeolite framework, with one additional point at each position occupied by a cation in one of the steps. Looking at this map allows qualitatively identifying the crystallographic sites as the zones where the density of points is the highest. In order to get quantitative information on the site localization and population, we devise a clustering algorithm that extracts the sites from the previous density map.
 
-Assuming we do not know the position of the cation sites, a canonical MC simulation (possibly with shooting star or another meta-algorithm) yields a sequence of cation configurations sampled at room temperature. This sequence can be flattened into a map of the zeolite framework, with one additional point at each position occupied by a cation in one of the steps. Looking at this map allows qualitatively identifying the crystallographic sites as the zones where the density of points is the highest. In order to get quantitative information on the site localization and population, we devise a clustering algorithm that extract the sites from the previous density map.
+The first step consists in dividing the space by a regular grid, whose voxels have the same angles as the unit cell but possibly different lengths, taken to be closest to a target value around \qty{0.15}{\angstrom}. To each voxel is then attributed the number of cations encountered within, across the recorded simulation cycles. This first step thus bins the density onto a regular grid.
 
-The first step consists in dividing the space by a regular grid, whose voxels have the same angles as the unit cell but possibly different lengths, taken to be closest to a target value around \qty{0.15}{\angstrom}. To each voxel is then attributed the number of cations encountered within across the recorded simulation steps. This first step thus bins the density onto a regular grid.
-
-In the second step, the bins are sorted by decreasing order of their value. Each voxel is then taken in order: if it is closer than a set distance to a previously recorded site, then the location of the site is updated as the average of its current position and that of the voxel, weighted by the respective density of both; the density of the voxel is then aded to that of the site. Otherwise, if it is far enough from all existing sites, it is added to the (initially empty) list of recorded sites, along with its density. This yields a series of sites and their respective occupancy. To be more efficient, the main loop early stops when the density of the inquired voxels go below a threshold value, taken as the maximum density of all bins divided by 100: as a consequence, the occupancies are corrected by a multiplicative factor so that the sum of the occupancies of all sites correspond to the number of cations. We note that this should not be required in theory, but it is the necessary fix to a double discretization artifact, once inherent to the MC scheme, and one due to our binning.
+In the second step, the bins are sorted by decreasing order of their value. Each voxel is then taken in order: if it is closer than a set distance to a previously recorded site, then the location of the site is updated as the average of its current position and that of the voxel, weighted by the respective density of both; the density of the voxel is then added to that of the site. Otherwise, if it is far enough from all existing sites (we use a minimum distance of \qty{1.6}{\angstrom}), it is added to the (initially empty) list of recorded sites, along with its density. This yields a series of sites and their respective occupancy. To be more efficient, the main loop early stops when the density of the inquired voxels go below a threshold value, taken as the maximum density of all bins divided by 100: as a consequence, the occupancies are corrected by a multiplicative factor so that the sum of the occupancies of all sites correspond to the number of cations. We note that this should not be required in theory, but it is the necessary fix to a double discretization artifact, once inherent to the MC scheme, and one due to our binning.
 
 We observe slightly better results by sorting the bins according the decreasing order their smoothed counterparts, where smoothing is done by convolving the density map by a small Gaussian, of standard deviation the size of the diagonal of a voxel. Indeed, this erases some small statistical fluctuations that may change the precise order of the voxels.
 
+This initial list of sites is then symmetrized, to obtain a common list of sites irrespective of the aluminium placements. To do so, a strategy similar to the hashing of aluminium placements (explained in \cref{aluminiumhash}) is used: for each site, its image is computed for each symmetry of the framework. If one of the image is too close (we use a minimum distance of \qty{1}{\angstrom}) to one of the previously recorded sites, they are merged; otherwise, the one closest to a fixed arbitrary reference is recorded. Hence, the initial sites are ``folded'' to yield a list of symmetrically unique sites. Those are then ``unfolded'' again by applying all symmetries to obtain the list of all sites in the framework.
+
+The final list of sites is such that for any site, all its symmetric images are also sites, and two sites cannot be closer than \qty{1}{\angstrom}. Note that the minimum distance of \qty{1.6}{\angstrom} used as a minimum between two starting points of initial sites does not necessarily transfer to the final sites, because of both the growing of the initial sites, and because of the merging operated during the ``folding'' part of resymmetrization.
+
+\section{Results}
+
+\begin{figure}
+	{\centering
+	\includegraphics[width=\columnwidth]{figures/cations/convergenceFAUshootingstar.pdf}
+	\caption{Convergence of the ``shooting star'' simulation of \ce{Na^+} in FAU with $\SiAl = 1$\\}\label{fig:convergenceFAUshootingstar}
+
+	\sl The dark blue line represents the average energy of the cold simulations for each cycle number. The light blue halo around it represents plus or minus its standard deviation across the cold simulations. The inset focuses on the production cycles using dark and light orange for the same purpose. The vertical purple line identifies the cycle at which the simulation is estimated to have converged. The thin horizontal green line is the average of the energy of the cold simulations during the production cycles. The thin horizontal purple line is the average energy of the cold simulations at the estimated convergence cycle.}
+\end{figure}
+
+This section presents the cation location and population results in the studied zeolites. We focus our attention on the FAU (faujasite) zeolite first, because it is an already well-studied case that highlights the main difficulties encountered when attempting to locate cations. We then present the more general case.
+
+\subsection{Case study: FAU}
+
+The FAU zeolite is one of the most well-known zeolites used in the industry. It is composed of large cages, of \qty{12}{\angstrom} in diameter, separated by 12-membered rings, and small sodalite cages separated by hexagonal prisms. A detail of FAU with $\SiAl = 1$ is illustrated on \cref{fig:FAUdetail}.
+
+\subsubsection{Site location}
+
+As previously explained, the sites are located by running ``shooting star'' simulations. We use the force field of [REF BoulfelfelSholl2021] with the hot simulation running at \qty{2000}K for \num{20000} cycles after \num{2000} initialization cycles, using both translations and random translation (\textit{i.e.} reinsertion without rotation) moves equiprobably. \num{200} cold simulations spawn, once every \num{100} hot cycles, running for \num{200} production cycles after \num{9800} initialization cycles. Only the production cycles are used to record the density map.
+
+The convergence of the ``shooting star'' simulation can be analyzed on \cref{fig:convergenceFAUshootingstar} in the particular case of \texttt{FAU\_1\_6e921e59}, which is simply the faujasite framework with $\SiAl = 1$ (\texttt{6e921e59} is the hash of the only aluminium placement compatible with L\"owenstein's rule, as explained in \cref{aluminiumhash}). This figure mostly focuses on the initialization cycles of the cold simulations, to study the global convergence of the simulation.
+
+Assuming that the different cold simulations are uncorrelated, the standard deviation of their energy at a fixed cycle number gives an information on the statistical noise of the system, which appears to be approximately constant on the figure. Convergence is assessed based on the lack of evolution of the energy averaged across the cold simulations: the vertical purple line marks the first cycle from which the slope of this average energy (smoothed on a few cycles to avoid artifacts) remains below a target bound.
+
+The vertical separation between the green (final energy) and the purple (convergence energy) horizontal lines is another way to quantify the error on the estimation of the convergence of the simulation. In the current case, the difference is well below the statistical noise, which is a further sign of convergence.
+
+\begin{figure}
+	\centering
+	\begin{subfigure}{0.47\columnwidth}
+		\centering
+		\includegraphics[width=\columnwidth]{figures/cations/FAU1_cages_text.jpg}
+		\subcaption{Detail of FAU with annotated cages}\label{fig:FAUdetail}
+	\end{subfigure}\hfill%
+	\begin{subfigure}{0.47\columnwidth}
+		\centering
+		\includegraphics[width=\columnwidth]{figures/cations/FAU1_density.jpg}
+		\subcaption{Simulated cation density map}\label{fig:FAUdensity}
+	\end{subfigure}
+
+	\vspace{1em}
+
+	\begin{subfigure}{0.47\columnwidth}
+		\centering
+		\includegraphics[width=\columnwidth]{figures/cations/FAU1_density_Na.jpg}
+		\subcaption{Extraction of sites from the density map}\label{fig:FAUextraction}
+	\end{subfigure}\hfill%
+	\begin{subfigure}{0.47\columnwidth}
+		\centering
+		\includegraphics[width=\columnwidth]{figures/cations/FAU1_NaColors.jpg}
+		\subcaption{Cationic sites after resymmetrization}\label{fig:FAUsites}
+	\end{subfigure}
+
+	\caption{Cation location for FAU with $\SiAl = 1$}\label{fig:FAU}
+\end{figure}
+
+Such a simulation runs for all structures corresponding to the reference topology: in the case of FAU, and for all other topologies that can reach $\SiAl = 1$, this means one simulation for $\SiAl = 1$ and six (with six different aluminium placements) for \SiAl equal or approximately equal to \num{1.23}, \num{1.4}, \num{1.7}, \num2, \num3, \num5 and \num{10}, hence \num{43} different ``shooting star'' simulations. The positions of each cation on each recorded cold production cycle across these simulations are flattened into a single density map of the framework, which serves as the basis for the location of cationic sites as explained in \cref{siteextraction}.
+
 \subsubsection{Direct site population}
 
-%TODO
+The site locations are obtained from the flattened density map across different \SiAl ratios, but the resulting occupancies are meaningless. To retrieve site population, the volume of the unit cell of the zeolite is divided into volumes centered around each site, such that each point in a volume is closest to the corresponding site than to any other site. This operation is actually the Voronoi decomposition of the crystal space around the sites.
+
+To keep it more physical, the Voronoi cells are intersected with solid spheres centered on the site and of radius \qty{2}{\angstrom}. Thus, any point in space is either in one of the truncated cells, in which case it is associated with a site closer than \qty{2}{\angstrom}, or it is not associated with any site. Once established for a given topology, this map is used for all its derivatives.
+
+In the literature, the different sites of FAU are well-known and have been given names. These are represented in \cref{fig:FAUsites}, using one color per kind of site, and with size proportional to their occupancy.
+
+%TODO pathological and ideal cases
 
 \subsubsection{Population combined with site hopping}
 
 %TODO
+
+\subsection{Other zeolites}
+
+
 
 \section{Energy computation}\label{energy_computation}
 
@@ -507,7 +578,7 @@ RASPA2 is an open-source software developed by [REF] for classical simulations o
 
 RASPA2 is written in C, a low-level programming language which allows reaching optimal performance, but is tedious to program in. It cannot be used on GPU and is single-threaded. In order to develop new simulation strategies in an easier setting, I re-implemented the algorithms used for both canonical and grand-canonical simulation of rigid species in rigid frameworks using the Julia programming language (see \cref{julia}).
 
-The energy computation algorithms detailed herein are those which were implemented in this new code, but most of them follow that implemented in RASPA2. Moreover, RASPA2 was used to validate the new code, by checking that the simulations yielded the correct physical values (energies, adsorption capacities, and such). By contrast, the shooting star methodology presented before does not exist in RASPA2.
+The energy computation algorithms detailed herein are those which were implemented in this new code, but most of them follow that implemented in RASPA2. Moreover, RASPA2 was used to validate the new code, by checking that the simulations yielded the correct physical values (energies, adsorption capacities, and such). By contrast, the ``shooting star'' methodology presented before does not exist in RASPA2.
 
 \subsection{Force fields}
 
@@ -596,7 +667,7 @@ E^\text{Coulomb} &= \sum_{\boldsymbol l} \sum_{n=1}^N\sum_{\substack{m=1\\m\not\
 \\&+ \frac1{2\varepsilon_0V} \sum_{\boldsymbol{k}\neq\boldsymbol{0}}\sum_{n=1}^N\sum_{m=1}^N \frac{q_n q_m}{k^2}e^{i\boldsymbol k\cdot\paren{\boldsymbol r_m - \boldsymbol r_n}}\exp\paren{\frac{-k^2}{4\alpha^2}}
 \\&- \xcancel{\sum_{n=1}^N\frac{2\alpha q_n}{\sqrt\pi}}
 - \frac12\sum_{n=1}^N\sum_{\substack{m=1\\m\smile n,\ m\neq n}}^N \frac{q_n q_m}{4\pi\varepsilon_0}\frac{\text{erf}\paren{\pnorm{\boldsymbol r_n - \boldsymbol r_m}}}{\pnorm{\boldsymbol r_n - \boldsymbol r_m}}
-\end{split}\]
+\label{eq:totalcoulombenergy}\end{split}\]
 
 The term summing the $2\alpha q_n/\sqrt\pi$ cancels out because the overall system needs to be electrically neutral to carry a physical meaning, so the sum of all $q_n$ is 0. This invariant is checked in the code to avoid any error.
 
@@ -669,7 +740,7 @@ RASPA2 does not implement this optimization, and simply recomputes the $e^{-i\bo
 
 Some MC trial moves attempt to displace an atom to a location that would lead to unphysically high energies -- typically, too close to a framework atom. Such positions can be determined once and for all, and the relevant MC moves automatically refused without the need for any energy computation.
 
-To do so, the simplest strategy consists in making a boolean grid, aligned with the energy grids used for short-term interactions, which stores a 1 when the voxel is blocked or 0 if it is allowed. The first step of any MC trial move then consists in checking whether each atom is in an allowed voxel, or refusing the move otherwise. In practise, the simplest implementation consists in making one such boolean grid per atom kind (since the energy threshold depends on the atom), and for each atom, checking the closest grid point of its kind.
+The simplest strategy to do so consists in making a boolean grid, aligned with the energy grids used for short-term interactions, which stores a 1 when the voxel is blocked or 0 if it is allowed. The first step of any MC trial move then consists in checking whether each atom is in an allowed voxel, or refusing the move otherwise. In practise, the simplest implementation consists in making one such boolean grid per atom kind (since the energy threshold depends on the atom), and for each atom, checking the closest grid point of its kind.
 
 In addition to its use as computational optimization, such boolean grids can also be used to mark some parts of the framework as inaccessible, irrespective of the corresponding energy. This is useful when small window size prevents a species -- for instance a gas molecule -- from entering a pore -- for instance the sodalite cages in LTA zeolites [10.1021/ja953856q]. Indeed, without explicitly blocking the pocket, an MC move could make a species appear in the pore, whereas it should be kinetically impossible to enter. This strategy will thus be used when studying the adsorption of gases in zeolites (see \cref{adsorption}), but for the small cations under study here, there is no need to additionally block any part of the frameworks.
 
@@ -677,7 +748,21 @@ RASPA2 only implements blocking for the latter case -- \textit{i.e.} explicit po
 
 \subsubsection{Site-hopping precomputations}
 
-%TODO
+The main computational advantage of site hopping simulations is that the number of sites is fixed in advance, which allows precomputing all framework-site and site-site interactions.
+
+To do so, the value of the framework-site interaction energy is computed and stored for each site by computing the energy associated with putting only one cation in the framework at the position of the site. This energy is actually ill-defined, since placing only one cation in the framework means that the unit cell has a net charge, and thus the (infinite periodic) material has an infinite charge. Moreover, even disregarding the physical absurdity of this scenario, a net charge would lead to a non-zero $\sum_{n=1}^N2\alpha q_n/\sqrt\pi$ term, even though it was removed in \cref{eq:totalcoulombenergy}. Still, the computations can be carried to yield a numerical value, which is thus stored in a list $\text{framework}[i]$ where $i$ designates the index of a particular site $s_i$. The reciprocal ewald contribution of this energy is also temporarily stored in a separate list as $r_i$.
+
+Likewise, for each pair $(s_i,s_j)$ of sites, the energy of the framework containing only two cations, one in $s_i$ and one in $s_j$, is computed as $e_{i,j}$, although it also does not carry physical sense. What is stored in a matrix is
+$\text{interaction}[i,j] = e_{i,j} - r_i - r_j$
+This is only possible if the number of sites is not too high, since the number of interactions to store becomes prohibitively high otherwise.
+
+Finally, the tail correction $\text{tc}_n$ associated with the framework filled with $n$ cations is computed once, where $n$ is constrained by the number of aluminiums in the structure.
+
+Using these unphysical values, the actual physical energy of a real configuration with $n$ cations on sites $s_{k_1}, s_{k_2}, \ldots, s_{k_n}$ can then be computed as
+\[E(s_{k_1}, s_{k_2}, \ldots, s_{k_n}) = \text{tc}_n + \sum_{i=1}^n\text{framework}[k_i] + \sum_{1\le i<j \le n}\text{interaction}[k_i,k_j]\]
+and the energy associated with a trial move of one cation can thus be computed with only $n$ array reads, which is optimally efficient.
+
+As previously emphasized, the components $\text{framework}[i]$ and $\text{interaction}[i,j]$ should not be considered individually to assess the stability of a particular site. Indeed, $\text{framework}[i] < \text{framework}[j]$ does not necessarily mean that site $s_i$ is more populated than $s_j$, because the site-site interaction energies could make the total energy $E$ systematically higher when $s_i$ is populated rather than $s_j$, which is the true measure of a site stability.
 
 \section{Possible alternatives}
 
