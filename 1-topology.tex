@@ -57,18 +57,7 @@
 %
 %\renewcommand{\t}{\text}
 %
-%% Boxed minipage
-%\newsavebox{\fminipagebox}
-%\NewDocumentEnvironment{fminipage}{m O{\fboxsep}}
-%{\par\kern#2\noindent\begin{lrbox}{\fminipagebox}
-%		\begin{minipage}{#1}\ignorespaces}
-%		{\end{minipage}\end{lrbox}%
-%	\makebox[#1]{%
-%		\kern\dimexpr-\fboxsep-\fboxrule\relax
-%		\fbox{\usebox{\fminipagebox}}%
-%		\kern\dimexpr-\fboxsep-\fboxrule\relax
-%	}\par\kern#2
-%}
+
 %
 %% Prevent all line breaks in inline equations.
 %\binoppenalty=10000
@@ -98,15 +87,15 @@ In order to describe the average structure of crystalline materials at the nano-
 \begin{figure*}[p]
 	\centering
 	\begin{subfigure}[t]{0.5\linewidth}
-		\includegraphics[width=\linewidth]{figures/topology/mof14_1.png}
+		\includegraphics[width=\linewidth]{figures/topology/mof14_1.jpg}
 		\subcaption{}
 	\end{subfigure}\\[5mm]
 	\begin{subfigure}[t]{0.5\linewidth}
-		\includegraphics[width=\linewidth]{figures/topology/mof14_2.png}
+		\includegraphics[width=\linewidth]{figures/topology/mof14_2.jpg}
 		\subcaption{}
 	\end{subfigure}\\[5mm]
 	\begin{subfigure}[t]{0.5\linewidth}
-		\includegraphics[width=\linewidth]{figures/topology/mof14_3.png}
+		\includegraphics[width=\linewidth]{figures/topology/mof14_3.jpg}
 		\subcaption{}
 	\end{subfigure}\\[5mm]
 	\caption{Decomposition of a crystalline framework into its underlying net:\\
@@ -402,7 +391,7 @@ Nets where at least two vertices have the same position are called \emph{unstabl
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.4\linewidth]{figures/topology/dia.png}
+	\includegraphics[width=0.4\linewidth]{figures/topology/dia.jpg}
 	\caption{Natural Euclidean embedding of the equilibrium placement for the {\bf dia} net.}
 	\label{diavmd}
 \end{figure}
@@ -478,7 +467,8 @@ Furthermore, $\der At$ is just a special case of the set of possible new cells. 
 	\caption{Illustration of the algorithm used to extract a key from a candidate on a 2-dimensional graph}
 \end{figure*}
 
-\begin{figure*}[p] \ContinuedFloat
+\begin{figure*}\ContinuedFloat
+	\begin{fminipage}{\linewidth}
 	\begin{enumerate}[label={\sffamily\small\bfseries(\alph*)},itemsep=0em]
 		\item Start from a candidate (in {\color{green!50!black}green}), whose origin is $\boldsymbol\triangle$ and axes are $x$ and $y$. Initialise an empty queue of vertices.
 		\item Represent the graph in the basis given by the candidate (the former unit cell and two of its neighbours are represented in {\color{orange}orange}). Note that axes $x$ and $y$ are now orthogonal. Assign number 1 to the origin $\boldsymbol\triangle$ and push it to the queue.
@@ -494,6 +484,7 @@ Furthermore, $\der At$ is just a special case of the set of possible new cells. 
 	\vspace{8mm}
 	
 	\caption{\emph{Continued:} Illustration of the algorithm used to extract a key from a candidate on a 2-dimensional graph} \label{algocandidate}
+	\end{fminipage}
 \end{figure*}
 
 

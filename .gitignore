@@ -13,11 +13,7 @@
 .*.lb
 *.pdf
 *.ptc
-!main.pdf
-!figures/*/*.pdf
-!figures/*/*/*.pdf
-.vscode/settings.json
-.DS_Store
+
 ## Intermediate documents:
 *.dvi
 *.xdv
@@ -286,4 +282,10 @@ TSWLatexianTemp*
 
 figures/*/*.png
 figures/*/*.svg
+figures/*/*.tga
 figures/data
+
+!main.pdf
+!figures/*/*.pdf
+!figures/*/*/*.pdf
+.DS_Store
