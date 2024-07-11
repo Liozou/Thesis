@@ -25,14 +25,13 @@ Chemisorption involves a stronger bond that physisorption, and is thus less reve
 
 An adsorption site designates a particular space where the adsorbate is likely to remain trapped on the surface of the adsorbent. In other words, the interaction between the adsorbate and the adsorbent is maximally attractive when the adsorbate is located in one of the adsorption sites.
 
-In the case of crystalline materials, adsorption sites can be identified through spectroscopy
-%TODO expand and add examples
-
 The position of the adsorption site depends on the adsorbent, but also the adsorbate. At very low density for example, a small polar molecule like \ce{H_2O} will preferentially adsorb in locations where it can orient itself to maximize the stabilizing Coulomb interaction of the framework. A large apolar molecule like a xylene on the other hand, will adsorb in locations that maximize its Van der Waals interactions with the adsorbent. Such sites are not necessarily related.
 
 Moreover, the location of the adsorption sites becomes less relevant when the density of the adsorbate becomes high. Indeed, the adsorbate-adsorbate interactions can play a key role in the global adsorption capacity of a material, and the stronger these interactions, the more the internal structure of the adsorbate will reorganize to accommodate these interactions, which may displace some molecules from the ideal adsorption site.
 
-Overall, the situation is quite different from the cationic sites, discussed in \cref{sitehopping}
+In the case of crystalline materials, adsorption sites can be identified through XRD spectroscopy. For example, \textcite{CO2SitesInMFI} identify the preferred adsorption sites for \ce{CO_2} in silica MFI zeolite (silicalite) in a context of very high mechanical pressure, compatible with DFT computations. Yet, the obtained positions for \ce{CO_2} molecules is not guaranteed to carry to another gas pressure than the one used in the study.
+
+Overall, the situation is quite different from the cationic sites, discussed in \cref{sitehopping}, mostly because the cations cannot reach a ``high-density'' regime, given that their number is constrained by the number of aluminium atoms. In turn, this makes the use of site-hopping or other site-derived algorithms less relevant in the context of adsorption simulation.
 
 \subsection{Small gases in zeolites}
 
@@ -40,7 +39,7 @@ Small gases such as \ce{CO_2}, \ce{N_2}, \ce{O_2}, \ce{CH_4} or \ce{Ar}, among o
 
 For molecules with significant size disparities, a simple approach consists in using a framework whose pore size allows one of the molecule to enter and adsorb, but not the other. Given the proximate sizes of the previous species however, this method cannot be used to separate these gases. Instead, what plays a key role is the adsorption capacity of the material with respect to each of these gases: if there is a material that adsorbs \ce{CO_2} easily but not \ce{N_2} for instance, then it can be used to separate the two.
 
-Since the pore size is not discriminant in our context, the adsorption capacity is primarily driven by
+% TODO: show difference between SuperCIT7 with and without charges on CO2 adsorption to quantify the role of electrostatics and the role of VdW
 
 \section{Grand Canonical Monte-Carlo}
 \label{GCMC}
@@ -66,7 +65,7 @@ The acceptance probability of a swap move is not decided purely on the basis of 
 \end{split}\]
 The dependency to the chemical potential $\mu$ is conveyed by the pressure $P$ of the gas exterior to the zeolite. This value is corrected by the fugacity coefficient $\varphi$, which accounts for the difference between the real gas and the ideal gas model.
 
-While the pressure $P$ and volume $V$ of the systems are simulation inputs, the fugacity coefficient $\varphi$ of the gas needs to be computed prior to the simulation. To do so, RASPA uses the Peng-Robinson equation of state, which is adequate for many common fluids. Since our range of gas applications is more restricted than the general-purpose RASPA software, we use the GERG-2008 [10.1021/je300655b] equation of state, which is the ISO standard for natural gases due to its accuracy compared to experimental measurements, with an extended validity range up to \qty{700}K and \qty{70}{MPa}, in the scope of our study.
+While the pressure $P$ and volume $V$ of the systems are simulation inputs, the fugacity coefficient $\varphi$ of the gas needs to be computed prior to the simulation. To do so, RASPA uses the Peng-Robinson equation of state \autocite{PengRobinson}, which is adequate for many common fluids. Since our range of gas applications is more restricted than the general-purpose RASPA software, we use the GERG-2008 \autocite{GERG2008} equation of state, which is the ISO standard for natural gases due to its accuracy compared to experimental measurements, with an extended validity range up to \qty{700}K and \qty{70}{MPa}, in the scope of our study.
 
 \begin{figure}
 	\centering
@@ -91,7 +90,7 @@ While the pressure $P$ and volume $V$ of the systems are simulation inputs, the 
 	\caption{Fugacity coefficients of small gases computed with different \texttt{Clapeyron.jl} models}\label{fugacity}
 \end{figure}
 
-In terms of programming, the fugacity coefficient can directly be obtained from the \texttt{Clapeyron.jl} [10.1021/acs.iecr.2c00326] Julia package, which provides a convenient unified access to many useful thermodynamic tools. Due to the way it is implemented, Clapeyron.jl used to fail and return \texttt{NaN} instead of the valid fugacity coefficient for \ce{CO_2} at high pressures: to solve this issue, we do an initial volume computation for the gas in the target conditions using the Peng-Robinson model, and we use the result as the starting point to compute the coefficient with the GERG-2008 model. \Cref{fugacityCO2} illustrates the differences between these approaches: the latter allows to compute fugacities at any pressure except those very close to the critical point (\qty{304.13}K and \qty{7.3773}{MPa} for \ce{CO_2}), while the former simply fails at high pressures (above \qty1{MPa}). The other gases illustrated on \cref{fugacity} show that the Peng-Robinson fugacity is usually close but slightly lower than that obtained with GERG-2008, which would result in an equally slight underestimation of the adsorption capacity. The difference between the two equations of state remains in the uncertainty margin of the GCMC simulation however, so it should not lead to a visible difference in the measured adsorption capacity.
+In terms of programming, the fugacity coefficient can directly be obtained from the \texttt{Clapeyron.jl} \autocite{Clapeyron} Julia package, which provides a convenient unified access to many useful thermodynamic tools. Due to the way it is implemented, Clapeyron.jl used to fail and return \texttt{NaN} instead of the valid fugacity coefficient for \ce{CO_2} at high pressures: to solve this issue, we do an initial volume computation for the gas in the target conditions using the Peng-Robinson model, and we use the result as the starting point to compute the coefficient with the GERG-2008 model. \Cref{fugacityCO2} illustrates the differences between these approaches: the latter allows to compute fugacities at any pressure except those very close to the critical point (\qty{304.13}K and \qty{7.3773}{MPa} for \ce{CO_2}), while the former simply fails at high pressures (above \qty1{MPa}). The other gases illustrated on \cref{fugacity} show that the Peng-Robinson fugacity is usually close but slightly lower than that obtained with GERG-2008, which would result in an equally slight underestimation of the adsorption capacity. The difference between the two equations of state remains in the uncertainty margin of the GCMC simulation however, so it should not lead to a visible difference in the measured adsorption capacity.
 
 \subsection{Computational aspects}
 
@@ -107,7 +106,7 @@ The self-interaction term is no longer constant: each new molecule contributes a
 
 \label{tailcorrection}
 
-Another difference is the tail correction, which is not constant anymore either. The tail correction [REF 10.1021/acs.jctc.9b00586] is an approximation of the energy resulting from the pair interactions further than the cutoff: if the pair interaction is shifted in the force field, then this energy is null, but otherwise it needs to be taken into account.
+Another difference is the tail correction, which is not constant anymore either. The tail correction, whose relevance for the particular context of porous materials modeling by \textcite{TailCorrection}, is an approximation of the energy resulting from the pair interactions further than the cutoff: if the pair interaction is shifted in the force field, then this energy is null, but otherwise it needs to be taken into account.
 
 To do so, a useful ansatz consists in assuming that the radial distribution function $g(r)$ is equal to 1 beyond the cutoff distance $r_c$, for all species. In turn, this allows analytically deriving the energy resulting from the average interaction of particles beyond the cutoff. For example, two particles interacting with a Lennard-Jones potential (see \cref{eq:LJ}) yield, for a unit cell volume $V$ and cutoff distance $r_c$, a tail correction of:
 \[\frac{8\pi}{3V}\varepsilon\sigma^3\times\paren{\frac13\paren{\frac{\sigma}{r_c}}^9 - \paren{\frac{\sigma}{r_c}}^3}\]
@@ -221,7 +220,7 @@ The different terms above are all precomputed for the different values of the gr
 
 The tail correction terms as stored as simple numbers, $\text{framework}(\boldsymbol r)$ is stored as a tridimensional array of energies, $\boldsymbol r$ being mapped to a triplet of integers indexing the grid points. The term that takes the most time to precompute, $\text{interaction}(\boldsymbol r, \boldsymbol r')$, is stored in a custom data structure made of a tridimensional index array, along the energy data, in a list. Due to translation symmetry, the query of the interaction between $\boldsymbol r$ and $\boldsymbol r'$ becomes that between the origin and $\boldsymbol r - \boldsymbol r'$. The corresponding triplet of integers maps to an index in the tridimensional array, and that index is the one used to retrieve the energy from the energy list. The index can also be 0, to indicate that the interaction energy is zero (i.e. beyond the cutoff): this way, the energy list only stores relevant values.
 
-The precomputation itself is also optimized, to avoid making it the dominant computational cost of running grid MC simulations. To do so, the framework interactions computation benefits from all the precomputations explained in \cref{precomputations}, in particular the tabulated atomic grids. For the molecule-molecule interaction averaged over the angles, the energy is interpolated from a linear grid: the interaction energy is computed by putting the bead of the first molecule at the origin and the other at a distance $d$, where $d$ increments from 0 to the cutoff distance by steps of one fifth of the average MC grid step. The interpolation is done with cubic splines through the \texttt{BasicInterpolators.jl} [REF] julia package.
+The precomputation itself is also optimized, to avoid making it the dominant computational cost of running grid MC simulations. To do so, the framework interactions computation benefits from all the precomputations explained in \cref{precomputations}, in particular the tabulated atomic grids. For the molecule-molecule interaction averaged over the angles, the energy is interpolated from a linear grid: the interaction energy is computed by putting the bead of the first molecule at the origin and the other at a distance $d$, where $d$ increments from 0 to the cutoff distance by steps of one fifth of the average MC grid step. The interpolation is done with cubic splines through the \texttt{BasicInterpolators.jl} julia package.
 
 
 \end{document}
