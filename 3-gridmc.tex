@@ -56,7 +56,7 @@ Likewise, this integral can be numerically evaluated by relying on a Monte-Carlo
 
 \subsection{Implementation}
 
-In practice, GCMC is implemented like a canonical MC simulation with one additional element: a swap MC move that can either insert or delete a particle. The insertion move simply consists in adding one additional gas particle to the system, while the deletion move removes one. If there are no particle in the systems anymore, the deletion move systematically fails; yet, it is crucial the probability of trying an insertion or a deletion remains equal independently of the number of particles in the system, to ensure micro-reversibility. For this reason, only the probability of trying a swap move is specified as a simulation parameter, while the probability of trying either an insertion or a deletion cannot be individually chosen and are necessarily equal to half the probability of a swap move.
+In practice, GCMC is implemented like a canonical MC simulation with one additional element: a swap MC move that can either insert or delete a particle. The insertion move simply consists in adding one additional gas particle to the system, while the deletion move removes one. If there are no particle in the systems anymore, the deletion move systematically fails; yet, it is crucial that the probability of trying an insertion or a deletion remains equal independently of the number of particles in the system, to ensure micro-reversibility. For this reason, only the probability of trying a swap move is specified as a simulation parameter, while the probability of trying either an insertion or a deletion cannot be individually chosen and are necessarily equal to half the probability of a swap move.
 
 The acceptance probability of a swap move is not decided purely on the basis of the difference of energy in the system, as is the case in \cref{eq:MCcanonicalaccept} for the canonical ensemble, because it also depends on the chemical potential $\mu$ of the system. With $N$, the number of particles in the system before the trial swap move, the acceptance probabilities for insertion and deletion are:
 \[\begin{split}
@@ -106,12 +106,12 @@ The self-interaction term is no longer constant: each new molecule contributes a
 
 \label{tailcorrection}
 
-Another difference is the tail correction, which is not constant anymore either. The tail correction, whose relevance for the particular context of porous materials modeling by \textcite{TailCorrection}, is an approximation of the energy resulting from the pair interactions further than the cutoff: if the pair interaction is shifted in the force field, then this energy is null, but otherwise it needs to be taken into account.
+Another difference is the tail correction, which is not constant anymore either. The tail correction, whose relevance for the particular context of porous materials modeling was studied by \textcite{TailCorrection}, is an approximation of the energy resulting from the pair interactions further than the cutoff: if the pair interaction is shifted in the force field, then this energy is null, but otherwise it needs to be taken into account.
 
 To do so, a useful ansatz consists in assuming that the radial distribution function $g(r)$ is equal to 1 beyond the cutoff distance $r_c$, for all species. In turn, this allows analytically deriving the energy resulting from the average interaction of particles beyond the cutoff. For example, two particles interacting with a Lennard-Jones potential (see \cref{eq:LJ}) yield, for a unit cell volume $V$ and cutoff distance $r_c$, a tail correction of:
-\[\frac{8\pi}{3V}\varepsilon\sigma^3\times\paren{\frac13\paren{\frac{\sigma}{r_c}}^9 - \paren{\frac{\sigma}{r_c}}^3}\]
+\[\text{tc}^\text{LJ} = \frac{8\pi}{3V}\varepsilon\sigma^3\times\paren{\frac13\paren{\frac{\sigma}{r_c}}^9 - \paren{\frac{\sigma}{r_c}}^3}\]
 Similarly, two particles interacting with a Buckingham potential (see \cref{eq:Buckingham}) yield a tail correction of:
-\[\frac{2\pi}V \paren{A\exp(-Br_c)\times\frac{2 + Br_c(2 + Br_c)}{B^3} - \frac C{3r_c^3}}\]
+\[\text{tc}^\text{Buckingham} = \frac{2\pi}V \paren{A\exp(-Br_c)\times\frac{2 + Br_c(2 + Br_c)}{B^3} - \frac C{3r_c^3}}\]
 
 All tail corrections $\text{tc}_{A,B}$ between one atom of kind $A$ and one of kind $B$ are precomputed for the given framework volume $V$ and cutoff $r_c$, but the total tail correction is the sum
 \[\text{tc} = \sum_A\sum_B N_AN_B\text{tc}_{A,B}\]
@@ -121,6 +121,14 @@ where $\text{tc}_\text{framework}$ is the constant tail correction due to the in
 
 Finally, the evolution of the tail correction when adding ($+$) or removing ($-$) one particle of kind $i$ is thus
 \[\Delta_{\pm}\text{tc} = \pm\text{tc}(i) \pm\paren{2n_i\pm1}\text{tc}(i,i) \pm 2\sum_{j\neq i} n_j\text{tc}(i,j)\]
+
+%\subsubsection{Excluded volume}
+%
+%As explained in \cref{blockingpockets}, atomic boolean grids are precomputed to fast-reject trial moves that would lead to a very high energy increase. The same method can be used to mark some specific parts of the framework as inaccessible, to prevent species from entering them when it would be kinetically unfeasible to do so.
+%
+%It stands to reason that a swap insertion move should also never create a new species in this excluded volume of the framework: there are two implementation possibilities to do so. The most direct one consists in continuing to choose an insertion position at random, and simply rejecting the trial move if the molecule happens to touch the excluded volume. This approach is correct but it leads to many rejections, so the simulation must run for long times to reach convergence. Instead, the alternative consists in only choosing insertion positions out of the excluded volume, by using a technique similar to that explained for the reinsertion moves.
+%
+
 
 \subsubsection{Resizable lists}
 
