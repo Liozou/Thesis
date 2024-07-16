@@ -545,7 +545,7 @@ The vertical separation between the green (final energy) and the purple (converg
 		\subcaption{Cationic sites after resymmetrization}\label{fig:FAUsites}
 	\end{subfigure}
 
-	\caption{Cation localization for FAU with $\SiAl = 1$}\label{fig:FAU}
+	\caption{Cation localization for FAU}\label{fig:FAU}
 \end{figure}
 
 Such a simulation runs for all structures corresponding to the reference topology: in the case of FAU, and for all other topologies that can reach $\SiAl = 1$, this means one simulation for $\SiAl = 1$ and six (with six different aluminium placements) for \SiAl equal or approximately equal to \num{1.23}, \num{1.4}, \num{1.7}, \num2, \num3, \num5 and \num{10}, hence \num{43} different ``shooting star'' simulations. The positions of each cation on each recorded cold production cycle across these simulations are flattened into a single density map of the framework, which serves as the basis for the location of cationic sites as explained in \cref{siteextraction}.
@@ -604,44 +604,54 @@ In the literature, the different sites of FAU are well-known and have been given
 \begin{figure}
 	\centering
 	\begin{subfigure}{0.9\linewidth}
-		{\centering
+		\centering
 		\includegraphics[width=\linewidth]{figures/cations/directsite_FAU.pdf}
 		\caption{Data from ``shooting star'' simulation}\label{fig:directsiteFAU}
-
-		\sl Transparent symbols indicate the values for each of the 6 explicit aluminium placements.}
 	\end{subfigure}
 
 	\begin{subfigure}{0.9\linewidth}
 		\centering
 		\includegraphics[width=\linewidth]{figures/cations/sitehopping_FAU.pdf}
-		\caption{Data from site hopping}
+		\caption{Data from site hopping}\label{fig:sitehoppingFAU}
 	\end{subfigure}
 
 	\caption{Population of each site of FAU with force field from \textcite{BoulfelfelSholl2021}}
+	
+	\sl Transparent symbols indicate the values for each of the 6 explicit aluminium placements.
 \end{figure}
 
 With this information, the attribution of the cations to their site can be operated for each cold production cycle of the ``shooting star'' simulation. The average result is presented in \cref{fig:directsiteFAU}.
 
 \subsubsection{Population combined with site hopping}
 
-Alternatively to using the ``shooting star'' simulation results to establish the site population, the resulting site positions can be used to launch a site hopping simulation.
+Alternatively to using the ``shooting star'' simulation results to establish the site population, the resulting site positions can be used to launch a site hopping simulation. Using 1 million production cycles (after 2 million initialization cycles) at \qty{300}K with an output every 1000 production cycles takes up to three minutes per structure and yields a slightly different site population presented in \cref{fig:sitehoppingFAU}.
+
 
 \begin{figure}
 	\centering
 	\begin{subfigure}{0.9\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{figures/cations/sitehoppingFAUchristele.pdf}
-		\caption{Data from site hopping}\label{fig:sitehopping_jeffroyFF}
+		\includegraphics[width=\linewidth]{figures/cations/FAUJeffroyFF_varationssitehopping.pdf}
+		\caption{Data from simple site hopping and ``shooting star'' of site hopping}\label{fig:sitehopping_jeffroyFF}
 	\end{subfigure}
-
+	
 	\begin{subfigure}{0.9\linewidth}
 		\centering
 		\includegraphics[width=\linewidth]{figures/cations/christele.pdf}
-		\caption{Data from Christèle Beauvais's Ph.D. dissertation}
+		\caption{Data from Christèle Beauvais's Ph.D. dissertation}\label{fig:christele}
 	\end{subfigure}
-
+	
 	\caption{Population of each site of FAU with force field from \textcite{DiLellaFF}}
 \end{figure}
+
+
+The main difference comes from the occupation of the sites I' at low \SiAl, which becomes almost maximal for the lowest ratio since since there are 32 sites I'. It appears that the `shooting star` simulation alone does not correctly reproduces this trends, while site hopping manages to explore more combinatorial configurations of site occupancy, thus yielding more faithful site populations.
+
+To compare those results with the literature, \cref{fig:christele} reproduces the site population of FAU obtained by Christèle Beauvais in her Ph.D. dissertation, superposing experimental previous works as well as simulation data obtained from both parallel tempering and site hopping, using the force field from \textcite{DiLellaFF}. Site J is not used in that work. Nonetheless, while the general trend of site occupations bears some similarity, the evolution also has some marked differences, notably for site I around $\SiAl = 3$.
+
+I investigated this discrepancy by running a new site hopping simulation, using the same force by \textcite{DiLellaFF}. The resulting site population, shown in \cref{fig:sitehopping_jeffroyFF} (big light symbols), is indeed more faithful to the original, but still bears a notable population difference for the lowest \SiAl ratios, where site I' fails to reach its expected occupancy of 32.
+
+Much like any base MC scheme, the site hopping algorithm can be combined with a meta-algorithm to improve its convergence. It is thus possible to run a ``shooting star'' simulation of site hopping, where the cations in both hot and cold simulations are constrained to only sit on sites and can only move by hopping onto other sites. This hybrid simulation ran for 2 million hot cycles at \qty{2000}K, spawning a cold simulation every \num{1000} cycles, each running for \num{20000} cycles following \num{1500000} initialization cycles at \qty{300}K. The results are superposed to the simple site hopping computation on \cref{fig:sitehopping_jeffroyFF} (small dark symbols). While the trend is very similar, the site occupancy evolutions are smoother with this protocol, which is at least more consistent with the simulation results of Christèle Beauvais. The difference at low \SiAl remains however, which is unexpected. It might be due to a difference in the exact positions used for the site, or even in the faujasite model used.
 
 \subsubsection{``Shooting star'' simulation calibration}
 
