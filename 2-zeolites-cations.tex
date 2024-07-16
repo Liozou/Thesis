@@ -458,7 +458,7 @@ In this strategy, the coldest simulation is constantly exploring a local free en
 
 Naturally, its main downside is its computational cost, proportional to the number of simulations and thus effectively related to the difference between the highest and the lowest temperatures. The choice of intermediate temperatures must be guided by an initial discovery of the typical energies encountered by system at each temperature, which requires a few dedicated simulations prior to the parallel tempering. Finding the optimal number of simulations requires striking a balance with the proportion of accepted MC exchange steps, whose impact on the overall simulation convergence can be difficult to measure. Additionally, simulations with neighbour temperatures must regularly synchronize to attempt an exchange, which strongly limits the amount of parallelization usable in the implementation of parallel tempering.
 
-\subsubsection{Shooting star methodology}
+\subsubsection{``Shooting star'' methodology}
 
 Previously exposed methods such as simple canonical MC, simulated annealing or parallel tempering focus on making the system (or at least, one of its replicas) reach equilibrium after a certain number of initial steps, so that the rest of the simulation occurs at equilibrium. This is crucial for the problem of sampling the equilibrium distribution of states in general. For the case of cation placement in zeolites however, the observed crystallographic positioning of the cations indicates that this distribution is sharply peaked: only a discrete number of sites can be occupied, and the question is to find their positions and occupancy. As a consequence, we can use another, simpler, strategy, which is potentially less efficient for the actual sampling of the distribution, but can uncover relevant local minima faster.
 
@@ -509,7 +509,7 @@ This section presents the cation location and population results in the studied 
 
 The FAU zeolite is one of the most well-known zeolites used in the industry. It is composed of large cages, of \qty{12}{\angstrom} in diameter, separated by 12-membered rings, and small sodalite cages separated by hexagonal prisms. A detail of FAU with $\SiAl = 1$ is illustrated on \cref{fig:FAUdetail}.
 
-\subsubsection{Site location}
+\subsubsection{Site localization}
 
 As previously explained, the sites are located by running ``shooting star'' simulations. We use the force field of [REF BoulfelfelSholl2021] with the hot simulation running at \qty{2000}K for \num{20000} cycles after \num{2000} initialization cycles, using both translations and random translation (\textit{i.e.} reinsertion without rotation) moves equiprobably. \num{200} cold simulations spawn, once every \num{100} hot cycles, running for \num{200} production cycles after \num{9800} initialization cycles. Only the production cycles are used to record the density map.
 
@@ -545,7 +545,7 @@ The vertical separation between the green (final energy) and the purple (converg
 		\subcaption{Cationic sites after resymmetrization}\label{fig:FAUsites}
 	\end{subfigure}
 
-	\caption{Cation location for FAU with $\SiAl = 1$}\label{fig:FAU}
+	\caption{Cation localization for FAU with $\SiAl = 1$}\label{fig:FAU}
 \end{figure}
 
 Such a simulation runs for all structures corresponding to the reference topology: in the case of FAU, and for all other topologies that can reach $\SiAl = 1$, this means one simulation for $\SiAl = 1$ and six (with six different aluminium placements) for \SiAl equal or approximately equal to \num{1.23}, \num{1.4}, \num{1.7}, \num2, \num3, \num5 and \num{10}, hence \num{43} different ``shooting star'' simulations. The positions of each cation on each recorded cold production cycle across these simulations are flattened into a single density map of the framework, which serves as the basis for the location of cationic sites as explained in \cref{siteextraction}.
@@ -554,15 +554,135 @@ Such a simulation runs for all structures corresponding to the reference topolog
 
 The site locations are obtained from the flattened density map across different \SiAl ratios, but the resulting occupancies are meaningless. To retrieve site population, the volume of the unit cell of the zeolite is divided into volumes centered around each site, such that each point in a volume is closest to the corresponding site than to any other site. This operation is actually the Voronoi decomposition of the crystal space around the sites.
 
-To keep it more physical, the Voronoi cells are intersected with solid spheres centered on the site and of radius \qty{2}{\angstrom}. Thus, any point in space is either in one of the truncated cells, in which case it is associated with a site closer than \qty{2}{\angstrom}, or it is not associated with any site. Once established for a given topology, this map is used for all its derivatives.
+To assert their physical meaning, the Voronoi cells are intersected with solid spheres centered on the site and of radius \qty{2}{\angstrom}. Thus, any point in space is either in one of the truncated cells, in which case it is associated with a site closer than \qty{2}{\angstrom}, or it is not associated with any site. Once established for a given topology, this map is used for all its corresponding structures (with different \SiAl ratios and aluminium placements).
 
-In the literature, the different sites of FAU are well-known and have been given names. These are represented in \cref{fig:FAUsites}, using one color per kind of site, and with size proportional to their occupancy.
+%\renewcommand{\arraystretch}{1.5}
 
-%TODO pathological and ideal cases
+\begin{table}
+	\centering
+	\begin{tabular}{|c|c|p{9cm}|c|}
+		\hline
+		\bfseries Cationic & \bfseries Number of & \multicolumn{1}{>{\centering\arraybackslash}m{9cm}|}{\multirow{3}{*}{\bfseries Location}} & \bfseries Color in\\
+		\bfseries site & \bfseries sites per && \bfseries figure\\
+		\bfseries name & \bfseries unit cell && \bfseries \labelcref{fig:FAUsites}\\\hline
+		I & 16 & At the center of the hexagonal prism. & \color{Blue!80!cyan} Blue \\\hline
+		&& In the middle of the 6-membered window between &\\
+		I'\! & 32 & the hexagonal prism and the sodalite cage, slightly & \color{Dandelion!40!olive} Yellow \\
+		&& displaced toward the sodalite cage. &\\\hline
+		\multirow{2}{*}{II} & \multirow{2}{*}{32} & In the middle of the 6-membered window between & \multirow{2}{*}{\color{green!50!black} Green}\\
+		&& thesodalite cage and the supercage.&\\\hline
+		\multirow{2}{*}{III} & \multirow{2}{*}{48} & In the supercage, atop the 4-membered window & \multirow{2}{*}{\color{BrickRed} Red}\\
+		&& between the sodalite and the supercage. &\\\hline
+		\multirow{2}*{III'\!} & \multirow{2}*{96} & In the supercage, atop the 4-membered window & \multirow{2}*{None}\\
+		&& between the hexagonal prism and the supercage. &\\\hline
+		&& In the 12-membered window between two supercages, &\\
+		J & 96 & atop the oxygen of the 4-membered window between & \color{Plum!60!black} Purple \\
+		&& the sodalite and the supercage. & \\\hline
+	\end{tabular}
+	\caption{Description of cationic sites of FAU}\label{table:FAUsites}
+\end{table}
+
+%\begin{table}
+%	\centering
+%	\begin{tabular}{|c|c|p{9cm}|c|}
+%		\hline
+%		\bf Cationic & \bf Number of & \multicolumn{1}{>{\centering\arraybackslash}m{9cm}|}{\multirow{3}{*}{\bf Location}} & \bf Color in\\
+%		\bf Site & \bf sites per && \bf figure\\
+%		\bf name & \bf unit cell && \bf \labelcref{fig:FAUsites}\\\hline
+%		I & 16 & At the center of the hexagonal prism. & Blue\\\hline
+%		I' & 32 & In the middle of the 6-membered window between the hexagonal prism and the sodalite cage, slightly displaced toward the sodalite cage. & Yellow\\\hline
+%		II & 32 & In the middle of the 6-membered window between the sodalite cage and the supercage. & Green\\\hline
+%		III & 48 & In the supercage, atop the 4-membered window between the sodalite and the supercage. & Red\\\hline
+%		J & 96 & In the 12-membered window between two supercages, atop the oxygen of the 4-membered window between the sodalite and the supercage. & Purple\\\hline
+%	\end{tabular}
+%	\caption{Description of cationic sites of FAU}\label{table:FAUsites}
+%\end{table}
+
+In the literature, the different sites of FAU are well-known and have been given names. Those detected by the previous algorithm are listed in \cref{table:FAUsites} along their usual names and represented in \cref{fig:FAUsites}, using one color per kind of site and with size proportional to their occupancy. Site III' is also mentioned because it is present in other studies, although it was not detected by the algorithm. By contrast, site J is not usually mentioned in studies of faujasite, presumably because it is unoccupied except in the presence of water\autocite{DiLellaFF,WaterFAU}, so its apparition here is possibly an artifact of the force field we use, from \textcite{BoulfelfelSholl2021}.
+% The only mention of site J we found was actually in [REF Marie Jeffroy], who misattributed its nomenclature to [REF 10.1021/ba-1971-0101.ch015], although no mention of site J is present in that reference. There could also possibly be some confusion between the definitions of the two sites, since both correspond to slight displacements of site III, albeit in orthogonal directions.
+
+\begin{figure}
+	\centering
+	\begin{subfigure}{0.9\linewidth}
+		{\centering
+		\includegraphics[width=\linewidth]{figures/cations/directsite_FAU.pdf}
+		\caption{Data from ``shooting star'' simulation}\label{fig:directsiteFAU}
+
+		\sl Transparent symbols indicate the values for each of the 6 explicit aluminium placements.}
+	\end{subfigure}
+
+	\begin{subfigure}{0.9\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{figures/cations/sitehopping_FAU.pdf}
+		\caption{Data from site hopping}
+	\end{subfigure}
+
+	\caption{Population of each site of FAU with force field from \textcite{BoulfelfelSholl2021}}
+\end{figure}
+
+With this information, the attribution of the cations to their site can be operated for each cold production cycle of the ``shooting star'' simulation. The average result is presented in \cref{fig:directsiteFAU}.
 
 \subsubsection{Population combined with site hopping}
 
-%TODO
+Alternatively to using the ``shooting star'' simulation results to establish the site population, the resulting site positions can be used to launch a site hopping simulation.
+
+\begin{figure}
+	\centering
+	\begin{subfigure}{0.9\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{figures/cations/sitehoppingFAUchristele.pdf}
+		\caption{Data from site hopping}\label{fig:sitehopping_jeffroyFF}
+	\end{subfigure}
+
+	\begin{subfigure}{0.9\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{figures/cations/christele.pdf}
+		\caption{Data from Christèle Beauvais's Ph.D. dissertation}
+	\end{subfigure}
+
+	\caption{Population of each site of FAU with force field from \textcite{DiLellaFF}}
+\end{figure}
+
+\subsubsection{``Shooting star'' simulation calibration}
+
+The temperature of the hot simulation, as well as the inclusion of reinsertion MC moves, was determined by running ``shooting star'' simulations at other temperatures with and without MC moves. Two starting positions of the cations were used, using a single structure with $\SiAl = 2$ hence 64 cations: both configurations start by filling the 32 sites II, then the first configuration fills the 32 sites I' (configuration I') while the second fills the 16 sites I and then selects 16 sites III at random (configuration I). As shown on \cref{fig:FAUsites}, every site I is sandwiched between two very close sites I', so a site I' and its neighbor site I cannot be occupied by cations at the same time. These two starting configurations are thus extremes, in the sense that crossing from one to the other requires transitioning through a state where one cation is in a site I' and another in either III or J, which is kinetically costly.
+
+\begin{figure}
+	\centering
+	\begin{subfigure}{\linewidth}
+		\begin{minipage}{0.5\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{figures/cations/temperaturecalibration_FAU_2_0b11da3b_logicalstart.pdf}
+		\end{minipage}\hfill%
+		\begin{minipage}{0.5\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{figures/cations/temperaturecalibration_FAU_2_0b11da3b_absurdstart.pdf}
+		\end{minipage}
+		\caption{Sites population with force field from \textcite{BoulfelfelSholl2021}}
+	\end{subfigure}
+
+	\begin{subfigure}{\linewidth}
+		\begin{minipage}{0.5\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{figures/cations/temperaturecalibration_FAU_T_logicalstart.pdf}
+		\end{minipage}\hfill%
+		\begin{minipage}{0.5\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{figures/cations/temperaturecalibration_FAU_T_absurdstart.pdf}
+		\end{minipage}
+		\caption{Sites population with force field from \textcite{DiLellaFF}}
+	\end{subfigure}
+
+	\caption{Hot temperature calibration results for ``shooting star'' simulations.}\label{fig:temperaturecalibration}
+	\textsl{``with'' (resp. ``without'') in the legends refers to the presence (resp. absence) of reinsertion moves.}
+\end{figure}
+
+The average repartition of cations across the different sites corresponding to these two starting positions are represented on \cref{fig:temperaturecalibration}, using two different force fields. The first one, from \textcite{BoulfelfelSholl2021}, requires having explicit aluminiums so a specific fixed placement was chosen, while the second one, from \textcite{DiLellaFF}, is designed for uniform T-atoms whose properties were set to correspond to the target $\SiAl = 2$.
+
+In both cases, sites I' remain strongly populated for starting configuration I' up to \qty{1000}K without reinsertion moves, much less so with reinsertions, hence the inclusion of these moves significantly increases the convergence of the MC simulations.
+
+The temperature itself plays an critical role: at low temperatures, the repartition remains close to the starting position, while at high temperatures the repartition becomes independent of the starting position. This effect is more pronounced on the simulations starting from configuration I', in particular when using the force field by \textcite{DiLellaFF}. The hot temperature of \qty{2000}K was thus chosen because it is the first temperature that shows an identical repartition independent of the starting configuration, while still avoiding having cations out of site (the right-most ``unknown'' bucket in the figure). At that temperature, the influence of the reinsertion moves as negligible, but we kept them for the expected improved convergence overall.
+
 
 \subsection{Other zeolites}
 
@@ -730,31 +850,34 @@ For the reciprocal part, the difference in energy is derived from \cref{eq:recip
 \Delta \norm{S_{\boldsymbol k}^\text{guest}}^2
 \right)\label{eq:reciprocal_move}\]
 %\[\Delta_\text{move}\Phi^\text{reciprocal}(\boldsymbol{r}) = \frac1{\varepsilon_0V}\sum_{\boldsymbol{k}\neq\boldsymbol{0}} \kappa_{\boldsymbol k}e^{i\boldsymbol k\cdot\boldsymbol{r}} \sum_{n\text{ moved}}q_n\paren{e^{-i\boldsymbol k\cdot\boldsymbol{r}'_n} - e^{-i\boldsymbol k\cdot\boldsymbol r_n}}\]
-Since both values of $S_{\boldsymbol k}^\text{guest}2$ need to be computed before and after the move to take the difference of their norm, it is actually equally efficient to directly compute both values of $E^\text{reciprocal}$ before and after the move, directly following \cref{eq:reciprocal_decomposed}, and taking the difference, instead of the previous formulation.
+Since both values of $S_{\boldsymbol k}^\text{guest}$ need to be computed before and after the move to take the difference of their norm, it is actually equally efficient to directly compute both values of $E^\text{reciprocal}$ before and after the move, directly following \cref{eq:reciprocal_decomposed}, and taking the difference, instead of the previous formulation.
 
 In order to allow computing this efficiently, each term $q_ne^{-i\boldsymbol k\cdot\boldsymbol r_n}$ is thus stored in memory (instead of recomputing it each time). The new values $q_ne^{-i\boldsymbol k\cdot\boldsymbol{r}'_n}$ computed for the trial move are also temporarily kept in memory, so they can be used to replace the previous ones if the trial move is accepted. Finally, the value of each $S_{\boldsymbol{k}}^\text{guest}$ is also kept in memory, so that it can be updated by reusing the previous computation.
 
 RASPA2 does not implement this optimization, and simply recomputes the $e^{-i\boldsymbol k\cdot\boldsymbol r_n}$ terms each time, which is slower but requires less memory.
 
 \subsubsection{Blocking pockets}
+\label{blockingpockets}
 
-Some MC trial moves attempt to displace an atom to a location that would lead to unphysically high energies -- typically, too close to a framework atom. Such positions can be determined once and for all, and the relevant MC moves automatically refused without the need for any energy computation.
+Some MC trial moves attempt to displace an atom to a location that would lead to unphysically high energies -- typically, too close to a framework atom. Such positions can be determined once and for all, and the relevant MC moves automatically rejected without the need for any energy computation.
 
-The simplest strategy to do so consists in making a boolean grid, aligned with the energy grids used for short-term interactions, which stores a 1 when the voxel is blocked or 0 if it is allowed. The first step of any MC trial move then consists in checking whether each atom is in an allowed voxel, or refusing the move otherwise. In practise, the simplest implementation consists in making one such boolean grid per atom kind (since the energy threshold depends on the atom), and for each atom, checking the closest grid point of its kind.
+The simplest strategy to do so consists in making a boolean grid, aligned with the energy grids used for short-term interactions, which stores a 1 when the voxel is blocked or 0 if it is allowed. The first step of any MC trial move then consists in checking whether each atom is in an allowed voxel, or rejecting the move otherwise. In practise, the simplest implementation consists in making one such boolean grid per atom kind (since the value of the framework-atom interaction energy depends on the atom), and for each actual atom position, checking the closest grid point of its kind.
 
 In addition to its use as computational optimization, such boolean grids can also be used to mark some parts of the framework as inaccessible, irrespective of the corresponding energy. This is useful when small window size prevents a species -- for instance a gas molecule -- from entering a pore -- for instance the sodalite cages in LTA zeolites [10.1021/ja953856q]. Indeed, without explicitly blocking the pocket, an MC move could make a species appear in the pore, whereas it should be kinetically impossible to enter. This strategy will thus be used when studying the adsorption of gases in zeolites (see \cref{adsorption}), but for the small cations under study here, there is no need to additionally block any part of the frameworks.
 
-RASPA2 only implements blocking for the latter case -- \textit{i.e.} explicit pocket removal. It does not use a boolean grid: instead, the blocked space is described as a combination of blocking spheres. For each trial move, the distance between the atoms of the moved guest and the center of each sphere is computed: if one is below its radius, the move is rejected. This approach requires less precomputation and thus less memory than storing the boolean grids, but its cost is much greater, and increases with the number of blocking spheres, preventing it from being used as an optimization like before. It is thus less efficient than the approach I implemented.
+RASPA2 only implements blocking for the latter case -- \textit{i.e.} explicit pocket removal. It does not use a boolean grid: instead, the blocked space is described as a combination of blocking spheres. For each trial move, the distance between the atoms of the moved guest and the center of each sphere is computed: if one is below its radius, the move is rejected. This approach requires less precomputation and thus less memory than storing the boolean grids, but its runtime cost is much greater, and increases with the number of blocking spheres, preventing it from being used as an optimization like before. It is thus less efficient than the approach I implemented.
+
+These boolean grids are also useful to improve the acceptance rate of reinsertions. When a reinsertion move is attempted, a new position for the species is chosen at random in the unit cell, but it is then immediately checked against the blocking pocket grids. If the attempted position is forbidden, a new random position is chosen, and so iteratively until finding a position compatible with the boolean grid constraints. This trial position is then used as any other trial moves, and can be accepted or rejected based on the energy criterion. Crucially, biasing the choice of the reinsertion trial move in this fashion improves its acceptance rate while still maintaining the detailed balance of the simulation, because a reinserted species was necessarily located in a position that was not blocked by the boolean grids either. Note that this bias cannot be used for local translations or rotation however: if a trial translation moves a species in a blocked pocket, the move must be rejected.
 
 \subsubsection{Site-hopping precomputations}
 
 The main computational advantage of site hopping simulations is that the number of sites is fixed in advance, which allows precomputing all framework-site and site-site interactions.
 
-To do so, the value of the framework-site interaction energy is computed and stored for each site by computing the energy associated with putting only one cation in the framework at the position of the site. This energy is actually ill-defined, since placing only one cation in the framework means that the unit cell has a net charge, and thus the (infinite periodic) material has an infinite charge. Moreover, even disregarding the physical absurdity of this scenario, a net charge would lead to a non-zero $\sum_{n=1}^N2\alpha q_n/\sqrt\pi$ term, even though it was removed in \cref{eq:totalcoulombenergy}. Still, the computations can be carried to yield a numerical value, which is thus stored in a list $\text{framework}[i]$ where $i$ designates the index of a particular site $s_i$. The reciprocal ewald contribution of this energy is also temporarily stored in a separate list as $r_i$.
+To do so, the value of the framework-site interaction energy is computed and stored for each site by computing the energy associated with putting only one cation in the framework at the position of the site. However, this energy is actually ill-defined, since placing only one cation in the framework means that the unit cell has a net charge, and thus the (infinite periodic) material has an infinite charge. Moreover, even disregarding the physical absurdity of this scenario, a net charge would lead to a non-zero $\sum_{n=1}^N2\alpha q_n/\sqrt\pi$ term, even though it was removed in \cref{eq:totalcoulombenergy}. Still, the computations can be carried to yield a numerical value, which is thus stored in a list $\text{framework}[i]$ where $i$ designates the index of a particular site $s_i$. The reciprocal ewald contribution of this energy is also temporarily stored in a separate list as $r_i$.
 
-Likewise, for each pair $(s_i,s_j)$ of sites, the energy of the framework containing only two cations, one in $s_i$ and one in $s_j$, is computed as $e_{i,j}$, although it also does not carry physical sense. What is stored in a matrix is
-$\text{interaction}[i,j] = e_{i,j} - r_i - r_j$
-This is only possible if the number of sites is not too high, since the number of interactions to store becomes prohibitively high otherwise.
+Likewise, for each pair $(s_i,s_j)$ of sites, the energy of the framework containing only two cations, one in $s_i$ and one in $s_j$, is computed as $e_{i,j}$, although it also does not carry physical sense either. What is stored in a matrix is
+$\text{interaction}[i,j] = e_{i,j} - r_i - r_j$.
+This is only possible if the number of sites is not too high, since the number of interactions to store grows quadratically with the number of sites and would become prohibitively high otherwise.
 
 Finally, the tail correction $\text{tc}_n$ associated with the framework filled with $n$ cations is computed once, where $n$ is constrained by the number of aluminiums in the structure.
 
