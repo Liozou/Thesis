@@ -4,7 +4,7 @@
 \begin{document}
 
 \chapter{Cation placement in zeolites}\label{cationzeolites}
-\vspace*{-1\baselineskip}
+\clearpage
 
 Among the different families of adsorbents, zeolites are among the most used in industry. Small gases tend to adsorb preferentially on cations when they are present, which makes the study of cationic zeolites particularly relevant to the understanding of industrial adsorption processes. This chapter presents the chemical nature of cationic zeolites and explain the challenges and methods used to obtain representative models of them for subsequent adsorption simulations. The central part of the chapter focuses on the newly developed ``shooting star'' methodology, which significantly reduces the amount of resource needed to compute the repartition of cations in zeolites.
 
@@ -503,9 +503,11 @@ The final list of sites is such that for any site, all its symmetric images are 
 	\sl The dark blue line represents the average energy of the cold simulations for each cycle number. The light blue halo around it represents plus or minus its standard deviation across the cold simulations. The inset focuses on the production cycles using dark and light orange for the same purpose. The vertical purple line identifies the cycle at which the simulation is estimated to have converged. The thin horizontal green line is the average of the energy of the cold simulations during the production cycles. The thin horizontal purple line is the average energy of the cold simulations at the estimated convergence cycle.}
 \end{figure}
 
-This section presents the cation location and population results in the studied zeolites. We focus our attention on the FAU (faujasite) zeolite first, because it is an already well-studied case that highlights the main difficulties encountered when attempting to locate cations. We then present the more general case.
+This section presents the cation location and population results in the studied zeolites. We focus our attention on the FAU (faujasite) zeolite first, because it is an already well-studied case that highlights the main difficulties encountered when attempting to locate cations.
 
 \subsection{Case study: FAU}
+
+\label{casestudyFAU}
 
 The FAU zeolite is one of the most well-known zeolites used in the industry. It is composed of large cages, of \qty{12}{\angstrom} in diameter, separated by 12-membered rings, and small sodalite cages separated by hexagonal prisms. A detail of FAU with $\SiAl = 1$ is illustrated on \cref{fig:FAUdetail}.
 
@@ -651,7 +653,7 @@ To compare those results with the literature, \cref{fig:christele} reproduces th
 
 I investigated this discrepancy by running a new site hopping simulation, using the same force by \textcite{DiLellaFF}. The resulting site population, shown in \cref{fig:sitehopping_jeffroyFF} (big light symbols), is indeed more faithful to the original, but still bears a notable population difference for the lowest \SiAl ratios, where site I' fails to reach its expected occupancy of 32.
 
-Much like any base MC scheme, the site hopping algorithm can be combined with a meta-algorithm to improve its convergence. It is thus possible to run a ``shooting star'' simulation of site hopping, where the cations in both hot and cold simulations are constrained to only sit on sites and can only move by hopping onto other sites. This hybrid simulation ran for 2 million hot cycles at \qty{2000}K, spawning a cold simulation every \num{1000} cycles, each running for \num{20000} cycles following \num{1500000} initialization cycles at \qty{300}K. The results are superposed to the simple site hopping computation on \cref{fig:sitehopping_jeffroyFF} (small dark symbols). While the trend is very similar, the site occupancy evolutions are smoother with this protocol, which is at least more consistent with the simulation results of Christèle Beauvais. The difference at low \SiAl remains however, which is unexpected. It might be due to a difference in the exact positions used for the site, or even in the faujasite model used.
+Much like any base MC scheme, the site hopping algorithm can be combined with a meta-algorithm to improve its convergence. It is thus possible to run a ``shooting star'' simulation of site hopping, where the cations in both hot and cold simulations are constrained to only sit on sites and can only move by hopping onto other sites. This hybrid simulation ran for 2 million hot cycles at \qty{2000}K, spawning a cold simulation every \num{1000} cycles, each running for \num{20000} cycles following \num{1500000} initialization cycles at \qty{300}K. The results are superposed to the simple site hopping computation on \cref{fig:sitehopping_jeffroyFF} (small dark symbols). While the trend is very similar, the site occupancy evolutions are smoother with this protocol, which is at least more consistent with the simulation results of Christèle Beauvais. The differences between those results and the current ones at low \SiAl remain however, which is unexpected. It might be due to a difference in the exact positions used for the site, or even in the faujasite model used.
 
 \subsubsection{``Shooting star'' simulation calibration}
 
@@ -696,7 +698,113 @@ The temperature itself plays an critical role: at low temperatures, the repartit
 
 \subsection{Other zeolites}
 
+The methodology developed before is not specific to the FAU zeolite, and can be used on any other structure. At the time of writing, 63 zeolite topologies were automatically investigated by running ``shooting star'' simulations on them at different \SiAl ratios, in order to identify their cationic sites. \Cref{tab:numsites} lists these topologies, along the number of symmetry-wise unique sites identified for each: for example, zeolite FAU has 5 unique sites, which are I, I', II, III and J.
 
+\begin{table}
+	\centering
+\begin{minipage}[t]{0.24\linewidth}
+\vspace{0pt}\centering
+\begin{tabular}{|c|c|}
+\hline
+ABW&3\\\hline
+AEL&7\\\hline
+AFG&6\\\hline
+AFO&6\\\hline
+AHT&4\\\hline
+ANA&2\\\hline
+ANO&12\\\hline
+AST&1\\\hline
+ASV&3\\\hline
+ATN&3\\\hline
+ATS&7\\\hline
+ATV&5\\\hline
+AWW&5\\\hline
+BOZ&15\\\hline
+CAN&2\\\hline
+CAS&5\\
+\end{tabular}
+\end{minipage}%
+\begin{minipage}[t]{0.24\linewidth}
+\vspace{0pt}\centering
+\begin{tabular}{|c|c|}
+CFI&8\\\hline
+CHA&4\\\hline
+DOH&6\\\hline
+DON&12\\\hline
+EMT&14\\\hline
+EWO&7\\\hline
+FAR&8\\\hline
+FAU&5\\\hline
+FER&8\\\hline
+FRA&13\\\hline
+GIU&10\\\hline
+IFO&8\\\hline
+IHW&11\\\hline
+IRN&14\\\hline
+JRY&6\\\hline
+LIO&11\\
+\end{tabular}
+\end{minipage}%
+\begin{minipage}[t]{0.24\linewidth}
+\vspace{0pt}\centering
+\begin{tabular}{|c|c|}
+LOS&4\\\hline
+LTA&2\\\hline
+LTJ&2\\\hline
+LTL&6\\\hline
+MAR&11\\\hline
+MEL&19\\\hline
+MSO&5\\\hline
+MTW&8\\\hline
+NPT&2\\\hline
+NSI&7\\\hline
+OBW&6\\\hline
+PTT&5\\\hline
+RFE&10\\\hline
+RTE&5\\\hline
+RWY&3\\\hline
+SAF&7\\
+\end{tabular}
+\end{minipage}%
+\begin{minipage}[t]{0.24\linewidth}
+\vspace{0pt}\centering
+\begin{tabular}{|c|c|}
+SAS&3\\\hline
+SAT&6\\\hline
+SFE&12\\\hline
+SFG&22\\\hline
+SFN&11\\\hline
+SGT&5\\\hline
+SOD&1\\\hline
+SSF&11\\\hline
+TOL&17\\\hline
+TON&6\\\hline
+TSC&8\\\hline
+UFI&8\\\hline
+UOZ&4\\\hline
+VET&6\\\hline
+VFI&4\\\hline
+\end{tabular}
+\end{minipage}
+
+	\caption{Number of cationic sites identified per investigated zeolite topology}\label{tab:numsites}
+\end{table}
+
+These numbers exhibit quite large disparities, between only 1 for AST and SOD to 22 different unique sites for SFG. They correlate quite well with the asymmetric volume of the unit cells, that is the volume of the unit cell divided by the number of symmetries of the topology, as illustrated on \cref{fig:sitesvolumecell}. This correlation is mathematically founded by the nature of the cationic sites the algorithm finds, which must obey the symmetries of the framework.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\linewidth]{figures/cations/sitesasymmetricvolumecell.pdf}
+	\caption{Correlation between the asymmetric volume of the unit cell and the number of unique site per zeolite}\label{fig:sitesvolumecell}
+\end{figure}
+
+Nonetheless, like for the case of FAU, the repartition of the cations largely differ depending on the site, making the less populated ones less relevant for analysis. For example, the ANO topology represented on \cref{fig:ANO} has 12 identified sites, of which 3 are never populated by more than one cation across all \SiAl ratios.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{figures/cations/ANO.pdf}
+	\caption{Population of each site of ANO}\label{fig:ANO}
+\end{figure}
 
 \section{Energy computation}\label{energy_computation}
 
