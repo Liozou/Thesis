@@ -3,8 +3,7 @@
 
 \begin{document}
 
-\chapter{Database approach}
-\vspace*{-1\baselineskip}
+\chapter{Database approach}\clearpage
 
 \section{Screening studies}
 
@@ -62,7 +61,7 @@ The adsorption capacity can be predicted numerically through GCMC simulations, a
 Finding general tendencies in the adsorption behaviour across zeolites requires doing the analysis of many different structures. To do so, the first step consists in establishing a database of models for the materials themselves. The general workflow for creating these structures, starting from the idealized zeolite structure defined by its topology, down to the cation placement, has already been described in \cref{cationzeolites}. To summarize, the two steps are:
 \begin{enumerate}
 	\item Aluminium placement. Start by finding the minimum \SiAl ratio by replacing as many silicium with aluminium atoms as possible, with random exchanges and restarts. Check multiple supercell sizes. Then, starting from these filled structures, replace some aluminium by silicium atoms at random and do more exchange steps to generate 6 aluminium placements for each target \SiAl ratio.
-	\item Cation placement: using either parallel tempering or shooting star simulations. The only cation used in the current study is sodium.
+	\item Cation placement: using either parallel tempering or ``shooting star'' simulations. The only cation used in the current study is sodium.
 \end{enumerate}
 
 For the entire database, we used the same force field which is that developed by \cite{BoulfelfelSholl2021} for adsorption of small gases on cationic zeolites with mobile cations.
@@ -79,9 +78,11 @@ Overall, \num{8983} different structures with aluminium placed were generated.
 
 \subsection{Cation placement}
 
-For all 239 known and non-interrupted topologies, and for each of the up to 6 different aluminium placements corresponding to the minimum \SiAl, a shooting star simulation was launched with the hot run at \qty{2000}K for \num{20000} cycles (and \num{2000} initialization cycles), spawning one cold simulation every \num{100} cycles. Each of the resulting \num{200} cold simulations ran at \qty{300}K for \num{10000} cycles. This served as an experiment to assess the convergence of the simulations: out of the 239 topologies, 57 converged in less than \num{5000} cycles (averaged across aluminium placements). For these topologies, shooting star simulations were run for all previously created aluminium placements across the different \SiAl ratios, using the same parameters (except for the number of cold cycles raised to \num{15000}). For each shooting star simulation, the \num{200} cold simulations are divided into six groups, and for each of these groups, the structure with the lowest corresponding energy is kept. Hence, this methodology yields 6 cation placement per structure.
+For all 239 known and non-interrupted topologies, and for each of the up to 6 different aluminium placements corresponding to the minimum \SiAl, a ``shooting star'' simulation was launched with the hot run at \qty{2000}K for \num{20000} cycles (and \num{2000} initialization cycles), spawning one cold simulation every \num{100} cycles. Each of the resulting \num{200} cold simulations ran at \qty{300}K for \num{10000} cycles. This served as an experiment to assess the convergence of the simulations: out of the 239 topologies, 57 converged in less than \num{5000} cycles (averaged across aluminium placements). For these topologies, ``shooting star'' simulations were run for all previously created aluminium placements across the different \SiAl ratios, using the same parameters (except for the number of cold cycles raised to \num{15000}). For each ``shooting star'' simulation, the \num{200} cold simulations are divided into six groups, and for each of these groups, the structure with the lowest corresponding energy is kept. Hence, this methodology yields 6 cation placement per structure.
 
-% TODO: discuss and choose whether lowest energy is better than random.
+This methodology is a reduced version of the full cation placement strategy illustrated on the FAU topology in \cref{casestudyFAU}. Such a strategy starts by identifying cationic sites using the previous simulation results, then follows up by running site hopping simulations augmented by ``shooting star'' (or another meta-algorithm) for each desired \SiAl ratio and aluminium placement. This ensures the optimal repartition of the cations in the different sites, although the site locations themselves may not be perfectly adequate for each precise structure, since they are identified based on a cation density map averaged over different structures. The 6 placements yielding the lowest energy should thus be optimized again by running one short MC simulation each, starting from that placement and only using local translation moves. Finally, for each of these 6 simulations, one of the cycles after energy convergence picked at random can be used to yield a representative cation placement.
+
+At the time of writing, this full methodology was not deployed yet. Although it requires more implementation effort, it should not incur a considerable computational cost compared to the initial shooting star simulations. The main reason for this is the speed of the site hopping simulations, which is considerably faster than a regular simulation.
 
 Overall, \num{14268} different structures with both aluminium and cations placed were obtained.
 % TODO: update this number
