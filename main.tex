@@ -126,6 +126,8 @@
 \usepackage[noabbrev,capitalize,nameinlink]{cleveref}
 % Not capitalized by default, use \Cref to capitalize
 % Interesting options: [noabbrev,capitalize,nameinlink]
+% combined with capitalize, this makes all cross-refs capitalized except sections:
+\Crefname{section}{section}{sections}
 
 % label subfiles
 
@@ -393,6 +395,7 @@
 		\kern\dimexpr-\fboxsep-\fboxrule\relax
 	}\par\kern#2
 }
+\usepackage[symbol*,perpage]{footmisc}
 
 %code
 \usepackage{listings}
