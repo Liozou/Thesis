@@ -39,7 +39,7 @@
 \usepackage[
     backend=biber,
     maxbibnames=99,
-    maxcitenames=1,
+    maxcitenames=2,
     url=false,
     sorting=none,
     citestyle=numeric-comp,
@@ -126,8 +126,9 @@
 \usepackage[noabbrev,capitalize,nameinlink]{cleveref}
 % Not capitalized by default, use \Cref to capitalize
 % Interesting options: [noabbrev,capitalize,nameinlink]
-% combined with capitalize, this makes all cross-refs capitalized except sections:
+% combined with capitalize, this makes all cross-refs capitalized except sections and chapters:
 \Crefname{section}{section}{sections}
+\Crefname{chapter}{chapter}{chapters}
 
 % label subfiles
 
@@ -396,6 +397,8 @@
 	}\par\kern#2
 }
 \usepackage[symbol*,perpage]{footmisc}
+\usepackage{mathrsfs}
+\newcommand{\Nleb}{\ensuremath{N_{\mathscr L}}\xspace}
 
 %code
 \usepackage{listings}
