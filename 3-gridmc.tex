@@ -147,7 +147,13 @@ Finally, the evolution of the tail correction when adding ($+$) or removing ($-$
 
 \subsubsection{Resizable lists}
 
-Overall, having a variable number of species requires extra bookkeeping, to make sure that all atoms are accounted for. To maximize performance in current computers, the data structures must have good cache locality: this means that, when memory needs to be read, it should be done in contiguous accesses as much as possible. For this purpose, the positions of the atoms, the $\kappa_{\boldsymbol k}$ factors, the precomputed $q_ne^{i\boldsymbol k\cdot \boldsymbol r_n}$ and $S_{\boldsymbol k}$ values, the self-interaction terms, etc., are all stored in tight arrays, with the appropriate indexing for each. When an atom or a molecule is removed, there are two choices: either leave a gap in the array, and keep track separately of which parts of the array actually refer to a valid data if need be, or move the contents of the array to fill the gap.
+Overall, having a variable number of species requires extra bookkeeping, to make sure that all atoms are accounted for. To maximize performance in current computers, the data structures must have good cache locality: this means that, when memory needs to be read, it should be done in contiguous accesses as much as possible. For this purpose, the positions of the atoms, the $\kappa_{\boldsymbol k}$ factors, the precomputed $q_ne^{i\boldsymbol k\cdot \boldsymbol r_n}$ and $S_{\boldsymbol k}$ values, the self-interaction terms, etc., are all stored in tight arrays, with the appropriate indexing for each. When an atom or a molecule is removed, there are two choices, illustrated on \cref{fig:resizelist}: either leave a gap in the array, and keep track separately of which parts of the array actually refer to a valid data if need be, or move the contents of the array to fill the gap.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{figures/gcmc/resizelist.pdf}
+	\caption{Schematic representations of the list resizing algorithmic options}\label{fig:resizelist}
+\end{figure}
 
 Both algorithmic strategies have their merit, and warrant a trial to check which performs best. I did not take the time to implement both however, and instead chose the latter systematically, because it is slightly simpler to reason about. In practice, such an approach consists in replacing the content of the gap in the array by the data at the end of the array, before reducing the size of the array, and thus removing the temporarily duplicated data at the end. The indices relative to the content of the array also need to be updated. The complexity of each array update is thus proportional to the number of elements to remove, which is generally optimal. Insertions are operated at the end of the arrays, with an optimal complexity.
 
@@ -159,14 +165,32 @@ Even with an efficient implementation, regular GCMC simulation remain resource-c
 
 Similar to the methods exposed in \cref{precomputations}, a typical strategy for reducing the computational cost consists in precomputing as much as possible, to decrease the workload of the main loop of the algorithm. In the case of GCMC, the main computation occurring at each trial move is that of the interactions between species, both in direct and reciprocal spaces. Since the configuration space for the molecules in the unit cell of the framework is continuous, and thus infinite, it is impossible to precompute all the possible pair interactions.
 
-However, that space can be discretized: to do so, the mobile species are forced to occupy one position each among a fixed set of possibilities. This principle is identical to the site hopping used in the case of cations (see \cref{sitehopping}) except that, as explained in \cref{adsorptionsites}, gas species are likely to occupy many more sites than cations. Thus, the conceptually simplest set of possible positions is a regular grid: each molecule must reside atop one grid point. For polyatomic species, like all gases of interest with the exception of rare gases, this definition is incomplete however, so there are three options:
+However, that space can be discretized: to do so, the mobile species are forced to occupy one position each among a fixed set of possibilities. This principle is identical to the site hopping used in the case of cations (see \cref{sitehopping}) except that, as explained in \cref{adsorptionsites}, gas species are likely to occupy many more sites than cations. Thus, the conceptually simplest set of possible positions is a regular grid: each molecule must reside atop one grid point. For polyatomic species, like all gases of interest with the exception of rare gases, this definition is incomplete however, so there are three options, also illustrated on \cref{fig:3options}:
 \begin{enumerate}
 	\item[$\mathscr A$)] the grid can include additional dimensions to account for the orientation of the molecule. In that case there must be a fixed convention dictating which atom of the molecule is placed on the grid point. That atom, called the ``bead'', is typically that around which the rotation MC move operates.
 	\item[$\mathscr B$)] each grid point can come with an associated fixed orientation of the molecule sitting on it. In that case, the lowest energy orientation with respect to the framework is probably the most reasonable choice, but it may grossly misrepresent the actual orientation of the molecules if those are mostly driven by the interaction with other molecules.
 	\item[$\mathscr C$)] the molecule can be represented as a single point sitting on the grid, with no orientation. In that case, the interaction energy of the molecule with the framework can be taken as the average of the energies corresponding to the different orientations and, likewise, the molecule-molecule interactions can be computed by taking averages over the orientation of both molecules. These averages could be either arithmetic or Boltzmann averages, depending on the interpretation: a Boltzmann average implicitly assumes that the molecules are at equilibrium, which is not very well defined for a single molecule sitting on a grid point, while an arithmetic average implies has an orientation independent of the corresponding energy, which is not exact either.
 \end{enumerate}
 
-
+\begin{figure}
+	\centering
+	\hfill\begin{subfigure}{0.33\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{figures/gcmc/gridMC_optionA.pdf}
+		\subcaption{Option $\mathscr A$: explicit angles}
+	\end{subfigure}\hfill%
+	\begin{subfigure}{0.33\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{figures/gcmc/gridMC_optionB.pdf}
+		\subcaption{Option $\mathscr B$: single angle}
+	\end{subfigure}\hfill%
+	\begin{subfigure}{0.33\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{figures/gcmc/gridMC_optionC.pdf}
+		\subcaption{Option $\mathscr C$: averages}
+	\end{subfigure}\hfill
+	\caption{The three considered options to account for angles on a grid}\label{fig:3options}
+\end{figure}
 
 Our study is restricted to small gases of the air which are all linear and centrosymmetric: \ce{CO_2}, \ce{N_2}, \ce{O_2}, etc., so the bead is conventionally chosen as the center of the molecule. Choosing an orientation thus amounts to choosing a direction for a rod (the molecule) across all possible angles. To accurately cover this configuration space while limiting the number of studied angles, we use a Lebedev grid, which is a set of \Nleb points $(\theta_i,\varphi_i)$ on the surface of the sphere such that the integral of a function $f$ can be well approximated by the sum
 \[I[f] = \int_0^\pi sin(\theta)\text d\theta \int_0^{2\pi}\text d\varphi f(\theta, \varphi)\ \approx\ 4\pi\sum_{i=1}^{\Nleb} w_if(\theta_i,\varphi_i)\]
@@ -176,7 +200,7 @@ The number of possible configurations of a molecule is $\alpha\times a\times b\t
 
 The goal of the grid MC approach is to reduce the amount of computations done at each step to accelerate the GCMC simulations, by precomputing the pair interactions between grid points. The number of pair interactions to precompute is thus, in theory, at least $\paren{\alpha\times120^3}^2/2 = \alpha^2\times120^6/2$. It can actually be reduced further with translation symmetry considerations: the interaction between grid points $(x_1,y_1,z_1,\theta_1)$ and $(x_2,y_2,z_2,\theta_2)$ is identical to that between grid points $(x_1+\Delta,y_1+\Delta,z_1+\Delta,\theta_1)$ and $(x_2+\Delta,y_2+\Delta,z_2+\Delta,\theta_2)$ for any $\Delta$. It is thus sufficient to precompute the interaction between $(0,0,0,\theta)$ and all other grid points, so the minimum number of precomputations is actually $\alpha^2\times 120^3 \approx \alpha^2\times 2\cdot10^6$. Each precomputation yields an energy, represented by a floating-point number, which takes \qty8B of space, and the typical RAM of a computer is on the order of \qty{10}{GB}, so the maximum value of $\alpha$ is approximately $\sqrt{10^{10}/\paren{8\times 2\cdot10^6}} = 25$ for the smallest possible spatial grid.
 
-In conclusion, using explicit angles is theoretically doable only for small enough materials and by using the smallest numbers of angles, otherwise the precomputation results cannot be stored in memory. Moreover, the numerical cost of the precomputation itself can be expected to be considerable, since it requires $\alpha^2\times 2\cdot10^6$ pair interaction computations. This is similar to the cost of simulating a system of $N = \alpha^2$ particles in interaction across one million MC steps, which is a typical GCMC simulation length, since each MC trial move requires computing $2N$ pair interactions ($N$ for the particle before the move, $N$ for the particle after). Therefore, option $\mathscr A$ is unlikely to be applicable in many cases.
+In conclusion, using explicit angles (option $\mathscr A$) is theoretically doable only for small enough materials and by using the smallest numbers of angles, otherwise the precomputation results cannot be stored in memory. Moreover, the numerical cost of the precomputation itself can be expected to be considerable, since it requires $\alpha^2\times 2\cdot10^6$ pair interaction computations. This is similar to the cost of simulating a system of $N = \alpha^2$ particles in interaction across one million MC steps (which is close to a typical GCMC simulation length), since each MC trial move requires computing $2N$ pair interactions ($N$ for the particle before the move, $N$ for the particle after). Therefore, option $\mathscr A$ is unlikely to be applicable in many cases.
 
 \subsection{Validation}
 
@@ -188,7 +212,7 @@ In conclusion, using explicit angles is theoretically doable only for small enou
 
 To check the validity of this simulation strategy, we start by comparing the loading of Ar in a zeolite obtained by regular GCMC and through this grid MC approach. The result for zeolite MFI is presented on \cref{fig:gridMC-ArMFI}, using a grid step size of \qty{0.2}{\angstrom}. The perfect superposition of the three isotherms indicate that the grid MC simulation method is apt to reproduce the adsorption property of noble gas in zeolites with great accuracy, even at high pressure.
 
-With more complex molecules, angles have to be taken into account, using either option $\mathscr B$ or $\mathscr C$. Their comparison is illustrated with the adsorption of \ce{CO_2} in FAU in \cref{fig:gridMC-pair}, shows that averaging orientations ($\mathscr C$) provide more qualitative results compared to selecting one single orientation per grid point ($\mathscr B$). Yet, none manage to qualitatively reproduce the adsorption behavior at intermediate to high pressures.
+With more complex molecules, angles have to be taken into account, using either option $\mathscr B$ or $\mathscr C$. Their comparison is illustrated with the adsorption of \ce{CO_2} in FAU in \cref{fig:gridMC-pair}, shows that averaging orientations ($\mathscr C$) provide more qualitative results compared to selecting one single orientation per grid point ($\mathscr B$). Yet, none manage to qualitatively reproduce the adsorption behavior at medium/high pressures.
 
 \begin{figure}
 	\centering
@@ -209,7 +233,7 @@ With more complex molecules, angles have to be taken into account, using either 
 \end{figure}
 
 
-As evoked previously, the nature of the angular averaging, either arithmetic or Boltzmannian, of energies stems from a hypothesis on the distribution of microstates, neither of which is actually valid. The influence of this choice on the simulated loading of \ce{CO_2} in FAU is presented in \cref{fig:gridMC-comparison}.
+As evoked previously, the nature of the angular averaging of energies, either arithmetic or Boltzmannian, stems from a hypothesis on the distribution of microstates, neither of which is actually valid. The influence of this choice on the simulated loading of \ce{CO_2} in FAU is presented in \cref{fig:gridMC-comparison}.
 
 In \cref{fig:gridMC-pair}, it appears that the choice of averaging for the molecule-molecule interaction has little influence on the result until the high pressures. Unsurprisingly, the Boltzmann average, which favors attractive interaction, increases the loading compared the arithmetic average, but the general trend is very similar and neither appear to be particularly more right than the other.
 
@@ -223,7 +247,7 @@ From these observations, it appears that the molecules of \ce{CO_2} preferential
 	\caption{Adsorption isotherm of \ce{CO_2} on silicic FAU obtained with different grid MC step sizes}\label{fig:gridMC-sizes}
 \end{figure}
 
-Regarding the numerical method itself, the main limit is the behaviour at intermediate and high pressure, which significantly parts from expectation. While this necessarily stems from the use of a grid, it does not depend on the grid step size: \cref{fig:gridMC-sizes} shows the evolution of the isotherm using option $\mathscr C$ with Boltzmann averaging for framework-molecule interactions and arithmetic averaging for molecule-molecule interactions. The isotherm does not evolve much when the grid step size is small enough, which points to the fact the issue lies in the nature of the simulation method itself.
+Regarding the numerical method itself, the main limit is the behaviour at intermediate and high pressure, which significantly parts from expectation. While this necessarily stems from the use of a grid, it does not depend on the grid step size: \cref{fig:gridMC-sizes} shows the evolution of the isotherm using option $\mathscr C$ with Boltzmann averaging for framework-molecule interactions and arithmetic averaging for molecule-molecule interactions. The isotherm remains constant as long as the grid step size is small enough, which points to the fact the issue lies in the nature of the simulation method itself.
 
 \subsection{Computational aspects}
 
@@ -243,7 +267,7 @@ The different terms above are all precomputed for the different values of the gr
 	\item $\text{tc}_\text{framework}$ is the tail correction for the atoms of the framework and the atoms of the molecule, and $\text{tc}_\text{interaction}$ is the tail correction for the atoms of two molecules interacting.
 \end{itemize}
 
-The tail correction terms as stored as simple numbers, $\text{framework}(\boldsymbol r)$ is stored as a tridimensional array of energies, $\boldsymbol r$ being mapped to a triplet of integers indexing the grid points. The term that takes the most time to precompute, $\text{interaction}(\boldsymbol r, \boldsymbol r')$, is stored in a custom data structure made of a tridimensional index array, along the energy data, in a list. Due to translation symmetry, the query of the interaction between $\boldsymbol r$ and $\boldsymbol r'$ becomes that between the origin and $\boldsymbol r - \boldsymbol r'$. The corresponding triplet of integers maps to an index in the tridimensional array, and that index is the one used to retrieve the energy from the energy list. The index can also be 0, to indicate that the interaction energy is zero (i.e. beyond the cutoff): this way, the energy list only stores relevant values.
+The tail correction terms are stored as simple numbers, $\text{framework}(\boldsymbol r)$ is stored as a tridimensional array of energies, $\boldsymbol r$ being mapped to a triplet of integers indexing the grid points. The term that takes the most time to precompute, $\text{interaction}(\boldsymbol r, \boldsymbol r')$, is stored in a custom data structure made of a tridimensional index array, along the energy data, in a flat list. Due to translation symmetry, the query of the interaction between $\boldsymbol r$ and $\boldsymbol r'$ becomes that between the origin and $\boldsymbol r - \boldsymbol r'$. The corresponding triplet of integers maps to an index in the tridimensional array, and that index is the one used to retrieve the energy from the energy list. The index can also be 0, to indicate that the interaction energy is zero (i.e. beyond the cutoff): this way, the energy list only stores relevant values.
 
 The precomputation itself is also optimized, to avoid making it the dominant computational cost of running grid MC simulations. To do so, the framework interactions computation benefits from all the precomputations explained in \cref{precomputations}, in particular the tabulated atomic grids. For the molecule-molecule interaction averaged over the angles, the energy is interpolated from a linear grid: the interaction energy is computed by putting the bead of the first molecule at the origin and the other at a distance $d$, where $d$ increments from 0 to the cutoff distance by steps of one fifth of the average MC grid step. The interpolation is done with cubic splines through the \texttt{BasicInterpolators.jl} julia package.
 
