@@ -65,18 +65,18 @@ To obtain the zeolite structures with random aluminium placements obeying L\"owe
     \item The starting point is either the zeolite filled with Si if the required \SiAl ratio is above 3, else a zeolite filled with as many Al as possible using a greedy algorithm. That greedy technique consists in doing a graph traversal of the T-atoms, transforming each atom into an Al if it is not the neighbour of an Al, or making it a Si otherwise: if all cycles in the graph are even, this is guaranteed to provide an aluminium placement with the minimal \SiAl of 1.
     \item The main algorithm then alternates between adjusting the number of Al and changing their positions, for a few steps each, back and forth.
     \begin{itemize}
-        \item The position update follows the principle of Marie Jeffroy's MC scheme but disregarding the energy change: one Si and one Al are exchanged at random if the resulting structure still follows L\"owenstein's rule.
+        \item The position update follows the principle of Marie Jeffroy's MC scheme but disregarding the energy change: one Si is chosen at random among those that have no Al neighbor, then one Al is picked at random, and both are exchanged. This guarantees that the resulting structure still follows L\"owenstein's rule. No position update can occur if all Si have at least one Al neighbor.
         \item The number of Al atoms is modified if the current \SiAl ratio does not correspond to the target: if it is too high, an Al is converted into a Si, and otherwise a Si that has no Al neighbour is converted into an Al.
     \end{itemize}
     \item Since the situation can be blocked (see \cref{fig:blocked_situation}), the algorithm sometimes restart from scratch, or sometimes does a partial restart by converting multiple Al atoms into Si.
-    \item Configurations with the closest \SiAl ratio to the target are kept in a set. Each configuration is assigned a hash, which is simply a sequence of 0 if the T-atom is a Si or 1 otherwise, in a fixed order of the T-atom. To avoid considering symmetry-equivalent configurations as different, the signature of a configuration is computed as the lexicographically minimum of all the hashes corresponding to the application of a symmetry operation on the configuration. For each unique signature, a corresponding unique configuration is then retained, and the six models are taken at random among these unique configurations.
+    \item Configurations with the closest \SiAl ratio to the target are kept in a set. Each configuration is assigned a hash, which is simply a sequence of 0 if the T-atom is a Si or 1 otherwise, in a fixed order of the T-atom. To avoid considering symmetry-equivalent configurations as different, the signature of a configuration is computed as the lexicographically minimum of all such hashes corresponding to the application of a symmetry operation on the configuration. For each unique signature, a corresponding unique configuration is then retained, and the six models are taken at random among these unique configurations.
 \end{itemize}\label{aluminiumhash}
 
 One last consideration is the choice of the supercell. It appears that, for a large number of zeolites topologies, the smallest unit cell cannot be filled with aluminiums so that it both obeys L\"owenstein's rule and reaches the minimal \SiAl ratio for that topology. In the case of LTA for instance, the smallest compatible cell is a $2\times2\times2$ supercell of the smallest unit cell. As a consequence, the greedy algorithm used before is launched on several supercells in an initial pass, and the one leading to the smallest \SiAl ratio is retained. This supercell is then used for all aluminium placement attempts on the same topology.
 
 The full list of minimum \SiAl ratio found for each zeolite topology (except interrupted ones) and the respective supercell is presented in \cref{table:zeosial}. The supercell is considered with respect to the idealized framework available for each topology on the IZA-SC database\footnote{accessible at \url{https://europe.iza-structure.org/IZA-SC/ftc_table.php}}. This table presents the lowest \SiAl ratio found, but apart for the cases where it is $1$, the values here are not proven to be minimal, since the algorithm relies on random attempts. Similarly, the supercell used could be not minimal.
 
-It is worth mentioning that a previous screening study of adsorption in zeolite by \textcite{WrongLowestSiAl1} claimed to use the lowest possible \SiAl ratios to screen through zeolites, but failed to reach the ones presented here, systematically in the case where a supercell needed to be used. Another by Daou, Fang, et al. \cite{WrongLowestSiAl2,WrongLowestSiAl3} alluded to that issue in the case of LTA, yet failed to identify some other topologies (ATT, JBY, LEV, LTL, MRT, OFF) which could reach an \SiAl ratio of 1. The choice of the supercell during aluminium placement is thus an easily overlooked, yet critical, point to consider.
+It is worth mentioning that a previous study of adsorption in zeolite by \textcite{WrongLowestSiAl1} claimed to use the lowest possible \SiAl ratios to screen through zeolites, but failed to reach the ones presented here, systematically in the case where a supercell needed to be used. Another by Daou, Fang, et al. \cite{WrongLowestSiAl2,WrongLowestSiAl3} alluded to that issue in the case of LTA, yet failed to identify some other topologies (ATT, JBY, LEV, LTL, MRT, OFF) which could reach an \SiAl ratio of 1. The choice of the supercell during aluminium placement is thus an easily overlooked, yet critical, point to consider.
 
 
 \begin{table}
@@ -244,7 +244,7 @@ MTW&$1.33$&1$\times$5$\times$3\\
 \end{minipage}\hspace{2pt}
 \begin{minipage}[t]{0.24\linewidth}
 \vspace{0pt}
-\begin{tabular}{|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{5pt}}|}
+\begin{tabular}{|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|}
 MVY&$1$&1$\times$1$\times$1\\\hline
 MWF&$1$&1$\times$1$\times$1\\\hline
 MWW&$1.53$&2$\times$2$\times$1\\\hline
@@ -297,7 +297,7 @@ SBS&$1$&1$\times$1$\times$1\\
 \end{minipage}\hspace{7pt}
 \begin{minipage}[t]{0.24\linewidth}
 \vspace{0pt}
-\begin{tabular}{|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{5pt}}|}
+\begin{tabular}{|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|@{\hspace{2pt}}c@{\hspace{2pt}}|}
 SBT&$1$&1$\times$1$\times$1\\\hline
 SEW&$1.36$&1$\times$2$\times$1\\\hline
 SFE&$1.33$&1$\times$1$\times$1\\\hline
@@ -357,7 +357,7 @@ ZON&$1$&4$\times$2$\times$2\\\hline
 
 \subsection{Cations}
 
-The electroneutrality of the framework requires that each negative introduced by an Al substitution be compensated by the introduction of a cation in the framework. In many cases, \ce{Na^+} or \ce{H^+} are used during synthesis; they are sometimes replaced by other cations in later steps.
+The electroneutrality of the framework requires that each negative charge introduced by an Al substitution be compensated by the introduction of a cation in the framework. In many cases, \ce{Na^+} or \ce{H^+} are used during synthesis; they are sometimes replaced by other cations in later steps.
 
 These cations have a primordial role for adsorption processes, because they constitute privileged adsorption sites for many small gases. The precise mechanism by which they contribute to the overall adsorption capacity of a material depends on their nature, their location, and the nature of the guest molecule however. Moreover, in addition to simple one-to-one adsorption cases of a small molecule on a cation, X-ray spectroscopy evidences the presence of adsorption complexes involving several cations and guest molecules at the same time\autocite{MultipleCationsMultipleSites}. Finally, the very nature of the cations present in the structure can be quite diverse, ranging from monovalent alkali to polyvalent metal ions, and even molecular ions such as many of the organic structure directing agents (OSDAs) used during zeolite synthesis.
 
@@ -370,14 +370,14 @@ While experimental cation maps are available on some zeolite structures, two sem
 
 \subsection{Underlying algorithms}
 
-To obtain equilibrium data, such as average positions, on molecular systems, there are two general simulation frameworks which can be used: molecular dynamics and Monte-Carlo (MC) simulation. We only used MC and its variations, because they are the only strategy available to study a variable number of molecules, which is necessary for the simulation of adsorption as we will explain in more details in \cref{GCMC}. The possible use of molecular dynamics and its variants will be discussed later in \cref{metadynamics}.
+To obtain equilibrium data, such as average positions, on molecular systems, there are two general simulation frameworks which can be used: molecular dynamics and Monte-Carlo simulation. I only used Monte-Carlo and its variations because they are the only strategy available to study a variable number of molecules, which is necessary for the simulation of adsorption as we will explain in more details in \cref{GCMC}. The possible use of molecular dynamics and its variants will be discussed later in \cref{metadynamics}.
 
 \subsubsection{Canonical Monte-Carlo direct simulation}
 % mention ergodicity
 
-The Monte-Carlo (MC) method designates a large variety of algorithms which all converge towards their result by performing multiple random samplings. A wide subset of these form the Markov Chain Monte-Carlo (MCMC) schemes, which are a class of algorithms that aim at sampling a target probability distribution. In the context of statistical physics, such methods provide practical ways of obtaining macroscopic observable values from the simulation of the microscopic behaviour of particles. Indeed, an observable $\mathcal O$ can be computed as the ensemble average of its microscopic counterpart $\left<o\right>$, which can be computed as an integral over the configuration space. For example, in the canonical ensemble where the number of particles, the external temperature and the volume of the system is fixed, \[\mathcal O = \left<o\right> = \frac1Z\int\!\text d{\boldsymbol p}\  o\left({\boldsymbol p}\right)\exp\left(-\beta U\left({\boldsymbol p}\right)\right)\label{eq:canonicalensemble}\] where $ U\left({\boldsymbol p}\right)$ is the energy of configuration $\boldsymbol p$ and $Z$ is the partition function. In other words, $\mathcal O$ can be computed as an integral of values of $o$ on a probability distribution of $\boldsymbol p$ given by $p\mapsto \frac1Z\exp\left(-\beta U\left({\boldsymbol p}\right)\right)$.
+The Monte-Carlo (MC) method designates a large variety of algorithms which all converge towards their result by performing multiple random samplings. A wide subset of these form the Markov Chain Monte-Carlo (MCMC) schemes, which are a class of algorithms that aim at sampling a target probability distribution. In the context of statistical physics, such methods provide practical ways of obtaining macroscopic observable values from the simulation of the microscopic behaviour of particles. Indeed, an observable $\mathcal O$ can be computed as the ensemble average of its microscopic counterpart $\left<o\right>$, which can be obtained from an integral over the configuration space. For example, in the canonical ensemble where the number of particles, the external temperature $T$ and the volume of the system is fixed, \[\mathcal O = \left<o\right> = \frac1Z\int\!\text d{\boldsymbol p}\  o\left({\boldsymbol p}\right)\exp\left(-\beta U\left({\boldsymbol p}\right)\right)\label{eq:canonicalensemble}\] where $\beta = 1/k_BT$, $U\left({\boldsymbol p}\right)$ is the energy of configuration $\boldsymbol p$ and $Z$ is the partition function. In other words, $\mathcal O$ can be computed as an integral of values of $o$ on a probability distribution of $\boldsymbol p$ given by $\boldsymbol p\mapsto \frac1Z\exp\left(-\beta U\left({\boldsymbol p}\right)\right)$.
 
-The direct evaluation of this probability distribution is impossible in general, because of the partition function $Z$ whose value cannot be computed. Instead, the MCMC method gives a way to directly evaluate the observable $\mathcal O$ by providing a sequence of configurations $\boldsymbol p$ that follows the same probability distribution as the target. The integral can then be computed as simply the average value of $o$ on this specific set of configurations $\boldsymbol p$.
+The direct evaluation of this probability distribution is impossible in general, because of the partition function $Z$ whose value cannot be computed. Instead, the MCMC method gives a way to directly evaluate the observable $\mathcal O$ by providing a sequence of configurations $\{\boldsymbol p\}$ that follows the same probability distribution as the target. The integral can then be computed as simply the average value of $o$ on this specific set of configurations $\{\boldsymbol p\}$.
 
 \label{metropolis}
 
@@ -385,34 +385,43 @@ The Metropolis-Hastings algorithm is the most common MCMC scheme used to provide
 \[P_\text{accept}(\Delta E) = \min\left(1, \exp\left(-\beta \Delta E\right)\right)\label{eq:MCcanonicalaccept}\]
 that the move be accepted. Intuitively, this means that any move that decreases the energy of the system is accepted, while the others are accepted with a probability that decreases as the energy difference increases, sharply at low temperature and more slowly at high temperature. In the limit of infinite temperature, all the moves are accepted; at zero temperature, only the moves that decrease the energy are. The details on how to compute energy are deferred to \cref{energy_computation}.
 
-To avoid drift, the algorithm obeys detailed balance which, conceptually, represents the microreversibility of the simulated physical processes. In practise, this means that, for each MC move that brings the system from configuration ${\boldsymbol p}_\mathcal{A}$ to ${\boldsymbol p}_\mathcal{B}$, there must exist a ``converse'' MC moves that can bring the system from $\mathcal{B}$ to $\mathcal{A}$ such that $\pi_\mathcal{A} P_{\mathcal{A}\to \mathcal{B}} = \pi_\mathcal{B} P_{\mathcal{B}\to \mathcal{A}}$ where $\pi_\mathcal{X}$ is the stationary probability of state ${\boldsymbol p}_\mathcal{X}$ and $P_{\mathcal{X}\to \mathcal{Y}}$ is the probability of the move from ${\boldsymbol p}_\mathcal{X}$ to ${\boldsymbol p}_\mathcal{Y}$. In the canonical ensemble, $\pi_\mathcal{X}$ is equal to to $\frac1Z\exp\left(-\beta U\left({\boldsymbol p}_\mathcal{X}\right)\right)$, while the probability of transition is $\min\left(1, \exp\left(-\beta \Delta E\right)\right)$. Hence, detailed balance simply translates to the algorithmic condition that the probability of choosing the trial move $\mathcal{A}\to \mathcal{B}$ must be equal to that of choosing the trial move $\mathcal{B}\to \mathcal{A}$, irrespective of the probability of accepting these moves.
+To avoid drift, the algorithm obeys detailed balance which, conceptually, represents the microreversibility of the simulated physical processes. In practice, this means that, for each MC move that brings the system from configuration ${\boldsymbol p}_\mathcal{A}$ to ${\boldsymbol p}_\mathcal{B}$, there must exist a ``converse'' MC moves that can bring the system from $\mathcal{B}$ to $\mathcal{A}$ such that $\pi_\mathcal{A} P_{\mathcal{A}\to \mathcal{B}} = \pi_\mathcal{B} P_{\mathcal{B}\to \mathcal{A}}$ where $\pi_\mathcal{X}$ is the stationary probability of state ${\boldsymbol p}_\mathcal{X}$ and $P_{\mathcal{X}\to \mathcal{Y}}$ is the probability of the move from ${\boldsymbol p}_\mathcal{X}$ to ${\boldsymbol p}_\mathcal{Y}$. In the canonical ensemble, $\pi_\mathcal{X}$ is equal to to $\frac1Z\exp\left(-\beta U\left({\boldsymbol p}_\mathcal{X}\right)\right)$, while the probability of transition is $\min\left(1, \exp\left(-\beta \Delta E\right)\right)$. Hence, detailed balance simply translates to the algorithmic condition that the probability of choosing the trial move $\mathcal{A}\to \mathcal{B}$ must be equal to that of choosing the trial move $\mathcal{B}\to \mathcal{A}$, irrespective of the probability of accepting these moves.
 
 The MC moves which are used for simulations in the canonical ensemble are usually the following:
 \begin{itemize}
-    \item translation: displace each atom of the particle by the same vector, taken uniformly at random in a sphere.
+    \item translation: displace each atom of a mobile particle by the same vector, taken uniformly at random in a sphere.
     \item rotation: rotate the particle around one of its atoms (called the ``bead'') along three uniformly random Euler angles, possibly constrained to some values only, most often all values under a maximum angle.
     \item reinsertion: remove and reintroduce the particle uniformly at random in the system.
 \end{itemize}
 
-Overall, the algorithm thus consists in a sequence of steps, each of which is an attempt to displace a cation either locally (translation) or not (reinsertion) and is accepted or not depending on the difference of energy the move generates. Configurations corresponding to neighbour steps are thus either identical if the move was rejected, or only separate by one atom move, so they are strongly correlated. To reduce computational cost, the computation of the microscopic state function $o$ is thus only realized once every cycle, each cycle corresponding to a number of steps. We fix the number of steps per cycle to 100.
+Overall, the algorithm thus consists in a sequence of steps, each of which is an attempt to displace a particle, in our case a cation, either locally (translation) or not (reinsertion) and is accepted or not depending on the difference of energy the move generates. Configurations corresponding to neighbour steps are thus either identical if the move was rejected, or only separate by one particle move, so they are strongly correlated. To reduce computational cost, the computation of the microscopic state function $o$ is thus only realized once every cycle, each cycle corresponding to a number of steps. I fix the number of steps per cycle to the number of mobile particles in the system in the case of canonical ensemble simulations.
 
-To satisfy detailed balance, the sphere in which the translation vector is taken must have a fixed radius, the bead must be fixed and the angle constraints must be symmetric. However, the best maximum translation length $d_{\max}$ and maximum angle $\theta_{\max}$ are those that yield a MC move acceptance rate of $1/2$. Since these optimal values depend on the precise simulation, it is customary to actually make these two constraints evolve along the simulation until reaching an acceptance rate of $1/2$. To do so, at the end of each cycle, they are updated with the following formulas:
+To satisfy detailed balance, the sphere in which the translation vector is taken must have a fixed radius, the bead must be fixed and the angle constraints must be symmetric. However, the best maximum translation length $d_{\max}$ and maximum angle $\theta_{\max}$ are those that yield a simulation that converges in the smallest number of cycles. \textcite{FrenkelSmit} indicate that this usually translates to a a MC move acceptance rate close to \qty{20}\% for translation moves (and not \qty{50}\% as widely expected). All of this depends on the precise simulation, but it is customary to make the two constraints $d_{\max}$ and $\theta_{\max}$ evolve along the simulation until reaching a target acceptance rate, for example \qty{25}\% for translations and \qty{50}\% for rotations. To do so, at the end of each cycle, they are updated with the following empirical formulas:
 \[\begin{split}
 	d_{\max} &\gets \text{clamp}\paren{
-		d_{\max}\times\paren{1+\paren{T_\text{ratio} - 1/2}\times\sqrt{\frac{10}{99+i}}},\ \qty{0.1}{\angstrom},\ \qty{3}{\angstrom}
+		d_{\max}\times\paren{1+\paren{T_\text{ratio} - 1/4}\times\sqrt{\frac{10}{99+i}}},\ \qty{0.1}{\angstrom},\ \qty{3}{\angstrom}
 	}\\
-	\theta_{\max} &\gets \frac{i-1}i\times\theta_{\max} + \frac{R_\text{ratio}}{i}\times\qty{120}{\degree}
+	\theta_{\max} &\gets \text{clamp}\paren{\theta_{\max} + \frac{\paren{1/2 - R_\text{ratio}}\times\qty{120}\degree}i, \qty{10}\degree, \qty{180}\degree}
 \end{split}\]
-where $i$ is the number of the current cycle (starting at 1), $T_\text{ratio}$ (respectively $R_\text{ratio}$) is the ratio of accepted over attempted translations (respectively rotations) in the entire simulation, and clamp$(x, m, M)$ is $x$ if $m\le x \le M$, otherwise $m$ if $x\le m$, otherwise $M$ (if $x\ge M)$. Having $d_{\max}$ and $\theta_{\max}$ change across the simulation breaks detailed balance, which is theoretically forbidden; yet it does not actually pose a problem in because the formulas used ensure that the two values evolve smoothly towards the optimum, and become almost constants for long enough simulations.
+where $i$ is the number of the current cycle (starting at 1), $T_\text{ratio}$ (respectively $R_\text{ratio}$) is the ratio of accepted over attempted translations (respectively rotations) in the entire simulation, and clamp$(x, m, M)$ is $x$ if $m\le x \le M$, otherwise $m$ if $x\le m$, otherwise $M$ (if $x\ge M)$. Having $d_{\max}$ and $\theta_{\max}$ change across the simulation breaks detailed balance, which is theoretically forbidden; yet it does not actually pose a problem in reality because the formulas used ensure that the two values evolve smoothly towards the optimum, and become almost constant once the simulation has been running for enough cycles.
 
-At the beginning of each step, an MC move is chosen at random. In our simulations, all three moves (translation, rotation and reinsertion) are chosen equiprobably. For the particular case of the movement of mono-atomic species, such as most cations in zeolites, the rotation MC move is useless and thus not used, while the reinsertion move collapses to a simple translation with infinite $d_{\max}$, both moves being chosen equiprobably.
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{figures/gcmc/parameterconvergence.pdf}
+
+	\caption{Evolution of $d_{\max}$, $\theta_{\max}$, the energy and the number of molecules during a Grand Canonical Monte-Carlo simulation of \ce{CO_2} in silicic FAU at \qty{300}K and \qty{50}{MPa}. The values for the energy and the loading are represented with one point per \num{200} cycles, averaging the corresponding values.}\label{fig:parameterconvergence}
+\end{figure}
+
+\Cref{fig:parameterconvergence} illustrates the evolution of $d_{\max}$ and $\theta_{\max}$, as well as the corresponding evolution of the energy and the number of molecules, which indicate the global convergence of the simulation. Both parameters $d_{\max}$ and $\theta_{\max}$ converges smoothly towards their optimum. In this particular simulation, the translation move acceptance rate was \num{24.93}\% and for rotation \num{49.87}\%, very close to the targets of respectively \num{25}\% and \num{50}\%.
+
+At the beginning of each step, an MC move is chosen at random. In our simulations, all three moves (translation, rotation and reinsertion) are chosen equiprobably. For the particular case of the movement of monoatomic species, such as most cations in zeolites, the rotation MC move is useless and thus not used, while the reinsertion move collapses to a simple translation with infinite $d_{\max}$, both moves being chosen equiprobably.
 
 The Metropolis-Hastings algorithm thus provides a way to walk through the configuration space. By privileging moves that decrease energy, the system spends more steps in low energy regions; by yet allowing opposite moves sometimes, the scheme ensures that all the configuration space is eventually visited. Hence, the algorithm guarantees ergodicity: in an infinitely long simulation, the fraction of steps spent in a part of the configuration space is proportional to its volume. %Finding the space with the lowest energy, and thus the largest probability and volume, should then simply be a matter of running the simulation long enough for the state to fall in the deepest energy pit.
 
 
 \subsubsection{Combined aluminium and cation placement} % method of Marie Jeffroy
 
-Specifically in the case cationic zeolites, Marie Jeffroy \cite{Jeffroy} proposes a simulation method to obtain both the placement of cations in the structure and the location of aluminium atoms across the T-sites. This consists in running an MC simulation where the cations are allowed all previously mentioned MC steps, while the aluminiums are only allowed exchanging positions with silicons, or a restart step that randomly positions aluminiums and silicons, both while obeying L\"owenstein's rule as explained in \cref{mariejeffory_al}.
+Specifically in the case cationic zeolites, Marie Jeffroy \cite{Jeffroy} proposes a simulation method to obtain both the placement of cations in the structure and the location of aluminium atoms across the T-sites. This consists in running an MC simulation where the cations are allowed all previously mentioned MC steps, while the aluminiums are only allowed exchanging positions with silicons, or a restart step that randomly positions aluminiums and silicons, both while obeying L\"owenstein's rule as explained in \cref{mariejeffroy_al}.
 
 The statistical ensemble simulated in this setting includes both aluminium and cations, which means that the distribution sampled through such a simulation method represents the equilibrium for both species. From a chemical point of view, this situation is representative of a framework whose synthesis was done with that very cation, and was thermodynamically-driven. While this does correspond to reality in some cases, there is also evidence that the synthesis is kinetically-driven in many other occurences: for such situation, obtaining the aluminium positions from statistical equilibrium is not representative of the actual framework. And in yet other situations, the cation is exchanged post-synthesis, which decorrelates the aluminium placement in the framework from the cation used for adsorption purposes.
 
@@ -513,7 +522,7 @@ The FAU zeolite is one of the most well-known zeolites used in the industry. It 
 
 \subsubsection{Site localization}
 
-As previously explained, the sites are located by running ``shooting star'' simulations. We use the force field of \textcite{BoulfelfelSholl2021} with the hot simulation running at \qty{2000}K for \num{20000} cycles after \num{2000} initialization cycles, using both translations and random translation (\textit{i.e.} reinsertion without rotation) moves equiprobably. \num{200} cold simulations spawn, once every \num{100} hot cycles, running for \num{200} production cycles after \num{9800} initialization cycles. Only the production cycles are used to record the density map.
+As previously explained, the sites are located by running ``shooting star'' simulations. We use the force field of \textcite{BoulfelfelSholl2021} with the hot simulation running at \qty{2000}K for \num{20000} cycles after \num{2000} initialization cycles, using both translations and reinsertions (without rotation, since the particles are monoatomic) equiprobably. \num{200} cold simulations spawn, once every \num{100} hot cycles, running for \num{200} production cycles after \num{9800} initialization cycles. Only the production cycles are used to record the density map.
 
 The convergence of the ``shooting star'' simulation can be analyzed on \cref{fig:convergenceFAUshootingstar} in the particular case of \texttt{FAU\_1\_6e921e59}, which is simply the faujasite framework with $\SiAl = 1$ (\texttt{6e921e59} is the hash of the only aluminium placement compatible with L\"owenstein's rule, as explained in \cref{aluminiumhash}). This figure mostly focuses on the initialization cycles of the cold simulations, to study the global convergence of the simulation.
 
@@ -523,29 +532,29 @@ The vertical separation between the green (final energy) and the purple (converg
 
 \begin{figure}
 	\centering
-	\begin{subfigure}{0.47\columnwidth}
+	\hfill\begin{subfigure}{0.45\columnwidth}
 		\centering
 		\includegraphics[width=\columnwidth]{figures/cations/FAU1_cages_text.jpg}
 		\subcaption{Detail of FAU with annotated cages}\label{fig:FAUdetail}
 	\end{subfigure}\hfill%
-	\begin{subfigure}{0.47\columnwidth}
+	\begin{subfigure}{0.45\columnwidth}
 		\centering
 		\includegraphics[width=\columnwidth]{figures/cations/FAU1_density.jpg}
 		\subcaption{Simulated cation density map}\label{fig:FAUdensity}
-	\end{subfigure}
+	\end{subfigure}\hfill
 
 	\vspace{1em}
 
-	\begin{subfigure}{0.47\columnwidth}
+	\hfill\begin{subfigure}{0.45\columnwidth}
 		\centering
 		\includegraphics[width=\columnwidth]{figures/cations/FAU1_density_Na.jpg}
 		\subcaption{Extraction of sites from the density map}\label{fig:FAUextraction}
 	\end{subfigure}\hfill%
-	\begin{subfigure}{0.47\columnwidth}
+	\begin{subfigure}{0.45\columnwidth}
 		\centering
 		\includegraphics[width=\columnwidth]{figures/cations/FAU1_NaColors.jpg}
 		\subcaption{Cationic sites after resymmetrization}\label{fig:FAUsites}
-	\end{subfigure}
+	\end{subfigure}\hfill
 
 	\caption{Cation localization for FAU}\label{fig:FAU}
 \end{figure}
@@ -554,9 +563,9 @@ Such a simulation runs for all structures corresponding to the reference topolog
 
 \subsubsection{Direct site population}
 
-The site locations are obtained from the flattened density map across different \SiAl ratios, but the resulting occupancies are meaningless. To retrieve site population, the volume of the unit cell of the zeolite is divided into volumes centered around each site, such that each point in a volume is closest to the corresponding site than to any other site. This operation is actually the Voronoi decomposition of the crystal space around the sites.
+The site locations are obtained from the flattened density map across different \SiAl ratios, but the resulting occupancies are meaningless. To retrieve site population, the unit cell of the zeolite is divided into volumes centered around each site, such that each point in a volume is closest to the corresponding site than to any other site. This operation is actually the Voronoi decomposition of the crystal space around the sites.
 
-To assert their physical meaning, the Voronoi cells are intersected with solid spheres centered on the site and of radius \qty{2}{\angstrom}. Thus, any point in space is either in one of the truncated cells, in which case it is associated with a site closer than \qty{2}{\angstrom}, or it is not associated with any site. Once established for a given topology, this map is used for all its corresponding structures (with different \SiAl ratios and aluminium placements).
+To assert their physical meaning, the Voronoi cells are intersected with solid spheres centered on the corresponding site and of radius \qty{2}{\angstrom}. Hence, any point in space is either in one of the truncated cells, in which case it is associated with a site closer than \qty{2}{\angstrom}, or it is not associated with any site. Once established for a given topology, this map is used for all its corresponding structures (with different \SiAl ratios and aluminium placements). Finding the population of each site from a simulation thus becomes a matter of averaging, across all recorded cycles, the number of cations in the truncated cells associated with each site.
 
 %\renewcommand{\arraystretch}{1.5}
 
@@ -647,19 +656,21 @@ Alternatively to using the ``shooting star'' simulation results to establish the
 \end{figure}
 
 
-The main difference comes from the occupation of the sites I' at low \SiAl, which becomes almost maximal for the lowest ratio since since there are 32 sites I'. It appears that the `shooting star` simulation alone does not correctly reproduces this trends, while site hopping manages to explore more combinatorial configurations of site occupancy, thus yielding more faithful site populations.
+The main difference comes from the occupation of the sites I' at low \SiAl, which becomes almost maximal for the lowest ratio since since there are 32 sites I'. It appears that the ``shooting star'' simulation alone does not correctly reproduces this trends, while site hopping manages to explore more combinatorial configurations of site occupancy, thus yielding more faithful site populations.
 
 To compare those results with the literature, \cref{fig:christele} reproduces the site population of FAU obtained by Christèle Beauvais in her Ph.D. dissertation, superposing experimental previous works as well as simulation data obtained from both parallel tempering and site hopping, using the force field from \textcite{DiLellaFF}. Site J is not used in that work. Nonetheless, while the general trend of site occupations bears some similarity, the evolution also has some marked differences, notably for site I around $\SiAl = 3$.
 
-I investigated this discrepancy by running a new site hopping simulation, using the same force by \textcite{DiLellaFF}. The resulting site population, shown in \cref{fig:sitehopping_jeffroyFF} (big light symbols), is indeed more faithful to the original, but still bears a notable population difference for the lowest \SiAl ratios, where site I' fails to reach its expected occupancy of 32. In this force field, the aluminiums and silicons of the framework are represented by an identical T-atom, whose charge depend on the \SiAl ratio, hence there the absence of the transparent symbols indicating the result of each explicit aluminium placement.
+I investigated this discrepancy by running a new site hopping simulation, using the same force field by \textcite{DiLellaFF}. The resulting site population, shown in \cref{fig:sitehopping_jeffroyFF} (big light symbols), is indeed more faithful to the original, but still bears a notable population difference for the lowest \SiAl ratios, where site I' fails to reach its expected occupancy of 32. In this force field, the aluminiums and silicons of the framework are represented by an identical T-atom, whose charge depend on the \SiAl ratio, hence there the absence of the transparent symbols indicating the result of each explicit aluminium placement.
 
 Much like any base MC scheme, the site hopping algorithm can be combined with a meta-algorithm to improve its convergence. It is thus possible to run a simulated annealing version, by varying the temperature during the simulation, or even a ``shooting star'' simulation of site hopping. For simulated annealing, the temperatures ramped down \num{400} times, each time starting from \qty{3000}K to \qty{2000}K, then \qty{1000}K, \qty{300}K and finally \qty{300}K again, equally spaced by \num{1000} cycles for each sub-ramp, and recording the site repartition at the end of the last \num{1000} cycles. For the ``shooting star'' variant, this hybrid simulation ran for 2 million hot cycles at \qty{2000}K, spawning a cold simulation every \num{1000} cycles, each running for \num{20000} cycles following \num{1500000} initialization cycles at \qty{300}K.\label{sitehopping_simulatedannealing}
 
-The results are superposed to the simple site hopping computation on \cref{fig:sitehopping_jeffroyFF} (medium symbols for simulated annealing, small dark symbols for ``shooting star''). The two evolutions with meta-algorithm superpose almost exactly, which shows that simulated annealing is complex enough to ensure convergence of site hopping simulations. These evolutions are smoother compared to the bare simulation without meta-algorithm, and show a consistent and marked difference around $\SiAl = 1.23$ in particular: this highlights the interest of using meta-algorithms to ensure proper convergence of even site-hopping simulations. These results still differ from those of Christèle Beauvais at low \SiAl remain, which is unexpected; it might be due to a difference in the exact positions used for the site, or even in the faujasite model used.
+The results are superposed to the simple site hopping computation on \cref{fig:sitehopping_jeffroyFF} (medium symbols for simulated annealing, small dark symbols for ``shooting star''). The two evolutions with meta-algorithm superpose almost exactly, which shows that simulated annealing is complex enough to ensure convergence of site hopping simulations. These evolutions are smoother compared to the bare simulation without meta-algorithm, and show a consistent and marked difference around $\SiAl = 1.23$ in particular: this highlights the interest of using meta-algorithms to ensure proper convergence of even site-hopping simulations. It is worth mentioning that the simulated annealing simulation ran to create \cref{fig:sitehopping_jeffroyFF} only takes a few minutes per point, and can be realized in parallel, so the main computational cost of finding the site populations is incurred earlier, when attempting to locate these sites.
+
+These results still differ from those of Christèle Beauvais at low \SiAl, which is unexpected; it might be due to a difference in the exact positions used for the site, or even in the faujasite model used.
 
 \subsubsection{``Shooting star'' simulation calibration}
 
-The temperature of the hot simulation, as well as the inclusion of reinsertion MC moves, was determined by running ``shooting star'' simulations at other temperatures with and without MC moves. Two starting positions of the cations were used, using a single structure with $\SiAl = 2$ hence 64 cations: both configurations start by filling the 32 sites II, then the first configuration fills the 32 sites I' (configuration I') while the second fills the 16 sites I and then selects 16 sites III at random (configuration I). As shown on \cref{fig:FAUsites}, every site I is sandwiched between two very close sites I', so a site I' and its neighbor site I cannot be occupied by cations at the same time. These two starting configurations are thus extremes, in the sense that crossing from one to the other requires transitioning through a state where one cation is in a site I' and another in either III or J, which is kinetically costly.
+The temperature of the hot simulation, as well as the inclusion of reinsertion MC moves, was determined by running ``shooting star'' simulations at other temperatures with and without MC moves. Two starting positions of the cations were used, using a single structure with $\SiAl = 2$ hence needing 64 cations: both configurations start by filling the 32 sites II, then the first configuration fills the 32 sites I' (configuration I') while the second fills the 16 sites I and then selects 16 sites III at random (configuration I). As shown on \cref{fig:FAUsites}, every site I is sandwiched between two very close sites I', so a site I' and its neighbor site I cannot be occupied by cations at the same time. These two starting configurations are thus extremes, in the sense that crossing from one to the other requires transitioning through a state where one cation is in a site I' and another in either III or J, which is kinetically costly.
 
 \begin{figure}
 	\centering
@@ -693,14 +704,14 @@ The temperature of the hot simulation, as well as the inclusion of reinsertion M
 
 The average repartition of cations across the different sites corresponding to these two starting positions are represented on \cref{fig:temperaturecalibration}, using two different force fields. The first one, from \textcite{BoulfelfelSholl2021}, requires having explicit aluminiums so a specific fixed placement was chosen, while the second one, from \textcite{DiLellaFF}, is designed for uniform T-atoms whose properties were set to correspond to the target $\SiAl = 2$.
 
-In both cases, sites I' remain strongly populated for starting configuration I' up to \qty{1000}K without reinsertion moves, much less so with reinsertions, hence the inclusion of these moves significantly increases the convergence of the MC simulations.
+In both cases, sites I' remain strongly populated for starting configuration I' up to \qty{1000}K without reinsertion moves, much less so with reinsertions, hence the inclusion of these moves appears to significantly increase the convergence of the MC simulations.
 
-The temperature itself plays an critical role: at low temperatures, the repartition remains close to the starting position, while at high temperatures the repartition becomes independent of the starting position. This effect is more pronounced on the simulations starting from configuration I', in particular when using the force field by \textcite{DiLellaFF}. The hot temperature of \qty{2000}K was thus chosen because it is the first temperature that shows an identical repartition independent of the starting configuration, while still avoiding having cations out of site (the right-most ``unknown'' bucket in the figure). At that temperature, the influence of the reinsertion moves as negligible, but we kept them for the expected improved convergence overall.
+The temperature of the hot simulation plays an critical role: at low temperatures, the repartition remains close to the starting position, while at high temperatures the repartition becomes independent of the starting position. This effect is more pronounced on the simulations starting from configuration I', in particular when using the force field by \textcite{DiLellaFF}. The hot temperature of \qty{2000}K was thus chosen because it is the first temperature that shows an identical repartition independent of the starting configuration, while still avoiding having cations out of site (the right-most ``unknown'' bucket in the figure). At that temperature, the influence of the reinsertion moves as negligible, but we kept them for the expected improved convergence overall. The residual cations out of a site have been discarded from the other figures in this section because of their negligible number.
 
 
 \subsection{Other zeolites}
 
-The methodology developed before is not specific to the FAU zeolite, and can be used on any other structure. At the time of writing, 64 zeolite topologies were automatically investigated by running ``shooting star'' simulations on them at different \SiAl ratios, in order to identify their cationic sites. \Cref{tab:numsites} lists these topologies, along the number of symmetry-wise unique sites identified for each: for example, zeolite FAU has 5 unique sites, which are I, I', II, III and J.
+The methodology developed before is not specific to the FAU zeolite, and can be used on any other structure. At the time of writing, 64 zeolite topologies were automatically investigated by running ``shooting star'' simulations on them at different \SiAl ratios, in order to identify their cationic sites. \Cref{tab:numsites} lists these topologies, along the number of symmetry-wise unique sites identified for each: for example, zeolite FAU has 5 detected unique sites, which are I, I', II, III and J.
 
 \begin{table}
 	\centering
@@ -797,11 +808,11 @@ These numbers exhibit quite large disparities, between only 1 for AST and SOD to
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.8\linewidth]{figures/cations/sitesasymmetricvolumecell.pdf}
-	\caption{Correlation between the volume of the asymmetric unit and the number of unique site per zeolite. Coefficient of determination: $R^2 = \num{0.84898}$}\label{fig:sitesvolumecell}
+	\includegraphics[width=0.65\linewidth]{figures/cations/sitesasymmetricvolumecell.pdf}
+	\caption{Correlation between the volume of the asymmetric unit and the number of unique site per zeolite. Coefficient of determination: $R^2 = \num{0.848}$}\label{fig:sitesvolumecell}
 \end{figure}
 
-Nonetheless, like for the case of FAU, the repartition of the cations largely differ depending on the site, making the less populated ones less relevant for analysis. For example, the ANO topology whose site population is represented on \cref{fig:ANO} has 12 identified sites, of which 4 are never populated by more than one cation across all \SiAl ratios.
+Nonetheless, like for the case of FAU, the repartition of the cations across these sites is far from uniform, making the less populated sites less relevant for analysis. For example, the ANO topology whose site population is represented on \cref{fig:ANO} has 12 identified sites, of which 4 are never populated by more than one cation across all \SiAl ratios.
 
 For this topology, the raw ``shooting star'' results are quite close to those obtained from the refined site hopping methodology augmented with simulated annealing, using the same conditions as in \cref{sitehopping_simulatedannealing}. Similar to the results for FAU represented on \cref{fig:sitehopping_jeffroyFF}, the trends are very similar, but the exact site occupancies sometimes differ, in particular here for site ``\_5''. Once again, this highlights the added value of site hopping simulations in order to obtain precise site population results.
 
@@ -829,6 +840,8 @@ For this topology, the raw ``shooting star'' results are quite close to those ob
 
 	\caption{Population of each site of ANO}\label{fig:ANO}
 \end{figure}
+
+Overall, the proposed methodology for identifying the cationic sites of a zeolite consists in running ``shooting star'' simulations of the target topology across different \SiAl ratios, flattening the cation density maps resulting from all the different cold simulations into a single map, from which the location of the sites are extracted. Their population is then found by running site hopping simulations augmented with simulated annealing. This method shows robust results even for zeolites with many sites, and convergence of the intermediate simulations can be controlled systematically.
 
 \section{Energy computation}\label{energy_computation}
 
@@ -954,7 +967,7 @@ During the simulation, in order to compute the short-term interactions between t
 Short-term interactions that can be stored in grids include the short-term direct part of the Ewald summation. The reciprocal term cannot however be simply stored as such.
 
 Yet, it is still possible to precompute a large part of the reciprocal interaction which is due to the framework. To take the potential given by \cref{eq:reciprocal} back to the energy, it is useful to introduce the sums:
-\[S_{\boldsymbol k} = \sum_{n=1}^N q_n e^{-i\boldsymbol k\cdot \boldsymbol r_n}\]
+\[S_{\boldsymbol k} = \sum_{n=1}^N q_n e^{-i\boldsymbol k\cdot \boldsymbol r_n}\label{eq:Sk}\]
 for each $\boldsymbol k$. With this notation, the contribution of the reciprocal term to the energy is
 \[\begin{split}
 E^\text{reciprocal} &= \frac12\sum_{m=1}^N q_m \Phi^\text{reciprocal}(\boldsymbol{r}_m)
