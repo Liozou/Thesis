@@ -273,19 +273,19 @@
         {\nolinkurl{#1}}%
 }
 
-% An enumerate like environement for the publication list
-\newcounter{pubcount}
-\setcounter{pubcount}{0}
-\defbibenvironment{publist}
-    {
-        \begin{enumerate}
-        \setcounter{enumi}{\thepubcount}
-    }
-    {
-        \setcounter{pubcount}{\theenumi}
-        \end{enumerate}
-    }
-    {\item}
+%% An enumerate like environement for the publication list
+%\newcounter{pubcount}
+%\setcounter{pubcount}{0}
+%\defbibenvironment{publist}
+%    {
+%        \begin{enumerate}
+%        \setcounter{enumi}{\thepubcount}
+%    }
+%    {
+%        \setcounter{pubcount}{\theenumi}
+%        \end{enumerate}
+%    }
+%    {\item}
 
 
 % Partial TOC formatting for chapters
@@ -511,7 +511,7 @@
 %    \appendix
 %    \subfile{Y-empty_appendix}
 
-    \input{publist}
+    \subfile{publist}
 
     \printglobalbibliography
 
