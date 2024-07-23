@@ -194,7 +194,37 @@ However, that space can be discretized: to do so, the mobile species are forced 
 
 Our study is restricted to small gases of the air which are all linear and centrosymmetric: \ce{CO_2}, \ce{N_2}, \ce{O_2}, etc., so the bead is conventionally chosen as the center of the molecule. Choosing an orientation thus amounts to choosing a direction for a rod (the molecule) across all possible angles. To accurately cover this configuration space while limiting the number of studied angles, we use a Lebedev grid, which is a set of \Nleb points $(\theta_i,\varphi_i)$ on the surface of the sphere such that the integral of a function $f$ can be well approximated by the sum
 \[I[f] = \int_0^\pi sin(\theta)\text d\theta \int_0^{2\pi}\text d\varphi f(\theta, \varphi)\ \approx\ 4\pi\sum_{i=1}^{\Nleb} w_if(\theta_i,\varphi_i)\]
-with the appropriate weights $w_i$. The values of $w_i$, $\theta_i$ and $\varphi_i$ have been precomputed once and for all for different values of \Nleb. Because of orthogonality constraints on the Lebedev points, not all values of \Nleb are possible: the ones which are usable in my code are $\Nleb =$ 6, 14, 26, 38, 50, 74, 86, 110, 146, 170, 194, 230, 266, 302, 350, 434, 590, 770, 974, 1202, 1454, 1730, 2030, 2354, 2702, 3074, 3470, 3890, 4334, 4802, 5294 and 5810, allowing for any fine-tuning of the precision level. Only half of these points are actually used since the both the target gases and the Lebedev grids are centrosymmetric.
+with the appropriate weights $w_i$. The values of $w_i$, $\theta_i$ and $\varphi_i$ have been precomputed once and for all for different values of \Nleb. Because of orthogonality constraints on the Lebedev points, not all values of \Nleb are possible: the ones which are usable in my code are $\Nleb =$ 6, 14, 26, 38, 50, 74, 86, 110, 146, 170, 194, 230, 266, 302, 350, 434, 590, 770, 974, 1202, 1454, 1730, 2030, 2354, 2702, 3074, 3470, 3890, 4334, 4802, 5294 and 5810, allowing for any fine-tuning of the precision level. Only half of these points are actually used since the both the target gases and the Lebedev grids are centrosymmetric. A few representations of the Lebedev grid are given on \cref{fig:lebedev}
+
+\begin{figure}
+	\centering
+	\hfill\begin{subfigure}{0.2\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{figures/gcmc/lebedev_6}
+		\caption{6 points}
+	\end{subfigure}\hfill%
+	\begin{subfigure}{0.2\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{figures/gcmc/lebedev_14}
+		\caption{14 points}
+	\end{subfigure}\hfill%
+	\begin{subfigure}{0.2\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{figures/gcmc/lebedev_26}
+		\caption{26 points}
+	\end{subfigure}\hfill%
+	\begin{subfigure}{0.2\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{figures/gcmc/lebedev_38}
+		\caption{38 points}
+	\end{subfigure}\hfill%
+	\begin{subfigure}{0.2\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{figures/gcmc/lebedev_25_symm}
+		\caption{25 points half grid}\label{fig:haldgridlebedev}
+	\end{subfigure}\hfill
+	\caption{Lebedev grid points. \cref{fig:haldgridlebedev} is a half-grid, used for centrosymmetric species.}\label{fig:lebedev}
+\end{figure}
 
 The number of possible configurations of a molecule is $\alpha\times a\times b\times c$ where $(a,b,c)$ is the size of the spatial grid and $\alpha$ is either \Nleb in option $\mathscr A$, or 1 for options $\mathscr B$ and $\mathscr C$. Since we use a Van der Waals cutoff of \qty{12}\angstrom, the framework with the smallest grid will necessarily have its perpendicular lengths greater or equal to $2\times\qty{12}\angstrom = \qty{24}\angstrom$. Thus, with a distance of \qty{0.2}{\angstrom} between two grid points, $a$, $b$ and $c$ are greater or equal to $120$ so the size of the configuration space is at least $\alpha\times120^3$.
 
