@@ -6,22 +6,22 @@
 \addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
 \chapter*{List of Publications}
 
-\section*{Peer-reviewed articles}
-\begin{itemize}
-	\item Lionel Zoubritzky and François-Xavier Coudert. ``CrystalNets.jl: Identification of Crystal Topologies''. In: \textsl{SciPost Chem.} 1 (2022), p. 005. \href{https://doi.org/10.21468/SciPostChem.1.2.005}{\bsc{doi}: 10.21468/SciPostChem.1.2.005}.
+\begin{refsection}[publications.bib]
+	\nocite{*}
 
-	\item Lionel Zoubritzky and François-Xavier Coudert. ``{CrystalNets} online: Intuitive Identification and Visualization of Crystal Topologies''. In preparation.
-\end{itemize}
+	\section*{Peer-reviewed articles}
+	\printbibliography[heading=none]
 
-\section*{Open-source software and libraries}
-\begin{itemize}
-	\item CrystalNets web interface: \url{https://progs.coudert.name/topology}
-	\item \texttt{CrystalNets.jl}: crystal net topology analysis, \url{https://github.com/coudertlab/CrystalNets.jl}
-	\item \texttt{PeriodicGraphs.jl}: periodic graphs algorithms and ring statistics, \url{https://github.com/Liozou/PeriodicGraphs.jl}
-	\item \texttt{PeriodicGraphEmbeddings.jl}: euclidean embeddings of periodic graphs and symmetry analysis, \url{https://github.com/Liozou/PeriodicGraphEmbeddings.jl}
-	\item \texttt{CrystalEnergyGrids.jl}: MC simulation framework for molecules in rigid crystalline materials, \url{https://github.com/Liozou/CrystalEnergyGrids.jl}, in development
-	\item \texttt{MolecularDFT.jl}: molecular density functional theory for molecules in rigid frameworks, \url{https://github.com/Liozou/MolecularDFT.jl}, in development
-\end{itemize}
+	\section*{Open-source software and libraries}
+	\begin{itemize}
+		\item CrystalNets web interface: \url{https://progs.coudert.name/topology}
+		\item \texttt{CrystalNets.jl}: crystal net topology analysis, \url{https://github.com/coudertlab/CrystalNets.jl}
+		\item \texttt{PeriodicGraphs.jl}: periodic graphs algorithms and ring statistics, \url{https://github.com/Liozou/PeriodicGraphs.jl}
+		\item \texttt{PeriodicGraphEmbeddings.jl}: euclidean embeddings of periodic graphs and symmetry analysis, \url{https://github.com/Liozou/PeriodicGraphEmbeddings.jl}
+		\item \texttt{CrystalEnergyGrids.jl}: MC simulation framework for guests in rigid crystalline materials (in development), \url{https://github.com/Liozou/CrystalEnergyGrids.jl}
+		\item \texttt{MolecularDFT.jl}: molecular density functional theory for molecules in rigid frameworks (in development), \url{https://github.com/Liozou/MolecularDFT.jl}
+	\end{itemize}
+\end{refsection}
 
 % Reset TOC depth
 \addtocontents{toc}{\protect\setcounter{tocdepth}{2}}

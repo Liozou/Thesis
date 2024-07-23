@@ -1026,7 +1026,7 @@ These boolean grids are also useful to improve the acceptance rate of reinsertio
 
 \subsubsection{Site-hopping precomputations}
 
-The main computational advantage of site hopping simulations is that the number of sites is fixed in advance, which allows precomputing all framework-site and site-site interactions.
+The main computational advantage of site hopping simulations, defined in \cref{sitehopping}, is that the number of sites is fixed in advance, which allows precomputing all framework-site and site-site interactions.
 
 To do so, the value of the framework-site interaction energy is computed and stored for each site by computing the energy associated with putting only one cation in the framework at the position of the site. However, this energy is actually ill-defined, since placing only one cation in the framework means that the unit cell has a net charge, and thus the (infinite periodic) material has an infinite charge. Moreover, even disregarding the physical absurdity of this scenario, a net charge would lead to a non-zero $\sum_{n=1}^N2\alpha q_n/\sqrt\pi$ term, even though it was removed in \cref{eq:totalcoulombenergy}. Still, the computations can be carried to yield a numerical value, which is thus stored in a list $\text{framework}[i]$ where $i$ designates the index of a particular site $s_i$. The reciprocal ewald contribution of this energy is also temporarily stored in a separate list as $r_i$.
 
