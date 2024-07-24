@@ -461,7 +461,13 @@ The simplest idea consists in running the simulation while smoothly varying the 
 
 Simulated annealing explores the configuration space by alternating between cold phases, where the exploration is detailed but localized, and hot phases, where the exploration is fast but superficial. Parallel tempering, also called ``replica exchange'' proposes doing both phases at the same time.
 
-In more detail, a parallel tempering simulation consists in running several MC simulations, the ``replicas'', in parallel, each at a different temperature. The temperatures are taken between room temperature and a hot temperature. An extra MC step is introduced, called the ``exchange'' step, which consists in exchanging the configurations of two replicas with neighbour temperatures. As with any MC step, the Metropolis-Hastings algorithm ensures that the exchange is accepted only if the difference of energy resulting from this exchange is not too high: as a consequence, for the exchange step to be accepted regularly, the temperatures must be taken so that the typical energies of the system between neighbour temperatures overlap, as shown on [FIGURE].
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{figures/cations/paralleltempering.pdf}
+	\caption{Parallel tempering energy distribution in a canonical MC simulation of \ce{Na+} in FAU with $\SiAl = \num{1.4}$}\label{fig:paralleltempering}
+\end{figure}
+
+In more detail, a parallel tempering simulation consists in running several MC simulations, the ``replicas'', in parallel, each at a different temperature. The temperatures are taken between room temperature and a hot temperature. An extra MC step is introduced, called the ``exchange'' step, which consists in exchanging the configurations of two replicas with neighbour temperatures. As with any MC step, the Metropolis-Hastings algorithm ensures that the exchange is accepted only if the difference of energy resulting from this exchange is not too high: as a consequence, for the exchange step to be accepted regularly, the temperatures must be taken so that the typical energies of the system between neighbour temperatures overlap, as shown on \cref{fig:paralleltempering}.
 
 In this strategy, the coldest simulation is constantly exploring a local free energy minimum, while the hottest simulation easily accepts MC moves and thus walks through the entire configuration space. By exchanging configurations, new configurations regularly trickle down from the hot simulations to the colder ones, while the general Metropolis-Hastings strategy ensures convergence towards a global minimum. It is also more efficient than simulated annealing since the exploration of the configuration space is not constrained by the small duration of the hot phase. Parallel tempering is therefore the method of choice used to obtain convergence when facing difficult energy landscapes such as the one encountered for cation placement.
 
