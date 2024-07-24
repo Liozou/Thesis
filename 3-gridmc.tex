@@ -32,7 +32,7 @@ Moreover, the location of the adsorption sites becomes less relevant when the de
 
 In the case of crystalline materials, adsorption sites can be identified through XRD spectroscopy. For example, \textcite{CO2SitesInMFI} identify the preferred adsorption sites for \ce{CO_2} in silica MFI zeolite (silicalite) in a context of very high mechanical pressure, compatible with DFT computations. Yet, the obtained positions for \ce{CO_2} molecules is not guaranteed to carry to another gas pressure than the one used in the study.
 
-Overall, the situation is quite different from the cationic sites, discussed in \cref{sitehopping}, mostly because the cations cannot reach a ``high-density'' regime, given that their number is constrained by the number of aluminium atoms. In turn, this makes the use of site-hopping or other site-derived algorithms less relevant in the context of adsorption simulation, except in the low-pressure regime.
+Overall, the situation is quite different from the cationic sites, discussed in \cref{sitehopping}, mostly because the cations cannot reach a ``high-density'' regime, given that their number is constrained by the number of aluminium atoms. In turn, this makes the use of site hopping or other site-derived algorithms less relevant in the context of adsorption simulation, except in the low-pressure regime.
 
 \subsection{Small gases in zeolites}
 
@@ -56,7 +56,7 @@ That role becomes considerably more important for the cationic zeolite however, 
 Hence, the electrostatic interactions are the main adsorption drive in cationic zeolites are low/medium pressures. Otherwise, \textit{i.e.} for silicic zeolites or at high pressure, the van der Waals interactions are the most important parameter, although the coulombic interactions continue to play a key role.
 
 
-\section{Grand Canonical Monte-Carlo}
+\section{Grand Canonical Monte Carlo}
 \label{GCMC}
 
 \subsection{Principle}
@@ -67,7 +67,7 @@ The statistical ensemble resulting from the constraints of fixing the chemical p
 \[\mathcal O = \left<o\right> = \frac1\Xi\sum_N\int\!\text d{\boldsymbol p_N}\  o\left({\boldsymbol p_N}\right)\exp\left(-\beta U\left({\boldsymbol p}\right) + \mu N\right)\label{eq:grandcanonicalensemble}\]
 where $\beta = 1/k_BT$, $N$ is the number of gas particles, $\boldsymbol p_N$ is their configuration, and $\Xi$ is the grand canonical partition function.
 
-Likewise, this integral can be numerically evaluated by relying on a Monte-Carlo Markov Chain to provide a sequence of configurations $(N, \boldsymbol p_N)$ such that the statistical average $\left<o\right>$ can be retrieved by computing the arithmetic average of $o\left({\boldsymbol p_N}\right)$ over these configurations: this particular kind of simulation is naturally called a grand canonical Monte-Carlo (GCMC) simulation. In the specific case of the adsorption capacity, the microscopic function is simply $o\left({\boldsymbol p_N}\right) = N$, thus it is computed by running a GCMC simulation and simply averaging the number of particles in the system across the simulation.
+Likewise, this integral can be numerically evaluated by relying on a Monte Carlo Markov Chain to provide a sequence of configurations $(N, \boldsymbol p_N)$ such that the statistical average $\left<o\right>$ can be retrieved by computing the arithmetic average of $o\left({\boldsymbol p_N}\right)$ over these configurations: this particular kind of simulation is naturally called a grand canonical Monte Carlo (GCMC) simulation. In the specific case of the adsorption capacity, the microscopic function is simply $o\left({\boldsymbol p_N}\right) = N$, thus it is computed by running a GCMC simulation and simply averaging the number of particles in the system across the simulation.
 
 \subsection{Implementation}
 
@@ -198,32 +198,38 @@ with the appropriate weights $w_i$. The values of $w_i$, $\theta_i$ and $\varphi
 
 \begin{figure}
 	\centering
-	\hfill\begin{subfigure}{0.2\linewidth}
-		\centering
-		\includegraphics[width=\linewidth]{figures/gcmc/lebedev_6}
-		\caption{6 points}
-	\end{subfigure}\hfill%
-	\begin{subfigure}{0.2\linewidth}
-		\centering
-		\includegraphics[width=\linewidth]{figures/gcmc/lebedev_14}
-		\caption{14 points}
-	\end{subfigure}\hfill%
-	\begin{subfigure}{0.2\linewidth}
-		\centering
-		\includegraphics[width=\linewidth]{figures/gcmc/lebedev_26}
-		\caption{26 points}
-	\end{subfigure}\hfill%
-	\begin{subfigure}{0.2\linewidth}
-		\centering
-		\includegraphics[width=\linewidth]{figures/gcmc/lebedev_38}
-		\caption{38 points}
-	\end{subfigure}\hfill%
-	\begin{subfigure}{0.2\linewidth}
-		\centering
-		\includegraphics[width=\linewidth]{figures/gcmc/lebedev_25_symm}
-		\caption{25 points half grid}\label{fig:haldgridlebedev}
-	\end{subfigure}\hfill
-	\caption{Lebedev grid points. \cref{fig:haldgridlebedev} is a half-grid, used for centrosymmetric species.}\label{fig:lebedev}
+	\begin{minipage}{0.55\linewidth}
+		\begin{subfigure}{0.5\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{figures/gcmc/lebedev_6}
+			\caption{6 points}
+		\end{subfigure}%
+		\begin{subfigure}{0.5\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{figures/gcmc/lebedev_14}
+			\caption{14 points}
+		\end{subfigure}
+
+		\begin{subfigure}{0.5\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{figures/gcmc/lebedev_26}
+			\caption{26 points}
+		\end{subfigure}%
+		\begin{subfigure}{0.5\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{figures/gcmc/lebedev_38}
+			\caption{38 points}
+		\end{subfigure}
+	\end{minipage}%
+	\begin{minipage}{0.45\linewidth}
+		\begin{subfigure}{\linewidth}
+			\centering
+			\includegraphics[width=\linewidth]{figures/gcmc/lebedev_25_symm}
+			\caption{25 points half grid}\label{fig:haldgridlebedev}
+		\end{subfigure}
+	\end{minipage}
+
+	\caption{Lebedev grid points. \cref{fig:haldgridlebedev} is a half grid, used for centrosymmetric species.}\label{fig:lebedev}
 \end{figure}
 
 The number of possible configurations of a molecule is $\alpha\times a\times b\times c$ where $(a,b,c)$ is the size of the spatial grid and $\alpha$ is either \Nleb in option $\mathscr A$, or 1 for options $\mathscr B$ and $\mathscr C$. Since we use a Van der Waals cutoff of \qty{12}\angstrom, the framework with the smallest grid will necessarily have its perpendicular lengths greater or equal to $2\times\qty{12}\angstrom = \qty{24}\angstrom$. Thus, with a distance of \qty{0.2}{\angstrom} between two grid points, $a$, $b$ and $c$ are greater or equal to $120$ so the size of the configuration space is at least $\alpha\times120^3$.
