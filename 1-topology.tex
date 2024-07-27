@@ -82,7 +82,7 @@ This chapter introduces the \texttt{CrystalNets.jl} software for crystal topolog
 
 \label{topology_introduction}
 
-In order to describe the average structure of crystalline materials at the nano-scale, reticular chemistry \autocite{reticularChemistry, reticularSynthesis} proposes to classify crystals, and in particular framework materials, in light of their topology. This approach consists in abstractly regrouping the atoms of a crystal into clusters, called \emph{vertices}, bonded together by an abstract kind of linkers, called \emph{edges} --- the choice of grouping being informed by chemical sense. In simple compounds, such as dense oxides, the mapping can be trivial, with each atom as a separate vertex and each chemical bond as an edge. For zeolites and pther aluminosilicates, the tetrahedral atoms T are considered the vertices (T = Al, Si, P, \ldots) and the T--O--T linkages are the edges. In the case of metal--organic frameworks (MOFs), the vertices would be chosen among the \emph{secondary building units} (SBUs) \autocite{SBUs} with more than 2 points of extension, and the edges would correspond to bonds between those as well as ditopic SBUs, for example. Any crystal can then be simplified into a topological structure, called a \emph{net}, consisting of the sets of vertices and edges (see \cref{fig:mof}).
+In order to describe the average structure of crystalline materials at the nano-scale, reticular chemistry \autocite{reticularChemistry, reticularSynthesis} proposes to classify crystals, and in particular framework materials, in light of their topology. This approach consists in abstractly regrouping the atoms of a crystal into clusters, called \emph{vertices}, bonded together by an abstract kind of linkers, called \emph{edges} --- the choice of grouping being informed by chemical sense. In simple compounds, such as dense oxides, the mapping can be trivial, with each atom as a separate vertex and each chemical bond as an edge. For zeolites and other aluminosilicates, the tetrahedral atoms T are considered the vertices (T = Al, Si, P, \ldots) and the T--O--T linkages are the edges. In the case of metal--organic frameworks (MOFs), the vertices would be chosen among the \emph{secondary building units} (SBUs) \autocite{SBUs} with more than 2 points of extension, and the edges would correspond to bonds between those as well as ditopic SBUs, for example. Any crystal can then be simplified into a topological structure, called a \emph{net}, consisting of the sets of vertices and edges (see \cref{fig:mof}).
 
 \begin{figure*}[p]
 	\centering
@@ -1038,7 +1038,7 @@ Indeed, by construction of the database, structures whose topology is already pa
 		\subcaption{Input prompt with the main options including the structure, bonding and clustering algorithms, and visualization outputs. More advanced options exist below.}\label{fig:crystalnetsweb_prompt}
 	\end{subfigure}
 
-\vfill
+\vspace{2em}
 
 	\begin{subfigure}{\linewidth}
 		\centering
