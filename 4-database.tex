@@ -332,7 +332,7 @@ For example, using the Jensen-Seaton adsorption model for \ce{CO_2} adsorption i
 
 \Cref{fig:beta_evolution} represents the comparison between the interpolated value of $\beta(r, T)$ and the values collected from the isotherms fitting in the previous setting. In this case, the fit works well, but the simple meta-model above does not always provide such a good level of agreement.
 
-Overall, this approach provides a simple meta-model which works reasonably well to interpolate isotherms. For example, \cref{fig:simplemodelfit} shows the difference in quality between the direct Jensen-Seaton fit of an isotherm, and the one obtained from the simple meta-model. In this example, the simple meta-model was built using \SiAl ratios of 1, 1.23, 1.4, 2, 5 and 10 and temperatures of \qty{300}K, \qty{340}K and \qty{420}K, thus excluding the investigated point with \SiAl ratio of 2.4 at $T = \qty{380}K$. While not as quantitative as the actual fit, the simple model allows retrieving an isotherm which is close to the reference without needing any additional computation.
+Overall, this approach provides a simple meta-model which works reasonably well to interpolate isotherms. For example, \cref{fig:simplemodelfit} shows the difference in quality between the direct Jensen-Seaton fit of an isotherm, and the one obtained from the simple meta-model. In this example, the simple meta-model was built using \SiAl ratios of 1, 1.23, 1.4, 2, 5 and 10 and temperatures of \qty{300}K, \qty{340}K and \qty{420}K, thus excluding the investigated point with \SiAl ratio of 2.4 at $T = \qty{380}K$. While not as quantitative as the actual fit, the simple meta-model allows retrieving an isotherm which is close to the reference without needing any additional computation.
 
 \begin{figure}
 	\begin{subfigure}{0.49\columnwidth}
@@ -341,7 +341,7 @@ Overall, this approach provides a simple meta-model which works reasonably well 
 	\end{subfigure}\hfill%
 	\begin{subfigure}{0.49\columnwidth}
 		\includegraphics[width=\columnwidth]{figures/isotherms/referencefit_simplemodel.pdf}
-		\subcaption{Interpolated fit using simple model}
+		\subcaption{Interpolated fit using simple meta-model}
 	\end{subfigure}
 	\caption{Fitted adsorption isotherms of \ce{CO_2} in FAU with \SiAl = 2.4 at $T = \qty{380}K$}\label{fig:simplemodelfit}
 \end{figure}
