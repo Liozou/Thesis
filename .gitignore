@@ -284,6 +284,7 @@ figures/*/*.png
 figures/*/*.svg
 figures/*/*.tga
 figures/data
+figures/*.OLD
 
 !main.pdf
 !figures/*/*.pdf

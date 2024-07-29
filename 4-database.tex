@@ -67,7 +67,7 @@ Finding general tendencies in the adsorption behaviour across zeolites requires 
 	\item Cation placement: using either parallel tempering or ``shooting star'' simulations, combined with annealed site hopping once the sites are localized. The only cation used in the current study is sodium.
 \end{enumerate}
 
-For the entire database, we used the same force field which is that developed by \textcite{BoulfelfelSholl2021} for the adsorption of small gases on cationic zeolites with mobile cations. As with any force field, it has limited accuracy, but the goal is to develop and test a methodology with a fixed known force field to ensure the consistency of the database.
+For the entire database, I used the same force field which is that developed by \textcite{BoulfelfelSholl2021} for the adsorption of small gases on cationic zeolites with mobile cations. As with any force field, it has limited accuracy, but the goal is to develop and test a methodology with a fixed known force field to ensure the consistency of the database.
 
 \subsection{Aluminium placement}
 
@@ -102,7 +102,7 @@ Adsorption isotherms are often used for the characterization of experimental por
 
 Another typical context of use for isotherm fitting is for the identification of a material, or the evaluation of its purity or degree of crystallization. To do so, a method consists in measuring one or more isotherms and comparing them to those obtained on a reference structure, to check if they match. In general data science, two curves can be compared by computing their root-mean-square deviation (RMSD), but this does not provide much physical meaning to the comparison, and requires that both isotherms have points measured at the same pressures. More often, the reference isotherm has been fitted against one model, hence the isotherms of the experimental structure can be fitted against the same model, so that the coefficients of the model, which carry some physical meaning, can be compared.
 
-In our setting, the goal is quite different since we aim at predicting the adsorption capacity from a theoretical structure, instead of an experimental one. The concept of isotherm is actually not strictly necessary to this goal: one could imagine making a black-box model that directly outputs the adsorption capacity given the three parameters (topology, \SiAl ratio, temperature) as well as the gas pressure. This approach, however, leads to a model that cannot be physically interpreted, and that offers no guarantee on the general shape of the isotherms, with the risk of them being unphysical. On the contrary, making a model that directly predicts the coefficients of a given isotherm model from the three parameters yields a result that already embeds the physics of adsorption through the isotherm mode. Of course, it also offers the additional guarantee of a smooth and plausible interpolation of the simulated data points across pressures.
+In the current setting, the aim is quite different since the goal is to predict the adsorption capacity from a theoretical structure, instead of an experimental one. The concept of isotherm is actually not strictly necessary to this goal: one could imagine making a black-box model that directly outputs the adsorption capacity given the three parameters (topology, \SiAl ratio, temperature) as well as the gas pressure. This approach, however, leads to a model that cannot be physically interpreted, and that offers no guarantee on the general shape of the isotherms, with the risk of them being unphysical. On the contrary, making a model that directly predicts the coefficients of a given isotherm model from the three parameters yields a result that already embeds the physics of adsorption through the isotherm mode. Of course, it also offers the additional guarantee of a smooth and plausible interpolation of the simulated data points across pressures.
 
 To make such a model, the first step thus consists in fitting the simulated isotherms against a given adsorption model, in order to obtain the coefficients associated with each triplet of parameters. Retrieving the relation between the parameters and the coefficient can then be cast as a data science problem.
 
@@ -158,7 +158,7 @@ It also follows Henry's law by reducing to a linear function of $P$ at low press
 \subsubsection{Jensen-Seaton}
 
 By adding a fourth parameter, Jensen and Seaton %[REF 10.1021/la9509460]
-propose an adsorption model that present both Henry's law linear behaviour at low pressure, as well as a non-constant affine behaviour at high pressure that models the compressibility region.
+propose an adsorption model that present both Henry's law linear behaviour at low pressure, as well as a non-constant affine asymptote at high pressure that models the compressibility region.
 \[n_\text{Jensen-Seaton} = \alpha\beta P\times\paren{1 + \paren{\frac{\beta P}{1 + \delta P}}^\gamma}^{-1/\gamma}\]
 
 This model reduces to the Toth model when $\delta = 0$ and to the Langmuir model when $\gamma = 1$ (with second parameter $\beta' = \beta+\delta$).% It has been used to accurately described the isotherm of \ce{CO_2} adsorption in some FAU zeolites, among others.
@@ -191,16 +191,53 @@ Like its two building blocks, this model collapses to a simple Langmuir isotherm
 	\caption{Main characteristics of different adsorption models}\label{table:adsorptionmodels}
 \end{table}
 
-Several of these models can be combined by simply adding them together. For this purpose, one extra dummy model was added, called ``Linear'', which simply consists in doing a linear regression of the isotherm:
+Several of these models can be combined by simply adding them together. For this purpose, one extra dummy model was added, which simply consists in doing a linear regression of the isotherm:
 \[n_\text{Linear} = \eta\times P\]
 
 Of course, this model does not fit any actual isotherm by itself, but it can be added to any model that reaches a plateau at high pressure to fix its behaviour for the compressibility phase, by making it affine as expected.
 
-The result of isotherm fitting according to all of these models, with and without linear addition, is represented in \cref{isothermfit} on a particular example, which is the adsorption of \ce{CO2} in FAU with $\SiAl = \num{1.23}$.
+\subsection{Isotherm fitting}
 
-The quality of the fit generally increases with the number of parameters, simply because of the increased flexibility of the model. Similarly, adding one extra linear parameter improves the quality of the overall fit, in particular at high pressure, since it corresponds to the linear compressibility regime. The case of the Jensen-Seaton adsorption model complements this point: there is no improvement in the fit due to the linear parameter in that case, because Jensen-Seaton isotherms already behave linearly at high pressure.
+In practice, fitting an isotherm means finding the parameters $\alpha$, $\beta$, $\gamma$, \ldots of the model such that the theoretical isotherm resulting from the model is as close as possible to the input one. This closeness can be properly defined through the RMSD for instance. Finding the best parameters can thus be formulated as an optimization problem, \textit{i.e.} a problem of the form
+\[\text{minimize }\mathcal D(\alpha, \beta, \gamma)\quad\text{such that }\alpha>0, \beta>0, 0<\gamma<5\]
+for example, where $\mathcal D$ represents the deviation between the model with the given parameters and the actual isotherm.
 
-However, not all models perform equivalently. For example, even with three sites and thus six parameters, Langmuir fits very poorly compared to the Sips-Toth model plus linear term, which is the overall best and only require five parameters. With only four parameters, Toth plus linear is equivalent to Jensen-Seaton. Both Freundlich and Redlich-Peterson fail to fit because of the polynomial behaviour at high pressure. 
+Unfortunately, the expressions of the different adsorption models make this problem non-convex, which is a category of optimization problems generally considered difficult. To solve it, I used the \texttt{LsqFit.jl} and \texttt{BlackBoxOptim.jl} Julia packages to do global optimization. Crucially, these two packages do not rely on $\mathcal D$ being differentiable, since that would require finding the derivative of the deviation with respect to the parameters for all investigated adsorption models and their combination.
+
+\subsubsection{Rational initial point}
+
+Both packages use meta-heuristic and stochastic algorithms to perform the actual optimization, but they need a starting point, \textit{i.e.} an initial value for the parameters, to work. The result often depends on the quality of this initial point: the closer it is to the optimum, the better the final result.
+
+To find this initial point, I tried to obtain it numerically from a linearization of the adsorption models. This operation consists in finding an equation $y = f(x)$ verified by the adsorption model, where $y$ and $x$ can be expressed in terms of the pressure $P$ and the loading $n$, and $f$ is an affine function $f:x\mapsto ax+b$, such that the parameters of the model $\alpha$, $\beta$, $\gamma$, \ldots, can be expressed in terms of $a$ and $b$. Doing a linear fit $y = f(x)$ using the simulated data thus allows retrieving a rational set of model parameters, which can serve as a starting point in \texttt{LsqFit.jl} to find the best model fit.
+
+For the different adsorption models tried, this is the strategy I used, mixing linear regressions and empirical parameter tuning:
+\begin{itemize}
+	\item For Langmuir, the linear regression $n^{-1} = f(P^{-1})$
+	 yields $n_\text{Langmuir}^{-1} = {\alpha'}_0^{-1}\paren{1 + {\beta'}_0^{-1}P^{-1}}$. 
+	 Three different initial points are then tested: $\alpha_0 = \alpha'_0\times\theta$
+	  and $\beta_0 = \beta'_0/\theta$ 
+	  with $\theta = 0.833$, $1.44$ and $0.579$.
+	\item For Freundlich, the linear regression $\log n = f(\log P)$ directly gives $\log n_\text{Freundlich} = \log A_0 + \gamma_0\log P$.
+	\item For Sips, a first linear regression $\log n = f(\log P)$ gives an approximate value $\gamma_0$, then a second linear regression $n^{-1} = f(P^{\gamma_0})$ yields $n_\text{Sips}^{-1} = \alpha_0\paren{1 + \beta^{-\gamma_0}P^{-\gamma_0}}$.
+	\item For Toth, the three initial points $\alpha_0$ and $\beta_0$ from the Langmuir isotherm are tested with $\gamma_0 = 0.667$, $2.25$ and $0.296$ respectively.
+	\item For Redlich-Peterson, a first linear regression $\log\paren{P/n} = f(\log P)$ allows to obtain $\log\paren{P/n_\text{Redlich-Peterson}} = \gamma_0\log P + C$, then a second linear regression $P/n = f(P^{\gamma_0})$ yields $P/n_\text{Redlich-Peterson} = \alpha_0^{-1}\paren{1 + \beta_0^{\gamma_0}P^{\gamma_0}}$.
+	\item For Jensen-Seaton, the three sets of initial parameters $\alpha_0$, $\beta_0$ and $\gamma_0$ are taken with the method for Toth, with a fixed $\delta_0 = 8\times10^{-10}$.
+	\item For Sips-Toth, both Sips and Toth parameters are tried, with the switching parameter $\zeta_0$ equal to either $1$, $10^{-5}$ or $10^{-10}$.
+\end{itemize}
+
+When adding a linear term to a model, the linear slope is taken from a linear regression of the four last point in the isotherm, then the rest of the initial point is taken from the isotherm minus this initial slope.
+
+\subsubsection{Black blox initial point}
+
+Unfortunately, the previous rational but simplistic method does not give good results even for simple models, because the initial points are too far from the optimum. A more systematic approach consists in checking a larger set of initial parameters with the \texttt{BlackBoxOptim.jl} package. The best set of parameters found is then used as the initial point for an \texttt{LsqFit.jl} optimization, and whichever set of parameters yields the lowest RMSD is deemed the optimal fit.
+
+The only requirement for \texttt{BlackBoxOptim.jl} is to delimit the minimum and maximum values for each parameter. I use $\qty{0}{Pa^{-1}} < \beta < \qty{1}{Pa^{-1}}$, $0 < \gamma < 5$, $\qty{0}{Pa^{-1}} < \delta < \qty{1}{Pa^{-1}}$, $\qty{0}{Pa^{-1}} < \zeta < \qty{0.5}{Pa^{-1}}$, and $2M/3 < \alpha < 4M/3$ where $M$ is the maximum value of the isotherm. Overall, I find that this approach, starting with \texttt{BlackBoxOptim.jl} to have an initial point followed by \texttt{LsqFit.jl} for fine-grained optimization, gives the best result.
+
+External to the Julia ecosystem, it is also possible to perform isotherm fitting using proprietary softwares like OriginLab, or other free open-source alternatives like the PyGAPS package in Python \autocite{pyGAPS}. The latter provides isotherm fitting capability for (up to 3-site) Langmuir, Freundlich, Toth, Jensen-Seaton and a few other models, but not Sips, Redlich-Peterson, nor custom functions like the Sips-Toth model presented before. The PyGAPS framework is flexible enough to allow adding custom models however, so it could be interesting to compare the quality of my fits with theirs.
+
+\subsection{Fitting result}
+
+The result of isotherm fitting according to all of the previous models, with and without linear addition, and starting from the black box initial point, is represented in \cref{isothermfit} on a particular example, which is the adsorption of \ce{CO2} in FAU with $\SiAl = \num{1.23}$.
 
 \begin{figure}
 	\begin{minipage}{0.49\columnwidth}
@@ -209,21 +246,21 @@ However, not all models perform equivalently. For example, even with three sites
 	\begin{minipage}{0.49\columnwidth}
 		\includegraphics[width=\columnwidth]{figures/isotherms/Langmuir + Linear.pdf}
 	\end{minipage}
-
+	
 	\begin{minipage}{0.49\columnwidth}
 		\includegraphics[width=\columnwidth]{figures/isotherms/Freundlich.pdf}
 	\end{minipage}\hfill%
 	\begin{minipage}{0.49\columnwidth}
 		\includegraphics[width=\columnwidth]{figures/isotherms/Freundlich + Linear.pdf}
 	\end{minipage}
-
+	
 	\begin{minipage}{0.49\columnwidth}
 		\includegraphics[width=\columnwidth]{figures/isotherms/Sips.pdf}
 	\end{minipage}\hfill%
 	\begin{minipage}{0.49\columnwidth}
 		\includegraphics[width=\columnwidth]{figures/isotherms/Sips + Linear.pdf}
 	\end{minipage}
-
+	
 	\begin{minipage}{0.49\columnwidth}
 		\includegraphics[width=\columnwidth]{figures/isotherms/Toth.pdf}
 	\end{minipage}\hfill%
@@ -240,21 +277,21 @@ However, not all models perform equivalently. For example, even with three sites
 	\begin{minipage}{0.49\columnwidth}
 		\includegraphics[width=\columnwidth]{figures/isotherms/3-site Langmuir + Linear.pdf}
 	\end{minipage}
-
+	
 	\begin{minipage}{0.49\columnwidth}
 		\includegraphics[width=\columnwidth]{figures/isotherms/Redlich-Peterson.pdf}
 	\end{minipage}\hfill%
 	\begin{minipage}{0.49\columnwidth}
 		\includegraphics[width=\columnwidth]{figures/isotherms/Redlich-Peterson + Linear.pdf}
 	\end{minipage}
-
+	
 	\begin{minipage}{0.49\columnwidth}
 		\includegraphics[width=\columnwidth]{figures/isotherms/Jensen-Seaton.pdf}
 	\end{minipage}\hfill%
 	\begin{minipage}{0.49\columnwidth}
 		\includegraphics[width=\columnwidth]{figures/isotherms/Jensen-Seaton + Linear.pdf}
 	\end{minipage}
-
+	
 	\begin{minipage}{0.49\columnwidth}
 		\includegraphics[width=\columnwidth]{figures/isotherms/Sips-Toth.pdf}
 	\end{minipage}\hfill%
@@ -264,47 +301,22 @@ However, not all models perform equivalently. For example, even with three sites
 	\caption{Simulated adsorption isotherm fitted with different models (continued)}
 \end{figure}
 
-\subsection{Isotherm fitting}
+The quality of the fit generally increases with the number of parameters, simply because of the increased flexibility of the model. Similarly, adding one extra linear parameter improves the quality of the overall fit, in particular at high pressure, since it corresponds to the linear compressibility regime. The case of the Jensen-Seaton adsorption model complements this point: there is no improvement in the fit due to the linear parameter in that case, because Jensen-Seaton isotherms already behave linearly at high pressure.
 
-In practice, fitting an isotherm means finding the parameters $\alpha$, $\beta$, $\gamma$, \ldots of the model such that the theoretical isotherm resulting from the model is as close as possible to the input one. This closeness can be properly defined through the RMSD for instance. Finding the best parameters can thus be formulated as an optimization problem, \textit{i.e.} a problem of the form
-\[\text{minimize }f(\alpha, \beta, \gamma)\quad\text{such that }\alpha>0, \beta>0, 0<\gamma<5\]
-for example, where $f$ represents the deviation between the model with the given parameters and the actual isotherm.
+However, not all models perform equivalently. For example, even with 3 sites and thus 6 parameters, Langmuir fits very poorly compared to the Sips-Toth model plus linear term, which is the overall best and require one less parameter. With only 4 parameters, Toth plus linear is equivalent to Jensen-Seaton. Both Freundlich and Redlich-Peterson fail to fit because of the polynomial behaviour at high pressure. 
 
-Unfortunately, the expressions of the different adsorption models make this problem non-convex, which is a category of optimization problems generally considered difficult. To solve it, we use the \texttt{LsqFit.jl} and \texttt{BlackBoxOptim.jl} Julia packages to do global optimization. Crucially, these two packages do not rely on $f$ being differentiable, since that would require finding the derivative of the deviation with respect to the parameters for all investigated adsorption models and their combination.
+Other isotherms of the database generally leads to the same ordering of fit quality, so the most appropriate adsorption models to use for the current purpose seem to be either Jensen-Seaton (4 parameters) or Sips-Toth plus linear (5 parameters). The next subsection presents a simple statistical methodology to predict the values of the parameters of a model, whichever it may be, hence it is assumed that one adsorption model has been chosen and fixed.
 
-Both packages use meta-heuristic and stochastic algorithms to perform the actual optimization, but they need a starting point, \textit{i.e.} an initial value for the parameters, to work. The result often depends on the quality of this initial point: the closer it is to the optimum, the better the result. Hence, I tried to use \texttt{LsqFit.jl}, with an initial set of parameters found from linearizations of the model:
-\begin{itemize}
-	\item For Langmuir, the linear regression $n^{-1} = f(P^{-1})$
-	 yields $n_\text{Langmuir}^{-1} = {\alpha'}_0^{-1}\paren{1 + {\beta'}_0^{-1}P^{-1}}$. 
-	 We then test three different initial points: $\alpha_0 = \alpha'_0\times\theta$
-	  and $\beta_0 = \beta'_0/\theta$ 
-	  with $\theta = 0.833$, $1.44$ and $0.579$.
-	\item For Freundlich, the linear regression $\log n = f(\log P)$ directly gives $\log n_\text{Freundlich} = \log A_0 + \gamma_0\log P$.
-	\item For Sips, a first linear regression $\log n = f(\log P)$ gives an approximate value $\gamma_0$, then a second linear regression $n^{-1} = f(P^{\gamma_0})$ yields $n_\text{Sips}^{-1} = \alpha_0\paren{1 + \beta^{-\gamma_0}P^{-\gamma_0}}$.
-	\item For Toth, we take the three initial points $\alpha_0$ and $\beta_0$ from the Langmuir isotherm and test $\gamma_0 = 0.667$, $2.25$ and $0.296$ respectively.
-	\item For Redlich-Peterson, a first linear regression $\log\paren{P/n} = f(\log P)$ gives $\log\paren{P/n_\text{Redlich-Peterson}} = \gamma_0\log P + C$, then a second linear regression $P/n = f(P^{\gamma_0})$ yields $P/n_\text{Redlich-Peterson} = \alpha_0^{-1}\paren{1 + \beta_0^{\gamma_0}P^{\gamma_0}}$.
-	\item For Jensen-Seaton, we try the three sets of initial parameters $\alpha_0$, $\beta_0$ and $\gamma_0$ taken with the method for Toth, and fix $\delta_0 = 8\times10^{-10}$.
-	\item For Sips-Toth, we try both Sips and Toth parameters, with the switching parameter $\zeta_0$ equal to either $1$, $10^{-5}$ or $10^{-10}$.
-\end{itemize}
-
-When adding a linear term to a model, the linear slope is taken from a linear regression of the four last point in the isotherm, then the rest of the initial point is taken from the isotherm minus this initial slope.
-
-Unfortunately, this rational but simplistic method does not give good results even for simple models, because the initial points are too far from the optimum. A more systematic approach consists in checking a larger set of initial parameters with the \texttt{BlackBoxOptim.jl} package. We then use the best set of parameters found as the initial point for an \texttt{LsqFit.jl} optimization, and keep whichever set of parameters yields the lowest RMSD.
-
-The only requirement for \texttt{BlackBoxOptim.jl} is to delimit the minimum and maximum values for each parameter. We use $\qty{0}{Pa^{-1}} < \beta < \qty{1}{Pa^{-1}}$, $0 < \gamma < 5$, $\qty{0}{Pa^{-1}} < \delta < \qty{1}{Pa^{-1}}$, $\qty{0}{Pa^{-1}} < \zeta < \qty{0.5}{Pa^{-1}}$, and $2M/3 < \alpha < 4M/3$ where $M$ is the maximum value of the isotherm. Overall, we find that this approach, starting with \texttt{BlackBoxOptim.jl} to have an initial point followed by \texttt{LsqFit.jl} for fine-grained optimization, gives the best result.
-
-External to the Julia ecosystem, it is also possible to perform isotherm fitting using proprietary softwares like OriginLab, or other free open-source alternatives like the PyGAPS package in Python \autocite{pyGAPS}. The latter provides isotherm fitting capability for (up to 3-site) Langmuir, Freundlich, Toth, Jensen-Seaton and a few other models, but not Sips, Redlich-Peterson, nor custom functions like the Sips-Toth model presented before. The PyGAPS framework is flexible enough to allow adding custom models however, so it could be interesting to compare the quality of our fits with theirs.
-
-\subsection{Simple models}
+\subsection{Simple meta-models}
 
 Once a sufficient number of fitted isotherms are available, the next goal is to somehow interpolate across them across \SiAl ratio and temperatures for a given topology. Through fitting, this problem is reduced to finding function $\alpha(r, T)$, $\beta(r, T)$, $\gamma(r, T)$, \ldots \textit{i.e.} to expressing each parameter of the adsorption model as a function of the \SiAl ratio $r$ and the temperature $T$.
 
-For each parameter $p$, we tried to express $p(r, T)$ through simple models, using \texttt{GLM.jl}, a Julia package for fitting linear models. In detail, we tried to fit expressions of the form
+For each parameter $p$, I tried to express $p(r, T)$ through a simple meta-model -- \textit{i.e.} a model of the evolution of a (sub-)model parameter --, using \texttt{GLM.jl}, a Julia package for fitting linear models. In detail, I tried to fit expressions of the form
 \[\der fp_p(p) = \der Ap\times \der fp_r(r) + \der Bp\times \der fp_T(T) + \der Cp\]
-where each function $\der fp$ was either the identity, the inverse, or the log. Such a fit consists in finding the optimal parameters $\der Ap$, $\der Bp$ and $\der Cp$ to minimize the RMSD between both sides of the expected equality. There are 27 such expressions to test for each parameter $p$ since each of the three function $\der fp$ only has three choices, and the expression which yields the lowest RMSD is kept as the model, along with the corresponding parameters.
+where each function $\der fp$ was either the identity, the inverse, or the log. Such a fit consists in finding the optimal parameters $\der Ap$, $\der Bp$ and $\der Cp$ to minimize the RMSD between both sides of the expected equality. There are 27 such expressions to test for each parameter $p$ since each of the three function $\der fp$ has three choices (identity, inverse, log), and the expression which yields the lowest RMSD is kept as the meta-model, along with the corresponding parameters.
 
 For example, using the Jensen-Seaton adsorption model for \ce{CO_2} adsorption in FAU zeolites, the following expression is found for the $\beta$ parameter:
-\[\log \beta(r, T) = -22.928 - 1.8489\log r + 5170.7/T\label{eq:beta_fit_JS}\]
+\[\log \beta(r, T) = - 1.8489\times\log r + 5170.7\times\frac1T -22.928 \label{eq:beta_fit_JS}\]
 
 \begin{figure}
 	\begin{subfigure}{0.49\columnwidth}
@@ -315,12 +327,12 @@ For example, using the Jensen-Seaton adsorption model for \ce{CO_2} adsorption i
 		\includegraphics[width=\columnwidth]{figures/isotherms/evolution_beta_ratio.pdf}
 		\subcaption{Evolution with Si/Al ratio for $T = \qty{340}K$}\label{subfig:beta_ratio}
 	\end{subfigure}
-	\caption{Evolution of the $\beta$ parameter in the Jensen-Seaton fit of \ce{CO_2} adsorption isotherms on FAU. The full line is the simple model obtained in \cref{eq:beta_fit_JS}.}\label{fig:beta_evolution}
+	\caption{Evolution of the $\beta$ parameter in the Jensen-Seaton fit of \ce{CO_2} adsorption isotherms on FAU. The full line is the simple meta-model obtained in \cref{eq:beta_fit_JS}.}\label{fig:beta_evolution}
 \end{figure}
 
-\Cref{fig:beta_evolution} represents the comparison between the interpolated value of $\beta(r, T)$ and the values collected from the isotherms fitting in the previous setting. In this case, the fit works well, but the simple model above does not always provide such a good level of agreement.
+\Cref{fig:beta_evolution} represents the comparison between the interpolated value of $\beta(r, T)$ and the values collected from the isotherms fitting in the previous setting. In this case, the fit works well, but the simple meta-model above does not always provide such a good level of agreement.
 
-Overall, this approach provides a simple model for the evolution of the parameters which works reasonably well to interpolate an isotherm. For example, \cref{fig:simplemodelfit} shows the difference in quality between the direct Jensen-Seaton fit of an isotherm, and the one obtained from the simple model. In this example, the simple model was built using \SiAl ratios of 1, 1.23, 1.4, 2, 5 and 10 and temperatures of \qty{300}K, \qty{340}K and \qty{420}K, thus excluding the investigated point with \SiAl ratio of 2.4 at $T = \qty{380}K$. While not as quantitative as the actual fit, the simple model allows retrieving an isotherm which is close to the reference without needing any additional computation.
+Overall, this approach provides a simple meta-model which works reasonably well to interpolate isotherms. For example, \cref{fig:simplemodelfit} shows the difference in quality between the direct Jensen-Seaton fit of an isotherm, and the one obtained from the simple meta-model. In this example, the simple meta-model was built using \SiAl ratios of 1, 1.23, 1.4, 2, 5 and 10 and temperatures of \qty{300}K, \qty{340}K and \qty{420}K, thus excluding the investigated point with \SiAl ratio of 2.4 at $T = \qty{380}K$. While not as quantitative as the actual fit, the simple model allows retrieving an isotherm which is close to the reference without needing any additional computation.
 
 \begin{figure}
 	\begin{subfigure}{0.49\columnwidth}
@@ -336,11 +348,11 @@ Overall, this approach provides a simple model for the evolution of the paramete
 
 \section{Perspectives}
 
-At the time of writing, we have only computed gas adsorption isotherm on three topologies: CHA, LTA and FAU. The previous methodology using simple models to interpolate isotherms constitute a convenient method to obtain adsorption capacities given enough data for the target topology, but does not allow generalizing to other topologies. To reach this target, more isotherm data is required on various topologies, from which point it would become possible to create yet another simple model whose target are the coefficients $A$, $B$ and $C$ of the previous simple model, depending only on the topology.
+At the time of writing, I have only computed gas adsorption isotherms on three topologies: CHA, LTA and FAU. The previous methodology using simple meta-models to interpolate isotherms constitute a convenient method to obtain adsorption capacities given enough data for the target topology, but does not allow generalizing to other topologies. To reach this target, more isotherm data is required on various topologies, from which point it would become possible to create yet another simple meta-meta-model whose target are the coefficients $A$, $B$ and $C$ of the previous simple meta-model, depending only on the topology.
 
 Another approach consists in relying on the more general tools of machine learning, instead of the custom approach detailed before. Deep learning could be used as a black-box method to directly learn the $p(r, T, \tau)$ functions, where $\tau$ designates the framework topology, numerically represented using ring statistics or coordination sequences for instance. Yet, once again, this requires much more isotherm data than what is currently available.
 
-Fortunately, our cationic zeolite structure database now contains 64 topologies with representative structures across \SiAl ratios. Once the adsorption isotherms are computed on all of these structures, it should provide enough data to start creating a more robust predictive model.
+Fortunately, my cationic zeolite structure database now contains 64 topologies with representative structures across \SiAl ratios. Once the adsorption isotherms are computed on all of these structures, it should provide enough data to start creating a more robust predictive model.
 
 
 \end{document}
