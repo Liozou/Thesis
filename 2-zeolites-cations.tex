@@ -539,7 +539,7 @@ Simulated annealing explores the configuration space by alternating between cold
 
 In more detail, a parallel tempering simulation consists in running several MC simulations, the ``replicas'', in parallel, each at a different temperature. The temperatures are taken between room temperature and a hot temperature. An extra MC step is introduced, called the ``exchange'' step, which consists in exchanging the configurations of two replicas with neighbour temperatures. As with any MC step, the Metropolis-Hastings algorithm ensures that the exchange is accepted only if the difference of energy resulting from this exchange is not too high: as a consequence, for the exchange step to be accepted regularly, the temperatures must be taken so that the typical energies of the system between neighbour temperatures overlap, as shown on an example in \cref{fig:paralleltempering}.
 
-In this strategy, the coldest simulation is constantly exploring a local free energy minimum, while the hottest simulation easily accepts MC moves and thus walks through the entire configuration space. By virtue of the exchange MC move, new configurations regularly trickle down from the hot simulations to the colder ones, as represented schematically in \cref{fig:paralleltempering_principle}, while the general Metropolis-Hastings strategy ensures convergence towards a global minimum. It is also more efficient than simulated annealing since the exploration of the configuration space is not constrained by the small duration of the hot phase. Parallel tempering is therefore the method of choice used to obtain convergence when facing difficult energy landscapes such as the one encountered for cation placement.
+In this strategy, the coldest simulation is constantly exploring a local free energy minimum, while the hottest simulation easily accepts MC moves and thus walks through the entire configuration space. By virtue of the exchange MC move, new configurations regularly trickle down from the hot simulations to the colder ones, as represented schematically in \cref{fig:paralleltempering_principle}, while the general Metropolis-Hastings strategy ensures convergence towards a global minimum. It is also more efficient than simulated annealing since the exploration of the configuration space is not constrained by the small duration of the hot phase. Parallel tempering is therefore the method of choice used to obtain convergence when facing difficult energy landscapes such as the one encountered for cation placement \autocite{Fang2016}.
 
 \begin{figure}
 	\centering
@@ -623,7 +623,7 @@ The final list of sites is such that for any site, all its symmetric images are 
 
 \section{Results}
 
-This section presents the cation location and population results in the studied zeolites. FAU (faujasite) zeolite will be presented first, because it is an already well-studied case that highlights the main difficulties encountered when attempting to locate cations, followed by a generalization.
+This section presents the cation location and population results in the studied zeolites. FAU (faujasite) zeolite will be presented first, because it is an already well-studied case \autocite{NaFaujasiteSimpleModel,Beauvais,CO2Faujasite,CationsFAUReview,FaujasiteCationLocalization} that highlights the main difficulties encountered when attempting to locate cations, followed by a generalization.
 
 \subsection{Case study: FAU}
 
@@ -764,7 +764,7 @@ Alternatively to using the ``shooting star'' simulation results to establish the
 	\begin{subfigure}{0.9\linewidth}
 		\centering
 		\includegraphics[width=\linewidth]{figures/cations/christele.pdf}
-		\caption{Data from Christèle Beauvais's Ph.D. dissertation}\label{fig:christele}
+		\caption{Data from Christèle Beauvais's Ph.D. thesis \cite{Beauvais}}\label{fig:christele}
 	\end{subfigure}
 
 	\begin{subfigure}{0.9\linewidth}
@@ -779,7 +779,7 @@ Alternatively to using the ``shooting star'' simulation results to establish the
 
 The main difference comes from the occupation of the sites I' at low \SiAl, which becomes almost maximal for the lowest ratio since since there are 32 sites I'. It appears that the ``shooting star'' simulation alone does not correctly reproduces this trends, while site hopping manages to explore more combinatorial configurations of site occupancy, thus yielding more faithful site populations.
 
-To compare those results with the literature, \cref{fig:christele} reproduces the site population of FAU obtained by Christèle Beauvais in her Ph.D. thesis, superposing experimental previous works as well as simulation data obtained from both parallel tempering and site hopping, using the force field from \textcite{DiLellaFF}. Site J is not used in that work. Nonetheless, while the general trend of site occupations bears some similarity, the evolution also has some marked differences, notably for site I around $\SiAl = 3$.
+To compare those results with the literature, \cref{fig:christele} reproduces the site population of FAU obtained by Christèle Beauvais in her Ph.D. thesis \cite{Beauvais}, superposing experimental previous works as well as simulation data obtained from both parallel tempering and site hopping, using the force field from \textcite{DiLellaFF}. Site J is not used in that work. Nonetheless, while the general trend of site occupations bears some similarity, the evolution also has some marked differences, notably for site I around $\SiAl = 3$.
 
 I investigated this discrepancy by running a new site hopping simulation, using the same force field by \textcite{DiLellaFF}. The resulting site population, shown in \cref{fig:sitehopping_jeffroyFF} (big light symbols), is indeed more faithful to the original, but still bears a notable population difference for the lowest \SiAl ratios, where site I' fails to reach its expected occupancy of 32. In this force field, the aluminium and silicon atoms of the framework are represented by an identical T-atom, whose charge depend on the \SiAl ratio, hence there the absence of the transparent symbols indicating the result of each explicit aluminium placement.
 
@@ -787,7 +787,7 @@ Much like any base MC scheme, the site hopping algorithm can be combined with a 
 
 The results are superposed to the simple site hopping computation on \cref{fig:sitehopping_jeffroyFF} (medium symbols for simulated annealing, small dark symbols for ``shooting star''). The two evolutions with meta-algorithm superpose almost exactly, which shows that simulated annealing is complex enough to ensure convergence of site hopping simulations. These evolutions are smoother compared to the bare simulation without meta-algorithm, and show a consistent and marked difference around $\SiAl = 1.23$ in particular: this highlights the interest of using meta-algorithms to ensure proper convergence of even site hopping simulations. It is worth mentioning that the simulated annealing simulation ran to create \cref{fig:sitehopping_jeffroyFF} only takes a few minutes per point, and can be realized in parallel, so the main computational cost of finding the site populations is incurred earlier, when attempting to locate these sites.
 
-These results still differ from those of Christèle Beauvais at low \SiAl, which is unexpected; it might be due to a difference in the exact positions used for the site, or even in the faujasite model used.
+These results still differ from those of Christèle Beauvais \cite{Beauvais} at low \SiAl, which is unexpected; it might be due to a difference in the exact positions used for the site, or even in the faujasite model used.
 
 \subsubsection{``Shooting star'' simulation calibration}
 
